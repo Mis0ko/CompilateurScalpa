@@ -3,10 +3,10 @@
   #include <stdlib.h>
   #include <string.h>
 
-    typedef struct quafrup {
+    typedef struct quafrup  {
       char* instruction;
       int   cible;
-    } quadrup;
+    }  quadrup;
     quadrup QUAD[100];
     int nextquad = 0;
 
