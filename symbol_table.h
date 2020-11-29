@@ -16,7 +16,7 @@ typedef struct AddrList
     int                 address ;
     struct AddrList*    next    ;
     int                 type    ;
-
+    int                 test_pour_voir_sur_git ;
 } AddrList ;
 
 #endif 
