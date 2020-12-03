@@ -1,0 +1,22 @@
+var
+    age : integer;
+
+begin
+    writeln('Quel est ton âge?');
+    readln(age);
+
+    if age <= 10 then
+    begin
+        writeln('Mais tu es tout petit! Oo')
+    end
+    else if age < 18 then
+    begin
+        writeln('Tu es encore mineur.')
+    end
+    else if age >= 60 then
+    begin
+        writeln('Wouaw, tu vieillis dis donc...');
+    end
+    while
+    machin
+end.
