@@ -1,6 +1,6 @@
-var
-    age : integer;
-
+var age : int;
+var taille : int;
+var gae : int;
 begin
     writeln('Quel est ton âge?');
     readln(age);
