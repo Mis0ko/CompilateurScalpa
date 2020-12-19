@@ -1,145 +1,83 @@
 %option nounput
 %option noyywrap
 %{
-	   /* Analyseur Lexical : conversion du texte en entrée
-		 en une liste de symboles (tokens). */
+	extern int yylval;
+	/* Analyseur Lexical : conversion du texte en entrée
+	en une liste de symboles (tokens). */
 
-		 /*
-		 Commande pour compiler et exec le fichier.
+	/*
+	Commande pour compiler et exec le fichier.
 
-		 flex lexeur.l
-		 gcc -lfl lex.yy.c -o lexeur_exec
-		 ./lexeur_exec < bidon.txt
-
-		 */
-
-	   #include <stdio.h>
-     #include <stdlib.h>
-		 struct P_token;
-		 #define SIZE_HASH_TABLE 1000
-		 #define TOK_SIZE 100
-
-		 typedef struct P_token{
-		   int indice;
-		   char* tok_chaine;	// chaine récuperer par l'analyseur syntaxique
-		   char* var_name;	//NULL si pas une variable
-		   struct P_token* next_doublon;	// si plusieurs memes valeurs de nb_hachage
-		 }P_token;
+	flex lexeur.l
+	gcc -lfl lex.yy.c -o lexeur_exec
+	./lexeur_exec < test_analyseur_syntaxique.txt 
 
 
+	les trucs à rajouter plus tard:
 
-		 P_token token_tab[SIZE_HASH_TABLE];
-
-		 /*
-		 fonction de hachage basique (somme des caractères ASCII)
-		 A changer pour de meilleurs perf plus tard
-		 */
-		 void hachage(char *chaine){
-			    int i = 0, nombreHache = 0;
-			    for (i = 0 ; chaine[i] != '\0' ; i++)
-			        nombreHache += chaine[i];
-			    nombreHache %= SIZE_HASH_TABLE;
-					printf("%s : %i\n", chaine, nombreHache);
-			}
+	faut gérer les minuscules et majusculesp our les mots clés
+	genre 
+	begin ==> [bB][eE]..... etc
 
 
-			/*
-			function to compare char from a token
-			*/
-			int cmp_tok_chaine(char* c1, char* c2){
-				return strncmp(c1, c2, TOK_SIZE);
-			}
+	*/
 
-			/*
-			compare 2 tokens base on all their arguments
-			When we use this function we consider that
-			the index / hash number is the same.
-			*/
-			int cmp_tok(P_token* tok1, P_token* tok2)
-			{
-				if(!cmp_tok_chaine(tok1->tok_chaine, tok2->tok_chaine)){
-						if((tok1->var_name != NULL) && (tok2->var_name != NULL)
-						&& !cmp_tok_chaine(tok1->var_name, tok2->var_name)){
-							return 1;
-						}
-				}
-				return 0;
-			}
-
-			/*
-			function that check if a token is in the hash table.
-			It use the hash number from the structure tok
-			and compare to the token in the hash table, and loop
-			for all the token that pocess the same hash number
-
-			not tested yet
-			*/
-
-			int search_token(P_token* tok){
-				P_token* tok_table = &token_tab[tok->indice];
-				if(tok_table != NULL){
-					while(tok_table != NULL){
-						if(cmp_tok(tok, tok_table))
-						{
-							printf("token present");
-							return 1;
-						}
-						tok_table = tok_table->next_doublon;
-					}
-				}
-				return 0;
-			}
+	#include <stdio.h>
+    #include <stdlib.h>
 
 
-			void print_token(P_token* tok)
-			{
-				printf("	%i	|	%s	", tok->indice, tok-> tok_chaine);
-				if(tok->tok_chaine != NULL)
-					printf("|	%s	|\n", tok->var_name);
-				else
-					printf("\n");
-			}
 
-			void print_tab()
-			{
-				 printf("index   |   chaine\n");
-				 for(int i =0; i < SIZE_HASH_TABLE ; i++){
-					 print_token(&token_tab[i]);
-					 if(token_tab[i].next_doublon != NULL)
-					 {
-						 P_token* tok_parcour = token_tab[i].next_doublon;
-						 while(token_tab[i].next_doublon != NULL){
-							 print_token(tok_parcour);
-						 }
-					 }
-				 }
-			}
+	void yyerror(char *msg) {
+  		fprintf(stderr, "%s\n",msg);
+	}
+
+
 
 %}
+letter [a-zA-Z]
+figure [0-9]
+id {letter}({letter}|{figure})*
+nb {figure}+
+white    [ \t\n]+
+
+
 
 %%
+("program")   			{output("key word : program");}
+("var")   				{output("key word : var");}
+("int")   				{output("key word : int");}
+("array")   			{output("key word : array");}
+("function")   			{output("key word : function");}
+("begin")   			{output("key word : begin");}
+("end")   				{output("key word : end");}
+("return")   			{output("key word : return");}
+("write")   			{output("key word : write");}
+("writeln")   			{output("key word : writeln");}
+("read")   				{output("key word : read");}
+("readln")   			{output("key word : readln");}
+("if")   				{output("key word : if");}
+("then")   				{output("key word : then");}
+("else")   				{output("key word : else");}
+("while")  		  		{output("key word : while");}
+("float")   			{output("key word : float");}
 
-("program")   		hachage("program");
-("var")   				hachage("var");
-("int")   				hachage("int");
-("array")   			hachage("array");
-("function")   		hachage("function");
-("begin")   			hachage("begin");
-("end")   				hachage("end");
-("return")   			hachage("return");
-("write")   			hachage("write");
-("writeln")   		hachage("writeln");
-("read")   				hachage("read");
-("readln")   			hachage("readln");
-("if")   					hachage("if");
-("then")   				hachage("then");
-("else")   				hachage("else");
-("while")  		  	hachage("while");
-("float")   			hachage("float");
+
+{nb} 								{sprintf(buffer, "NB: %s (nb carac : %d)", yytext, yyleng); output(buffer);}
+{id} 								{sprintf(buffer, "ID: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
+"<"|"<="|">="|">"|"=="|"not" 		{sprintf(buffer, "OP_COMP: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
+\+|-|or 							{sprintf(buffer, "OP_ADD: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
+= 									{sprintf(buffer, "OP_AFF: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
+\*|\/|div|mod|and 		{			sprintf(buffer, "OP_MULT: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
+
+
+{white}  {}
+
+
+.						{sprintf(buffer, "other %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 %%
 
 int main(void){
   yylex();
-	print_tab();
+  //print_tab();
   return 0;
 }
