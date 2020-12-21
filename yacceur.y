@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "y.tab.h"
+#include "token_tab.c"
 void yyerror(char *msg) {
   fprintf(stderr, "%s\n",msg);
 }
@@ -11,32 +12,7 @@ int yylex_destroy();
 
 
 
-typedef struct ident_list
-{
-    const char*       name;           // name
-    struct ident_list* next;
-} ident_list ;
 
-
-ident_list* create_identlist(char* ident)
-{
-    ident_list* my_list = malloc(sizeof(ident_list));
-    strncpy(my_list->name, ident, strlen(ident));
-    my_list->next = NULL;
-    return my_list;
-}
-
-ident_list* add_to_identlist(ident_list* old_list, char* ident)
-{
-    ident_list* new_ident = malloc(sizeof(ident_list));
-    strncpy(new_ident->name, ident, strlen(ident));
-    new_ident->next = NULL;
-    ident_list* loop_ident = old_list;
-    while(loop_ident->next != NULL)
-        loop_ident = loop_ident->next;
-    loop_ident->next = new_ident;
-    return old_list;
-}
 
 %}
 
@@ -88,7 +64,7 @@ vardecllist:
             | varsdecl ; vardcllist
             ;
 
-varsdecl: var identlist : typename {$$=create_symb($1, $2, $4);}
+varsdecl: var identlist : typename {create_symblist($1, $2, $4);}
         ;
 
 identlist:    ident                 {$$ = create_identlist($1);}

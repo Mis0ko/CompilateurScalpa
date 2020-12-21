@@ -31,6 +31,12 @@
   		fprintf(stderr, "%s\n",msg);
 	}
 
+	char buffer[200];
+	void output(const char* msg)
+	{
+		printf("Analyseur lexical: %s\n", msg);
+	}
+
 
 
 %}

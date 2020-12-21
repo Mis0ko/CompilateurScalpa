@@ -513,7 +513,7 @@ char *yytext;
 
 	flex lexeur.l
 	gcc -lfl lex.yy.c -o lexeur_exec
-	./lexeur_exec < bidon.txt
+	./lexeur_exec < test_analyseur_syntaxique.txt 
 
 
 	les trucs à rajouter plus tard:
@@ -527,156 +527,23 @@ char *yytext;
 
 	#include <stdio.h>
     #include <stdlib.h>
-	struct P_token;
-	#define SIZE_HASH_TABLE 1000
-	#define TOK_SIZE 100
 
-	char buffer[1000];
+
+
 	void yyerror(char *msg) {
   		fprintf(stderr, "%s\n",msg);
 	}
 
+	char buffer[200];
 	void output(const char* msg)
 	{
 		printf("Analyseur lexical: %s\n", msg);
 	}
 
-	typedef struct P_token{
-		int indice;
-		char* tok_chaine;	// chaine récuperer par l'analyseur syntaxique
-		char* var_name;	//NULL si pas une variable
-		struct P_token* next_doublon;	// si plusieurs memes valeurs de nb_hachage
-	}P_token;
 
 
-
-	P_token token_tab[SIZE_HASH_TABLE];
-
-	/*
-	fonction de hachage basique (somme des caractères ASCII)
-	A changer pour de meilleurs perf plus tard
-	*/
-	void hachage(char *chaine){
-		int i = 0, nombreHache = 0;
-		for (i = 0 ; chaine[i] != '\0' ; i++)
-			nombreHache += chaine[i];
-		nombreHache %= SIZE_HASH_TABLE;
-			printf("%s : %i\n", chaine, nombreHache);
-	}
-
-
-	/*
-	function to compare char from a token
-	*/
-	int cmp_tok_chaine(char* c1, char* c2){
-		return strncmp(c1, c2, TOK_SIZE);
-	}
-
-	/*
-	compare 2 tokens base on all their arguments
-	When we use this function we consider that
-	the index / hash number is the same.
-	*/
-	int cmp_tok(P_token* tok1, P_token* tok2)
-	{
-		if(!cmp_tok_chaine(tok1->tok_chaine, tok2->tok_chaine)){
-				if((tok1->var_name != NULL) && (tok2->var_name != NULL)
-				&& !cmp_tok_chaine(tok1->var_name, tok2->var_name)){
-					return 1;
-				}
-		}
-		return 0;
-	}
-
-
-
-
-	/*
-	function that check if a token is in the hash table.
-	It use the hash number from the structure tok
-	and compare to the token in the hash table, and loop
-	for all the token that pocess the same hash number
-
-	not tested yet
-	return -1 if not found
-	*/
-
-	int search_token(P_token* tok){
-		P_token* tok_table = &token_tab[tok->indice];
-		if(tok_table != NULL){
-			while(tok_table != NULL){
-				if(cmp_tok(tok, tok_table))
-				{
-					printf("token present");
-					return 1;
-				}
-				tok_table = tok_table->next_doublon;
-			}
-		}
-		return -1;
-	}
-
-	/*
-typedef struct P_token{
-		int indice;
-		char* tok_chaine;	// chaine récuperer par l'analyseur syntaxique
-		char* var_name;	//NULL si pas une variable
-		struct P_token* next_doublon;	// si plusieurs memes valeurs de nb_hachage
-	}P_token;
-
-	*/
-	int add_token(P_token* tok)
-	{
-		int already_in = search_token(tok);
-		if(already_in == -1)
-		{
-			if(&token_tab[tok->indice]!= NULL)
-			{
-				P_token* tok_parcour = token_tab[tok->indice].next_doublon;
-				while(tok_parcour->next_doublon != NULL){
-					tok_parcour = tok_parcour-> next_doublon;
-				}
-				tok_parcour->next_doublon = tok;
-			}
-			else{ // hash table case empty, just copy the token
-				strncpy(token_tab[tok->indice].tok_chaine, tok->tok_chaine, TOK_SIZE);
-				strncpy(token_tab[tok->indice].var_name, tok->var_name, TOK_SIZE);
-				token_tab[tok->indice].next_doublon = tok-> next_doublon;
-			}
-		}
-		
-	}
-
-
-	void print_token(P_token* tok)
-	{
-		printf("	%i	|	%s	", tok->indice, tok-> tok_chaine);
-		if(tok->var_name != NULL)
-			printf("|	%s	|\n", tok->var_name);
-		else
-			printf("\n");
-	}
-
-	void print_tab()
-	{
-			printf("		index   	|   	chaine		\n");
-			for(int i =0; i < SIZE_HASH_TABLE ; i++){
-				if(&token_tab[i]!= NULL){
-					print_token(&token_tab[i]);
-					if(token_tab[i].next_doublon != NULL)
-					{
-						P_token* tok_parcour = token_tab[i].next_doublon;
-						while(tok_parcour != NULL){
-							print_token(tok_parcour);
-							tok_parcour = tok_parcour-> next_doublon;
-						}
-					}
-				}
-			}
-	}
-
-#line 679 "lex.yy.c"
-#line 680 "lex.yy.c"
+#line 546 "lex.yy.c"
+#line 547 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -891,9 +758,9 @@ YY_DECL
 		}
 
 	{
-#line 184 "lexeur.l"
+#line 51 "lexeur.l"
 
-#line 897 "lex.yy.c"
+#line 764 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -952,136 +819,136 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 185 "lexeur.l"
+#line 52 "lexeur.l"
 {output("key word : program");}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 186 "lexeur.l"
+#line 53 "lexeur.l"
 {output("key word : var");}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 187 "lexeur.l"
+#line 54 "lexeur.l"
 {output("key word : int");}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 188 "lexeur.l"
+#line 55 "lexeur.l"
 {output("key word : array");}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 189 "lexeur.l"
+#line 56 "lexeur.l"
 {output("key word : function");}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 190 "lexeur.l"
+#line 57 "lexeur.l"
 {output("key word : begin");}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 191 "lexeur.l"
+#line 58 "lexeur.l"
 {output("key word : end");}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 192 "lexeur.l"
+#line 59 "lexeur.l"
 {output("key word : return");}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 193 "lexeur.l"
+#line 60 "lexeur.l"
 {output("key word : write");}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 194 "lexeur.l"
+#line 61 "lexeur.l"
 {output("key word : writeln");}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 195 "lexeur.l"
+#line 62 "lexeur.l"
 {output("key word : read");}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 196 "lexeur.l"
+#line 63 "lexeur.l"
 {output("key word : readln");}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 197 "lexeur.l"
+#line 64 "lexeur.l"
 {output("key word : if");}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 198 "lexeur.l"
+#line 65 "lexeur.l"
 {output("key word : then");}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 199 "lexeur.l"
+#line 66 "lexeur.l"
 {output("key word : else");}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 200 "lexeur.l"
+#line 67 "lexeur.l"
 {output("key word : while");}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 201 "lexeur.l"
+#line 68 "lexeur.l"
 {output("key word : float");}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 204 "lexeur.l"
+#line 71 "lexeur.l"
 {sprintf(buffer, "NB: %s (nb carac : %d)", yytext, yyleng); output(buffer);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 205 "lexeur.l"
+#line 72 "lexeur.l"
 {sprintf(buffer, "ID: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 206 "lexeur.l"
+#line 73 "lexeur.l"
 {sprintf(buffer, "OP_COMP: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 207 "lexeur.l"
+#line 74 "lexeur.l"
 {sprintf(buffer, "OP_ADD: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 208 "lexeur.l"
+#line 75 "lexeur.l"
 {sprintf(buffer, "OP_AFF: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 209 "lexeur.l"
+#line 76 "lexeur.l"
 {			sprintf(buffer, "OP_MULT: %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 	YY_BREAK
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
-#line 212 "lexeur.l"
+#line 79 "lexeur.l"
 {}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 215 "lexeur.l"
+#line 82 "lexeur.l"
 {sprintf(buffer, "other %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 216 "lexeur.l"
+#line 83 "lexeur.l"
 ECHO;
 	YY_BREAK
-#line 1085 "lex.yy.c"
+#line 952 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2049,7 +1916,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 216 "lexeur.l"
+#line 83 "lexeur.l"
 
 
 int main(void){
