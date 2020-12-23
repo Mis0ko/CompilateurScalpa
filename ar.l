@@ -39,32 +39,39 @@ letter [a-zA-Z]
 figure [0-9]
 ident {letter}({letter}|{figure})*
 nb {figure}+
-white    [ \t\n]+
+white   [ \t\n]+
+spc [ \t]
 
 
 %%
-("program")   			{output("key word ");return LEPROGRAM ;}
-("var")   				{output("key word : var");return VAR;}
-("int")   				{output("key word : int"); return INT;}
-("bool")   				{output("key word : int"); return BOOL;}
-("char")   				{output("key word : int"); return CHAR;}
-("real")   				{output("key word : int"); return REAL;}
-("array")   			{output("key word : array"); return ARRAY1;}
-("function")   			{output("key word : function");return FUNC;}
-("begin")   			{output("key word : begin");return BEGIN1;}
-("end")   				{output("key word : end");return END;}
-("return")   			{output("key word : return");return RETURN;}
-("write")   			{output("key word : write");return WRITE;}
-("writeln")   			{output("key word : writeln");return WRITELN;}
-("read")   				{output("key word : read");return READ;}
-("readln")   			{output("key word : readln");return READLN;}
-("if")   				{output("key word : if");return IF;}
-("then")   				{output("key word : then");return THEN;}
-("else")   				{output("key word : else");return ELSE;}
-("while")  		  		{output("key word : while");return WHILE;}
+("program")   			{output("key word : \tprogram");return LEPROGRAM ;}
+("var")   				{output("key word : \tvar");return VAR;}
+("int")   				{output("key word : \tint"); return INT;}
+("bool")   				{output("key word : \tint"); return BOOL;}
+("char")   				{output("key word : \tint"); return CHAR;}
+("real")   				{output("key word : \tint"); return REAL;}
+("array")   			{output("key word : \tarray"); return ARRAY1;}
+("function")   			{output("key word : \tfunction");return FUNC;}
+("begin")   			{output("key word : \tbegin");return BEGIN1;}
+("end")   				{output("key word : \tend");return END;}
+("return")   			{output("key word : \treturn");return RETURN;}
+("write")   			{output("key word : \twrite");return WRITE;}
+("writeln")   			{output("key word : \twriteln");return WRITELN;}
+("read")   				{output("key word : \tread");return READ;}
+("readln")   			{output("key word : \treadln");return READLN;}
+("if")   				{output("key word : \tif");return IF;}
+("then")   				{output("key word : \tthen");return THEN;}
+("else")   				{output("key word : \telse");return ELSE;}
+("while")  		  		{output("key word : \twhile");return WHILE;}
 
 
 {nb} 								{sprintf(buffer, "NB: %s (nb carac : %d)", yytext, yyleng); output(buffer);return NUMBER;}
 {ident} 								{sprintf(buffer, "ID: %s (nb carac : %d)", yytext, yyleng);output(buffer);return IDENT;}
+{spc}							{output("key elem : \tspace"); return SPC;}
+{white}							{output("key elem : \tretour white"); return WHITE;}
+","								{output("key elem : \t ya une virgule");return COMA;}
+"("								{output("key elem : \tparenthese gauche");return PARENTHESE_GAUCHE;}
+")"								{output("key elem: \tparenthese droite");return PARENTHESE_DROITE;}
+
 .						{sprintf(buffer, "other %s (nb carac : %d)", yytext, yyleng);output(buffer);}
 %%

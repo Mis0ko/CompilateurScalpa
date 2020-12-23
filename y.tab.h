@@ -51,101 +51,121 @@ extern int yydebug;
   {
     NUMBER = 258,
     LEPROGRAM = 259,
-    ASSIGN = 260,
-    WHILE = 261,
-    DO = 262,
-    DONE = 263,
-    IF = 264,
-    THEN = 265,
-    ELSE = 266,
-    ENDIF = 267,
-    PLUS = 268,
-    MINUS = 269,
-    TIMES = 270,
-    DIVIDE = 271,
-    POWER = 272,
-    INF = 273,
-    INF_EQ = 274,
-    SUP = 275,
-    SUP_EQ = 276,
-    EQ = 277,
-    INF_SUP = 278,
-    EQUAL = 279,
-    TRUE = 280,
-    FALSE = 281,
-    OR = 282,
-    AND = 283,
-    NOT = 284,
-    XOR = 285,
-    PARENTHESE_DROITE = 286,
-    PARENTHESE_GAUCHE = 287,
-    END = 288,
-    IDENT = 289,
-    VAR = 290,
-    COMA = 291,
-    AFFECT = 292,
-    INT = 293,
-    CHAR = 294,
-    REAL = 295,
-    BOOL = 296,
-    CTE = 297,
-    NEG = 298
+    FUNC = 260,
+    BEGIN1 = 261,
+    WRITE = 262,
+    WRITELN = 263,
+    READ = 264,
+    READLN = 265,
+    ASSIGN = 266,
+    WHILE = 267,
+    DO = 268,
+    DONE = 269,
+    IF = 270,
+    THEN = 271,
+    ELSE = 272,
+    ENDIF = 273,
+    PLUS = 274,
+    MINUS = 275,
+    TIMES = 276,
+    DIVIDE = 277,
+    POWER = 278,
+    INF = 279,
+    INF_EQ = 280,
+    SUP = 281,
+    SUP_EQ = 282,
+    EQ = 283,
+    INF_SUP = 284,
+    EQUAL = 285,
+    TRUE = 286,
+    FALSE = 287,
+    OR = 288,
+    AND = 289,
+    NOT = 290,
+    XOR = 291,
+    PARENTHESE_DROITE = 292,
+    PARENTHESE_GAUCHE = 293,
+    END = 294,
+    RETURN = 295,
+    IDENT = 296,
+    VAR = 297,
+    ARRAY1 = 298,
+    COMA = 299,
+    SPC = 300,
+    WHITE = 301,
+    AFFECT = 302,
+    INT = 303,
+    CHAR = 304,
+    REAL = 305,
+    BOOL = 306,
+    CTE = 307,
+    NEG = 308
   };
 #endif
 /* Tokens.  */
 #define NUMBER 258
 #define LEPROGRAM 259
-#define ASSIGN 260
-#define WHILE 261
-#define DO 262
-#define DONE 263
-#define IF 264
-#define THEN 265
-#define ELSE 266
-#define ENDIF 267
-#define PLUS 268
-#define MINUS 269
-#define TIMES 270
-#define DIVIDE 271
-#define POWER 272
-#define INF 273
-#define INF_EQ 274
-#define SUP 275
-#define SUP_EQ 276
-#define EQ 277
-#define INF_SUP 278
-#define EQUAL 279
-#define TRUE 280
-#define FALSE 281
-#define OR 282
-#define AND 283
-#define NOT 284
-#define XOR 285
-#define PARENTHESE_DROITE 286
-#define PARENTHESE_GAUCHE 287
-#define END 288
-#define IDENT 289
-#define VAR 290
-#define COMA 291
-#define AFFECT 292
-#define INT 293
-#define CHAR 294
-#define REAL 295
-#define BOOL 296
-#define CTE 297
-#define NEG 298
+#define FUNC 260
+#define BEGIN1 261
+#define WRITE 262
+#define WRITELN 263
+#define READ 264
+#define READLN 265
+#define ASSIGN 266
+#define WHILE 267
+#define DO 268
+#define DONE 269
+#define IF 270
+#define THEN 271
+#define ELSE 272
+#define ENDIF 273
+#define PLUS 274
+#define MINUS 275
+#define TIMES 276
+#define DIVIDE 277
+#define POWER 278
+#define INF 279
+#define INF_EQ 280
+#define SUP 281
+#define SUP_EQ 282
+#define EQ 283
+#define INF_SUP 284
+#define EQUAL 285
+#define TRUE 286
+#define FALSE 287
+#define OR 288
+#define AND 289
+#define NOT 290
+#define XOR 291
+#define PARENTHESE_DROITE 292
+#define PARENTHESE_GAUCHE 293
+#define END 294
+#define RETURN 295
+#define IDENT 296
+#define VAR 297
+#define ARRAY1 298
+#define COMA 299
+#define SPC 300
+#define WHITE 301
+#define AFFECT 302
+#define INT 303
+#define CHAR 304
+#define REAL 305
+#define BOOL 306
+#define CTE 307
+#define NEG 308
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "ar.y"
+#line 24 "ar.y"
 
     int ival;
     char* sstring;
-    ident_list* list;
+    struct ident_list* list;
 
-#line 149 "y.tab.h"
+#line 169 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

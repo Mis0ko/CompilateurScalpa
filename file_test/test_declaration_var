@@ -1,0 +1,2 @@
+program puissances (input, output);
+var n, max, min : int ;

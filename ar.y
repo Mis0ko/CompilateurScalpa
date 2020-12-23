@@ -12,7 +12,11 @@ void yyerror(char *msg) {
 int yylex();
 int yylex_destroy();
 
-
+char buffer[200];
+void output_S(const char* msg)
+{
+        printf("Analyseur syntaxique: %s\n", msg);
+}
 
 
 
@@ -36,7 +40,7 @@ int yylex_destroy();
 
 
 %token <sstring>IDENT VAR ARRAY1
-%token COMA
+%token COMA SPC WHITE 
 %token AFFECT
 
 %token INT CHAR REAL BOOL CTE
@@ -70,21 +74,21 @@ int yylex_destroy();
 
 
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: LEPROGRAM IDENT vardecllist {printf("programme lance");}//instr
+program: LEPROGRAM SPC IDENT SPC PARENTHESE_GAUCHE identlist PARENTHESE_DROITE ';' WHITE vardecllist {printf("programme lance");}//instr
         ;
 
 vardecllist: varsdecl {$$ = $1;}
             /* | varsdecl ; vardcllist  faut faire une fonction de concaténation de liste*/
             ;
 
-varsdecl: VAR identlist ':' typename {$$=create_symblist($1, $2, $4);}
+varsdecl: VAR SPC identlist ':' typename ';' {output_S("vardecl");$$=create_symblist($1, $3, $5);}
         ;
 
-identlist:    IDENT                 {$$ = create_identlist($1);}
-            | IDENT COMA identlist  {$$ = add_to_identlist($3, $1);}
+identlist:    IDENT                 {$$ = create_identlist($1);output_S("ident grammar");}
+            | IDENT COMA SPC identlist  {$$ = add_to_identlist($4, $1);output_S("identlist grammar");}
             ;
 
-typename: atomictype {$$ = $1;}
+typename: atomictype {output_S("atomictype grammar");$$ = $1;}
         ;
 
 
@@ -135,7 +139,7 @@ int main(void)
 {
       printf("Made by group blabla\n");
       printf("you can run the example file with\n");
-      printf("./ex3 << example_test\n");
+      printf("./ex3 < example_test\n");
       yyparse();
       //yylex_destroy();
       return 0;
