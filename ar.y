@@ -11,17 +11,17 @@ struct ident_list;
 #define SIZE_HASH_TABLE 1000
 #define SYMBNAME_SIZE 100
 
-typedef enum ident_type 
-{ 
-    VARIABLE , FUNCTION , ARRAY , PARAMETER 
+typedef enum ident_type
+{
+    VARIABLE , FUNCTION , ARRAY , PARAMETER
 } ident_type ;
 
 
 // T_TYPE au lieu de juste TYPE pck sinn redeclaration avec
 // le fichier y.tab.h
 typedef enum atomic_type
-{ 
-    T_INT , T_REAL , T_BOOL , T_CHAR 
+{
+    T_INT , T_REAL , T_BOOL , T_CHAR
 } atomic_type ;
 
 typedef struct ident_list
@@ -35,7 +35,7 @@ typedef struct ident_list
 typedef struct P_symb
 {
     int                 idx;
-    char*               name;           // Name of the identifier 
+    char*               name;           // Name of the identifier
     ident_type          type_I;         // Type of the identifier ( variable , function , array , function parameter , ... )
     atomic_type         type_A;         // atomic type of ident / return value if function (int, real, bool, char)
     unsigned int        addr;           // Memory address
@@ -46,11 +46,11 @@ typedef struct P_symb
 
 
 P_symb** symb_tab; //global table
-
+int idx = 0;
 
 void init_symb_tab();
 int hachage(char *chaine);
-void create_symb(char* var, char* typename, ident_list* list);
+void create_symb(char* var, char* typename, char *id);
 ident_list* create_symblist(char* var, ident_list* list, char* typename);
 int add_symb(P_symb* symb);
 int search_symb(P_symb* symb);
@@ -71,7 +71,6 @@ void print_tab();
 
 /* ************** begining of the functions ********************/
 
-char buffer[200];
 void output_S(const char* msg)
 {
     printf("Analyseur syntaxique: %s\n", msg);
@@ -94,7 +93,7 @@ void CHK_MALLOC(void* monmalloc)
 Just dynamic init for token table
 */
 void init_symb_tab(){
-    symb_tab = malloc(SIZE_HASH_TABLE * sizeof(P_symb));
+    symb_tab = malloc(SIZE_HASH_TABLE * sizeof(P_symb*));
 }
 
 
@@ -109,7 +108,7 @@ ident_list* create_symblist(char* var, ident_list* list, char* typename)
 {
     ident_list* list_parcour = list;
     while(list_parcour != NULL){
-        create_symb(var, typename,  list);
+        create_symb(var, typename,  list_parcour->name);
         list_parcour = list_parcour->next;
     }
     return list;
@@ -137,23 +136,20 @@ int hachage(char *chaine){
 }
 
 
-/* 
+/*
 * This Function creates a symbol thanks to the args from the grammar.
 *(cf grammar)
 * It create a symb and try to add it to the hash table.
 * (Add_symb already check if the symb is already in the table)
 */
-void create_symb(char* var, char* typename, ident_list* list)
+void create_symb(char* var, char* typename, char *id)
 {
         P_symb* symb = malloc(sizeof(P_symb));
         symb->next_doublon = NULL;
         symb->name = malloc(SYMBNAME_SIZE);
         CHK_MALLOC(symb->name);
-        strncpy(symb->name, list->name, SYMBNAME_SIZE);
-        printf("symbname %s\n", symb->name);
-        int machin = hachage("bonjour");
-        printf("cc");
-        
+		sprintf(symb->name, "%s", id);
+
         if(strcmp(var, "var") == 0)
             symb->type_I = VARIABLE;
 
@@ -166,13 +162,14 @@ void create_symb(char* var, char* typename, ident_list* list)
         else if(strcmp(typename, "char") == 0)
             symb->type_A = T_CHAR;
 
+		symb->idx = idx;
+		idx++;
         symb->addr = 0;      // on verra plus tard
         symb->scope = 0;     //idem
-        
-
         if(!add_symb(symb)){
             printf("on free pck il existe déja le symb\n");
             free(symb);
+			idx--;
         }
 
         return ;
@@ -180,14 +177,15 @@ void create_symb(char* var, char* typename, ident_list* list)
 
 /*
 * Add a symbole given in argument in the hash table (global variable, symb_tab).
-* Before that it checks (with search_symb function) if the symb 
-* isn't already in the table. if not it check if a doublon 
-* already exist at the idx of our current symb and add it to the 
+* Before that it checks (with search_symb function) if the symb
+* isn't already in the table. if not it check if a doublon
+* already exist at the idx of our current symb and add it to the
 * linked list, otherwise it just affect it.
 */
 int add_symb(P_symb* symb)
 {
     int already_in = search_symb(symb);
+
     if(already_in == -1)
     {
         if(symb_tab[symb->idx]!= NULL)
@@ -206,7 +204,7 @@ int add_symb(P_symb* symb)
         return 1;
     }
     return 0;   //symb already exist, wasnt added
-    
+
 }
 
 
@@ -220,7 +218,10 @@ return 1 if found -1 if not found
 */
 
 int search_symb(P_symb* symb){
+
+
     P_symb* symb_loop = symb_tab[symb->idx];
+
     if(symb_loop != NULL){
         while(symb_loop != NULL){
             if(same_symb(symb, symb_loop))
@@ -259,7 +260,7 @@ int same_symb(P_symb* symb1, P_symb* symb2)
 
 /*
 * identlists are just linked-list of futur variable,
-* that are componded of a char* (the ident), and a 
+* that are componded of a char* (the ident), and a
 * identlist*, for the next ident in the list.
 */
 
@@ -270,7 +271,8 @@ ident_list* create_identlist(char* ident)
 {
     ident_list* my_list = malloc(sizeof(ident_list));
     //strncpy(my_list->name, ident, strlen(ident));
-    my_list->name = ident;
+	my_list->name = malloc(SYMBNAME_SIZE);
+    sprintf(my_list->name,"%s",ident);
     my_list->next = NULL;
     return my_list;
 }
@@ -279,7 +281,8 @@ ident_list* add_to_identlist(ident_list* old_list, char* ident)
 {
     ident_list* new_ident = malloc(sizeof(ident_list));
     //strncpy(new_ident->name, ident, strlen(ident));
-    new_ident->name = ident;
+	new_ident->name = malloc(SYMBNAME_SIZE);
+	sprintf(new_ident->name,"%s",ident);
     new_ident->next = NULL;
     ident_list* loop_ident = old_list;
     while(loop_ident->next != NULL)
@@ -325,7 +328,7 @@ void lex_free();
 %union {
 	char *strval;
 	int intval;
-	struct P_symb *psymb;
+	struct P_symb **psymb;
 	struct ident_list* list;
 }
 
@@ -333,11 +336,11 @@ void lex_free();
 %token <strval> ID
 %token <intval> NUM UNIT BOOL INT CHAR REAL
 
-%token PBEGIN PEND RETURN WHILE 
+%token PBEGIN PEND RETURN WHILE
 
 
 
-%type <list> identlist 
+%type <list> identlist
 %type <strval> atomictype typename
 %type <psymb> vardecllist varsdecl
 
@@ -349,8 +352,9 @@ void lex_free();
 program: PROGRAM ID {output_S("program avant");ident_list *list = create_identlist($2);} vardecllist {output_S("program apres");}
         ;
 
-vardecllist: varsdecl {$$ = $1;output_S("vardecllist");} 
+vardecllist: varsdecl {$$ = $1;output_S("vardecllist");}
             | varsdecl ';' vardecllist {output_S("vardecllist");}
+			| {} //element vide
             ;
 
 varsdecl: VAR identlist ':' typename {output_S("vardecl");create_symblist("var",$2, $4);}
@@ -360,7 +364,7 @@ identlist: ID                 {output_S("identlist");$$ = create_identlist($1);}
          | identlist ',' ID   {output_S("identlist");$$ = add_to_identlist($1, $3);}
          ;
 
-typename: atomictype ';'   {output_S("typename");$$ = $1;}
+typename: atomictype   {output_S("typename");$$ = $1;}
 
 atomictype: UNIT  {output_S("atomictype");$$ = "unit";}
           | BOOL  {output_S("atomictype");$$ = "bool";}
@@ -402,11 +406,13 @@ void yyerror (char *s) {
 
 
 int main() {
+	init_symb_tab();
 	printf("Enter your code:\n");
+
 	yyparse();
 	printf("-----------------\nSymbol table:\n");
 	//printf("-----------------\nQuad list:\n");
-	//print_tab();
+	print_tab();
 
 	// Be clean.
 	lex_free();
