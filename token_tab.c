@@ -15,13 +15,14 @@ It's in this function that we create all the symbols
 (for now only variable), cf the grammar.
 Check others comment's function for further details
 */
-void create_symblist(char* var, ident_list* list, char* typename)
+ident_list* create_symblist(char* var, ident_list* list, char* typename)
 {
-    while(list != NULL){
+    ident_list* list_parcour = list;
+    while(list_parcour != NULL){
         create_symb(var, typename,  list);
-        list = list->next;
+        list_parcour = list_parcour->next;
     }
-    return;
+    return list;
 }
 
 
@@ -61,13 +62,13 @@ void create_symb(char* var, char* typename, ident_list* list)
             symb->type_I = VARIABLE;
 
         if(strcmp(typename, "int") == 0)
-            symb->type_A = INT;
+            symb->type_A = T_INT;
         else if(strcmp(typename, "real") == 0)
-            symb->type_A = REAL;
+            symb->type_A = T_REAL;
         else if(strcmp(typename, "bool") == 0)
-            symb->type_A = BOOL;
+            symb->type_A = T_BOOL;
         else if(strcmp(typename, "char") == 0)
-            symb->type_A = CHAR;
+            symb->type_A = T_CHAR;
 
         symb->addr = 0;      // on verra plus tard
         symb->scope = 0;     //idem
