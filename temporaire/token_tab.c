@@ -1,101 +1,11 @@
-%{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define DINT 0
-#define DBOOL 1
-#define DUNIT 2
-
-struct P_symb;
-struct ident_list;
-#define SIZE_HASH_TABLE 1000
-#define SYMBNAME_SIZE 100
-
-typedef enum ident_type 
-{ 
-    VARIABLE , FUNCTION , ARRAY , PARAMETER 
-} ident_type ;
-
-
-// T_TYPE au lieu de juste TYPE pck sinn redeclaration avec
-// le fichier y.tab.h
-typedef enum atomic_type
-{ 
-    T_INT , T_REAL , T_BOOL , T_CHAR 
-} atomic_type ;
-
-typedef struct ident_list
-{
-    char*       name;           // name
-    struct ident_list* next;
-} ident_list ;
-
-/* need to crate a function to desallocate a symb */
-
-typedef struct P_symb
-{
-    int                 idx;
-    char*               name;           // Name of the identifier 
-    ident_type          type_I;         // Type of the identifier ( variable , function , array , function parameter , ... )
-    atomic_type         type_A;         // atomic type of ident / return value if function (int, real, bool, char)
-    unsigned int        addr;           // Memory address
-    int                 scope;          // globale/locale, begin with 0 for globable and +1 for each new bloc, but we begin without it.
-    struct P_symb* next_doublon;
-} P_symb ;
-
-
-
-P_symb** symb_tab; //global table
-
-
-void init_symb_tab();
-int hachage(char *chaine);
-void create_symb(char* var, char* typename, ident_list* list);
-ident_list* create_symblist(char* var, ident_list* list, char* typename);
-int add_symb(P_symb* symb);
-int search_symb(P_symb* symb);
-int same_symb(P_symb* symb1, P_symb* symb2);
-ident_list* create_identlist(char* ident);
-ident_list* add_to_identlist(ident_list* old_list, char* ident);
-void print_symb(P_symb* symb);
-void print_tab();
-
-
-
-
-
-
-
-
-
-
-/* ************** begining of the functions ********************/
-
-char buffer[200];
-void output_S(const char* msg)
-{
-    printf("Analyseur syntaxique: %s\n", msg);
-}
-
-void bug(const char* msg)
-{
-    printf("DEBUG : %s\n", msg);
-}
-
-void CHK_MALLOC(void* monmalloc)
-{
-    if(monmalloc == NULL){
-        perror("Unable to allocate memory");
-        exit(EXIT_FAILURE);
-    }
-}
-
+#include "token_tab.h"
 /*
 Just dynamic init for token table
 */
 void init_symb_tab(){
     symb_tab = malloc(SIZE_HASH_TABLE * sizeof(P_symb));
 }
+
 
 
 
@@ -127,12 +37,10 @@ Hash Function
 */
 int hachage(char *chaine){
     int i = 0, nombreHache = 0;
-    for (i = 0 ; chaine[i] != '\0' ; i++){
+    for (i = 0 ; chaine[i] != '\0' ; i++)
         nombreHache += chaine[i];
-    }
     nombreHache %= SIZE_HASH_TABLE;
-        printf("hachage:\t%s : %i\n", chaine, nombreHache);
-    bug("fin de fct");
+        printf("%s : %i\n", chaine, nombreHache);
     return nombreHache;
 }
 
@@ -146,14 +54,10 @@ int hachage(char *chaine){
 void create_symb(char* var, char* typename, ident_list* list)
 {
         P_symb* symb = malloc(sizeof(P_symb));
-        symb->next_doublon = NULL;
-        symb->name = malloc(SYMBNAME_SIZE);
-        CHK_MALLOC(symb->name);
-        strncpy(symb->name, list->name, SYMBNAME_SIZE);
-        printf("symbname %s\n", symb->name);
-        int machin = hachage("bonjour");
-        printf("cc");
-        
+
+        symb->idx = hachage(list->name);
+        symb->name = list->name;
+
         if(strcmp(var, "var") == 0)
             symb->type_I = VARIABLE;
 
@@ -169,6 +73,7 @@ void create_symb(char* var, char* typename, ident_list* list)
         symb->addr = 0;      // on verra plus tard
         symb->scope = 0;     //idem
         
+        symb->next_doublon = NULL;
 
         if(!add_symb(symb)){
             printf("on free pck il existe déja le symb\n");
@@ -315,100 +220,6 @@ void print_tab()
 
 
 
-void yyerror(char*);
-int yylex();
-void lex_free();
 
-
-%}
-
-%union {
-	char *strval;
-	int intval;
-	struct P_symb *psymb;
-	struct ident_list* list;
-}
-
-%token PROGRAM  VAR
-%token <strval> ID
-%token <intval> NUM UNIT BOOL INT CHAR REAL
-
-%token PBEGIN PEND RETURN WHILE 
-
-
-
-%type <list> identlist 
-%type <strval> atomictype typename
-%type <psymb> vardecllist varsdecl
-
-%start program
-%%
-
-
-/* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: PROGRAM ID {output_S("program avant");ident_list *list = create_identlist($2);} vardecllist {output_S("program apres");}
-        ;
-
-vardecllist: varsdecl {$$ = $1;output_S("vardecllist");} 
-            | varsdecl ';' vardecllist {output_S("vardecllist");}
-            ;
-
-varsdecl: VAR identlist ':' typename {output_S("vardecl");create_symblist("var",$2, $4);}
-        ;
-
-identlist: ID                 {output_S("identlist");$$ = create_identlist($1);}
-         | identlist ',' ID   {output_S("identlist");$$ = add_to_identlist($1, $3);}
-         ;
-
-typename: atomictype ';'   {output_S("typename");$$ = $1;}
-
-atomictype: UNIT  {output_S("atomictype");$$ = "unit";}
-          | BOOL  {output_S("atomictype");$$ = "bool";}
-          | INT   {output_S("atomictype");$$ = "int";}
-          | REAL  {output_S("atomictype");$$ = "real";}
-          ;
-
-/*
-instr : lvalue AFFECT expr
-	  | return expr /*{ gencode("j $ra"); }*/
-/*	  | return /*{ gencode("j $ra"); }*/
-/*	  |	begin sequence end { $$ = $2; }
-	  | begin end
-	  ;
-
-sequence : sequence ';' M instr /*{ complete($1, $3); $$ = $4; }*/
-/*		 | instr ';' { $$ = $1; }
-		 | instr { $$ = $1; }
-		 ;
-
-lvalue: ID { $$ = $1; }//a completer pour la suite
-      ;
-
-exprlist: expr
-        | expr ',' exprlist
-        ;
-
-expr: NUM
-    | '(' expr ')'
-	| ID
-	;
-
-M : {}*/
-
-%%
-void yyerror (char *s) {
-	fprintf(stderr, "[Yacc] error: %s\n", s);
-}
-
-
-int main() {
-	printf("Enter your code:\n");
-	yyparse();
-	printf("-----------------\nSymbol table:\n");
-	//printf("-----------------\nQuad list:\n");
-	//print_tab();
-
-	// Be clean.
-	lex_free();
-	return 0;
-}
+void test_symb_tab(void)
+{}

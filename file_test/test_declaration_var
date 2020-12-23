@@ -1,2 +1,2 @@
-program puissances (input, output);
-var n, max, min : int ;
+program maxi
+var i, example, machin, test : int ;

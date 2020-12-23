@@ -4,7 +4,7 @@ YACC = yacc -d
 CFLAGS = -O2 -Wall
 LDFLAGS = -lfl # Linux: -lfl / OSX: -ll
 EXEC = ar
-SRC = token_tab.c 
+SRC = 
 OBJ = $(SRC:.c=.o)
 
 all: $(OBJ) y.tab.c lex.yy.c
