@@ -18,17 +18,17 @@ number     [1-9][0-9]*
 
 %%
 
-("program")   			{output("program");return PROGRAM ;}
+"program"   			{output("program");return PROGRAM ;}
 
 "var"   				{output("var");return VAR;}
 "int"   				{output("int");return INT;}
-"bool"  				{output("int");return BOOL;}
-"char"  				{output("int");return CHAR;}
-"real"  				{output("int");return REAL;}
-"unit"          {output("uint");return UNIT; }
+"bool"  				{output("bool");return BOOL;}
+"char"  				{output("char");return CHAR;}
+"real"  				{output("real");return REAL;}
+"uint"          {output("unit");return UNIT; }
 
-"begin"   			{output("begin");return PBEGIN;}
-"end"   				{output("end");return PEND;}
+"begin"   			{output("begin");return SBEGIN;}
+"end"   				{output("end");return SEND;}
 
 
 {identifier} {yylval.strval = strdup(yytext);output(yylval.strval); return ID;}

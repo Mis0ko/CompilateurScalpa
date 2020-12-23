@@ -1,2 +1,7 @@
 program maxi
-var i, example, machin, test : int ;
+var i, example, machin, test, nimhca, exemple, example, machni : int ;
+var j, k : uint ;
+var lettre : char;
+var mesboules : bool;
+var monreel : real;
+var mesbouless, etpasque : bool;

@@ -4,7 +4,7 @@ YACC = yacc -d
 CFLAGS = -O2 -Wall
 LDFLAGS = -lfl # Linux: -lfl / OSX: -ll
 EXEC = ar
-SRC = 
+SRC = src/*
 OBJ = $(SRC:.c=.o)
 
 all: $(OBJ) y.tab.c lex.yy.c
@@ -20,4 +20,4 @@ lex.yy.c: $(EXEC).l
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
-	/bin/rm $(EXEC) *.o y.tab.c y.tab.h lex.yy.c
+	/bin/rm $(EXEC) y.tab.c y.tab.h lex.yy.c
