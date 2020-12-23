@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "token_tab.h"
+
 #include "y.tab.h"
-struct ident_list;
+
 void yyerror(char *msg) {
   fprintf(stderr, "%s\n",msg);
 }
@@ -19,22 +20,22 @@ int yylex_destroy();
 %union{
     int ival;
     char* sstring;
-    ident_list* list;
+    struct ident_list* list;
 }
 
 
-%token  NUMBER LEPROGRAM 
+%token  NUMBER LEPROGRAM FUNC BEGIN1 WRITE WRITELN READ READLN
 %token  ASSIGN WHILE DO DONE IF THEN ELSE ENDIF
 %token  PLUS MINUS TIMES DIVIDE POWER
 %token  INF INF_EQ SUP SUP_EQ EQ INF_SUP
 %token  EQUAL TRUE FALSE OR AND NOT XOR
 %token  PARENTHESE_DROITE PARENTHESE_GAUCHE
-%token  END
+%token  END RETURN
 
 
 
 
-%token <sstring>IDENT VAR
+%token <sstring>IDENT VAR ARRAY1
 %token COMA
 %token AFFECT
 
@@ -83,7 +84,7 @@ identlist:    IDENT                 {$$ = create_identlist($1);}
             | IDENT COMA identlist  {$$ = add_to_identlist($3, $1);}
             ;
 
-typename: atomictype {$$ = $1;} 
+typename: atomictype {$$ = $1;}
         ;
 
 
@@ -94,37 +95,37 @@ atomictype:   INT  {$$ = "int";}
             ;
 
 
-/* instr: lvalue AFFECT expr 
+/* instr: lvalue AFFECT expr
         ;
 
-lvalue: IDENT 
+lvalue: IDENT
         ;
 
-exprlist:   expr 
+exprlist:   expr
             /*| expr COMA exprlist  idem on voit plus tard*/
-            //; 
-/* 
-expr: CTE 
+            //;
+/*
+expr: CTE
     | PARENTHESE_GAUCHE expr PARENTHESE_DROITE
-    | expr opb expr 
+    | expr opb expr
     | opu expr ; */
 
-/* opb : PLUS {$$ = $1} 
-    | MINUS {$$ = $1} 
-    | TIMES {$$ = $1} 
-    | DIVIDE {$$ = $1} 
-    | POWER {$$ = $1} 
-    | INF {$$ = $1} 
-    | INF_EQ {$$ = $1} 
-    | SUP {$$ = $1} 
-    | SUP_EQ {$$ = $1} 
-    | EQ {$$ = $1} 
-    | INF_SUP {$$ = $1} 
-    | AND {$$ = $1} 
-    | OR {$$ = $1} 
+/* opb : PLUS {$$ = $1}
+    | MINUS {$$ = $1}
+    | TIMES {$$ = $1}
+    | DIVIDE {$$ = $1}
+    | POWER {$$ = $1}
+    | INF {$$ = $1}
+    | INF_EQ {$$ = $1}
+    | SUP {$$ = $1}
+    | SUP_EQ {$$ = $1}
+    | EQ {$$ = $1}
+    | INF_SUP {$$ = $1}
+    | AND {$$ = $1}
+    | OR {$$ = $1}
     | XOR {$$ = $1}  */
 
-/* opu : NEG {$$ = $1}   
+/* opu : NEG {$$ = $1}
     | NOT {$$ = $1}
  */
 
@@ -139,4 +140,3 @@ int main(void)
       //yylex_destroy();
       return 0;
 }
-
