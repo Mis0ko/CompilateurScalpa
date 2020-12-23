@@ -46,7 +46,6 @@ typedef struct P_symb
 
 
 P_symb** symb_tab; //global table
-int idx = 0;
 
 void init_symb_tab();
 int hachage(char *chaine);
@@ -162,14 +161,12 @@ void create_symb(char* var, char* typename, char *id)
         else if(strcmp(typename, "char") == 0)
             symb->type_A = T_CHAR;
 
-		symb->idx = idx;
-		idx++;
+		symb->idx = hachage(id);
         symb->addr = 0;      // on verra plus tard
         symb->scope = 0;     //idem
         if(!add_symb(symb)){
             printf("on free pck il existe déja le symb\n");
             free(symb);
-			idx--;
         }
 
         return ;
@@ -349,27 +346,27 @@ void lex_free();
 
 
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: PROGRAM ID {output_S("program avant");ident_list *list = create_identlist($2);} vardecllist {output_S("program apres");}
+program: PROGRAM ID {ident_list *list = create_identlist($2);create_symblist("var",list, "unit");} vardecllist
         ;
 
-vardecllist: varsdecl {$$ = $1;output_S("vardecllist");}
-            | varsdecl ';' vardecllist {output_S("vardecllist");}
+vardecllist: varsdecl {$$ = $1;}
+            | varsdecl ';' vardecllist {}
 			| {} //element vide
             ;
 
-varsdecl: VAR identlist ':' typename {output_S("vardecl");create_symblist("var",$2, $4);}
+varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
         ;
 
-identlist: ID                 {output_S("identlist");$$ = create_identlist($1);}
-         | identlist ',' ID   {output_S("identlist");$$ = add_to_identlist($1, $3);}
+identlist: ID                 {$$ = create_identlist($1);}
+         | identlist ',' ID   {$$ = add_to_identlist($1, $3);}
          ;
 
-typename: atomictype   {output_S("typename");$$ = $1;}
+typename: atomictype   {$$ = $1;}
 
-atomictype: UNIT  {output_S("atomictype");$$ = "unit";}
-          | BOOL  {output_S("atomictype");$$ = "bool";}
-          | INT   {output_S("atomictype");$$ = "int";}
-          | REAL  {output_S("atomictype");$$ = "real";}
+atomictype: UNIT  {$$ = "unit";}
+          | BOOL  {$$ = "bool";}
+          | INT   {$$ = "int";}
+          | REAL  {$$ = "real";}
           ;
 
 /*
