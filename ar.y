@@ -38,7 +38,7 @@ void lex_free();
 %token <intval> INF INFEQ SUP SUPEQ DIFF EQ
 %token <intval> AND OR XOR NOT
 
-%token SBEGIN SEND
+%token SBEGIN SEND WRITE READ
 %token IF THEN ELSE ENDIF WHILE DO DONE RETURN
 
 
@@ -48,7 +48,7 @@ void lex_free();
 %type <exprval> E
 %type <tf> cond
 %type <actualquad> M
-%type <lpos> instr tag
+%type <lpos> instr tag sequence
 
 
 %left INF INFEQ SUP SUPEQ DIFF EQ
@@ -124,7 +124,25 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
 		  gencode(q);
 	  }
+	  | SBEGIN sequence SEND { $$ = $2; }
+	  | SBEGIN SEND  { }
+	  | READ ID //lvalue a l'origine, a changer apres les tableaux
+	  {
+		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name($2));
+		  gencode(q);
+	  }
+	  | WRITE E
+	  {
+		  quad q = quad_make(Q_WRITE, NULL, NULL, $2);
+		  gencode(q);
+	  }
 	  ;
+
+sequence : instr ';' M sequence { complete($1, $3); $$ = $4; }
+		 | instr ';' { $$ = $1; }
+		 | instr { $$ = $1; }
+		 ;
+
 
 E : ID { $$ = quadop_name($1);}
 | NUM { $$ = quadop_cst($1);}

@@ -56,6 +56,8 @@ number     [1-9][0-9]*
 "done"       { return DONE; }
 "do"         { return DO; }
 "return"	 { return RETURN; }
+"write"		 { return WRITE; }
+"read"		 { return READ; }
 
 {identifier} {yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}

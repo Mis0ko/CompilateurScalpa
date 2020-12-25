@@ -252,6 +252,16 @@ void affiche(quad q)
 			else
 				printf("?\n");
 			break;
+		case Q_READ:
+			printf("read %s\n", q.res->u.name);
+			break;
+		case Q_WRITE:
+			printf("write ");
+			if (q.res->type == QO_CST)
+				printf("%d\n", q.res->u.cst);
+			else
+				printf("%s\n", q.res->u.name);
+			break;
 		case Q_RET:
 			printf("ret ");
 			if (q.res->type == QO_CST)
