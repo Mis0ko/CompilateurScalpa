@@ -23,9 +23,7 @@ number     [1-9][0-9]*
 "var"   				{output("var");return VAR;}
 "int"   				{output("int");return INT;}
 "bool"  				{output("bool");return BOOL;}
-"char"  				{output("char");return CHAR;}
-"real"  				{output("real");return REAL;}
-"uint"          {output("unit");return UNIT; }
+"unit"          	{output("unit");return UNIT; }
 
 "begin"   			{output("begin");return SBEGIN;}
 "end"   				{output("end");return SEND;}

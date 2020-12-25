@@ -257,9 +257,9 @@ void affiche(quad q)
 			break;
 		case Q_WRITE:
 			printf("write ");
-			if (q.res->type == QO_CST)
-				printf("%d\n", q.res->u.cst);
-			else
+			/*if (q.res->type == QO_CST)
+				printf("%dbla%i\n", q.res->u.cst, QO_CST);
+			else*/
 				printf("%s\n", q.res->u.name);
 			break;
 		case Q_RET:

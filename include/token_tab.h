@@ -27,7 +27,7 @@ typedef enum ident_type
 // le fichier y.tab.h
 typedef enum atomic_type
 {
-    T_INT , T_REAL , T_BOOL , T_CHAR
+    T_INT , T_UNIT , T_BOOL
 } atomic_type ;
 
 typedef struct ident_list

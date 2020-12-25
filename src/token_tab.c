@@ -1,6 +1,6 @@
 #include "../include/token_tab.h"
 
-P_symb** symb_tab; 
+P_symb** symb_tab;
 
 /******************** begining of the functions ********************/
 
@@ -44,12 +44,10 @@ void create_symb(char *var, char *typename, char *id)
 
     if (strcmp(typename, "int") == 0)
         symb->type_A = T_INT;
-    else if (strcmp(typename, "real") == 0)
-        symb->type_A = T_REAL;
     else if (strcmp(typename, "bool") == 0)
         symb->type_A = T_BOOL;
-    else if (strcmp(typename, "char") == 0)
-        symb->type_A = T_CHAR;
+    else if (strcmp(typename, "unit") == 0)
+        symb->type_A = T_UNIT;
 
     symb->idx = hachage(id);
     symb->addr = 0;  // on verra plus tard
@@ -144,9 +142,23 @@ ident_list *add_to_identlist(ident_list *old_list, char *ident)
 void print_symb(P_symb *symb)
 {
     if (strlen(symb->name) >= 8)
-        printf("|\t\t%i\t\t|\t\t%s\t|\n", symb->idx, symb->name);
+        printf("|\t\t%i\t\t|\t\t%s\t|", symb->idx, symb->name);
     else
-        printf("|\t\t%i\t\t|\t\t%s\t\t|\n", symb->idx, symb->name);
+        printf("|\t\t%i\t\t|\t\t%s\t\t|", symb->idx, symb->name);
+	if (symb->type_I == VARIABLE)
+		switch (symb->type_A) {
+			case T_INT:
+				printf("int|\n");
+				break;
+			case T_BOOL:
+				printf("bool|\n");
+				break;
+			case T_UNIT:
+				printf("unit|\n");
+				break;
+		}
+	else
+		printf("\n" );
 }
 
 void print_tab()

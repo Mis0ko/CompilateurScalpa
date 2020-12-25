@@ -31,8 +31,8 @@ void lex_free();
 }
 
 %token PROGRAM  VAR
-%token <strval> ID
-%token <intval> NUM UNIT BOOL INT CHAR REAL
+%token <strval> ID STR
+%token <intval> NUM UNIT BOOL INT
 
 %token <intval> PLUS AFFECT TIMES MINUS DIVIDE POWER TRUE FALSE
 %token <intval> INF INFEQ SUP SUPEQ DIFF EQ
@@ -70,7 +70,6 @@ vardecllist: varsdecl {}
             | varsdecl ';' vardecllist {}
 			| {} //element vide
             ;
-/*je sais pas pk tu remontais la liste crée jusqu'en haut mais pour l'instant on a pas besoin*/
 varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
         ;
 
@@ -83,8 +82,6 @@ typename: atomictype   {$$ = $1;}
 atomictype: UNIT  {$$ = "unit";}
           | BOOL  {$$ = "bool";}
           | INT   {$$ = "int";}
-          | REAL  {$$ = "real";}
-		  | CHAR  {$$ = "char";}
           ;
 
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
@@ -124,7 +121,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
 		  gencode(q);
 	  }
-	  | SBEGIN sequence SEND { $$ = $2; }
+	  | SBEGIN sequence SEND ';'{$$ = $2; }
 	  | SBEGIN SEND  { }
 	  | READ ID //lvalue a l'origine, a changer apres les tableaux
 	  {
@@ -138,7 +135,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  }
 	  ;
 
-sequence : instr ';' M sequence { complete($1, $3); $$ = $4; }
+sequence : instr ';' M sequence { $1 = crelist(nextquad);complete($1, $3); $$ = $4;}
 		 | instr ';' { $$ = $1; }
 		 | instr { $$ = $1; }
 		 ;
