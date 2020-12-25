@@ -1,0 +1,3 @@
+program maxi
+var i,j,max : int;
+if i < max then j := 5 endif

@@ -34,8 +34,8 @@
 /* Undocumented macros, especially those whose name start with YY_,
    are private implementation details.  Do not rely on them.  */
 
-#ifndef YY_YY_BUILD_Y_SCALPA_H_INCLUDED
-# define YY_YY_BUILD_Y_SCALPA_H_INCLUDED
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -49,88 +49,113 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    PROGRAM = 258,
-    VAR = 259,
-    DECL = 260,
-    COMMA = 261,
-    BEGINPROG = 262,
-    ENDPROG = 263,
-    INT = 264,
-    IF = 265,
-    ELSE = 266,
-    WHILE = 267,
-    FOR = 268,
-    RETURN = 269,
-    PRINTI = 270,
-    ASSIGN = 271,
-    PLUS = 272,
-    MINUS = 273,
-    MULT = 274,
-    DIVI = 275,
-    END = 276,
-    TRUE = 277,
-    FALSE = 278,
-    OR = 279,
-    AND = 280,
-    NOT = 281,
-    CONSTANT = 282,
-    RELOP = 283,
-    IDENTIFIER = 284
+    COMMENT = 258,
+    PROGRAM = 259,
+    VAR = 260,
+    ID = 261,
+    NUM = 262,
+    UNIT = 263,
+    BOOL = 264,
+    INT = 265,
+    CHAR = 266,
+    REAL = 267,
+    PLUS = 268,
+    AFFECT = 269,
+    TIMES = 270,
+    MINUS = 271,
+    DIVIDE = 272,
+    POWER = 273,
+    TRUE = 274,
+    FALSE = 275,
+    INF = 276,
+    INFEQ = 277,
+    SUP = 278,
+    SUPEQ = 279,
+    DIFF = 280,
+    EQ = 281,
+    AND = 282,
+    OR = 283,
+    XOR = 284,
+    NOT = 285,
+    SBEGIN = 286,
+    SEND = 287,
+    WRITE = 288,
+    READ = 289,
+    IF = 290,
+    THEN = 291,
+    ELSE = 292,
+    ENDIF = 293,
+    WHILE = 294,
+    DO = 295,
+    DONE = 296,
+    RETURN = 297,
+    SFUNCTION = 298,
+    NEG = 299
   };
 #endif
 /* Tokens.  */
-#define PROGRAM 258
-#define VAR 259
-#define DECL 260
-#define COMMA 261
-#define BEGINPROG 262
-#define ENDPROG 263
-#define INT 264
-#define IF 265
-#define ELSE 266
-#define WHILE 267
-#define FOR 268
-#define RETURN 269
-#define PRINTI 270
-#define ASSIGN 271
-#define PLUS 272
-#define MINUS 273
-#define MULT 274
-#define DIVI 275
-#define END 276
-#define TRUE 277
-#define FALSE 278
-#define OR 279
-#define AND 280
-#define NOT 281
-#define CONSTANT 282
-#define RELOP 283
-#define IDENTIFIER 284
+#define COMMENT 258
+#define PROGRAM 259
+#define VAR 260
+#define ID 261
+#define NUM 262
+#define UNIT 263
+#define BOOL 264
+#define INT 265
+#define CHAR 266
+#define REAL 267
+#define PLUS 268
+#define AFFECT 269
+#define TIMES 270
+#define MINUS 271
+#define DIVIDE 272
+#define POWER 273
+#define TRUE 274
+#define FALSE 275
+#define INF 276
+#define INFEQ 277
+#define SUP 278
+#define SUPEQ 279
+#define DIFF 280
+#define EQ 281
+#define AND 282
+#define OR 283
+#define XOR 284
+#define NOT 285
+#define SBEGIN 286
+#define SEND 287
+#define WRITE 288
+#define READ 289
+#define IF 290
+#define THEN 291
+#define ELSE 292
+#define ENDIF 293
+#define WHILE 294
+#define DO 295
+#define DONE 296
+#define RETURN 297
+#define SFUNCTION 298
+#define NEG 299
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 23 "yacc/scalpa.y"
+#line 19 "ar.y"
 
-  // for identifiers 
-  char* string;
-  // for numbers and relops (==, !=, <= ...) 
-  int value;
-  // head : a link to the first quad of the statement
-  // next : list of quad that needs to be completed
-  struct statement_node_ {
-    struct quad_list_* head;
-    struct quad_list_* next;
-  } statementData;
-  // head : link to the first quad
-  // ptr : the resulting symbol 
-  struct expr_node_ {
-     struct quad_list_* ql;
-     struct symbol_* ptr;
-  } exprData;
+	char *strval;
+	int intval;
+	struct P_symb **psymb;
+	struct ident_list* list;
+	struct quadop* exprval;
+	struct {
+		struct lpos* true;
+		struct lpos* false;
+	} tf;
+	struct lpos* lpos;
+	int actualquad;
 
-#line 134 "build/y.scalpa.h"
+#line 159 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -143,4 +168,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_BUILD_Y_SCALPA_H_INCLUDED  */
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */

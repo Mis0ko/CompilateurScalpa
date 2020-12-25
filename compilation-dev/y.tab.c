@@ -66,29 +66,25 @@
 
 
 /* First part of user prologue.  */
-#line 1 "yacc/scalpa.y"
+#line 1 "ar.y"
 
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <string.h>
-  #include "symbol.h"
-  #include "quad.h"
-  #include "mips.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "include/token_tab.h"
+#include "include/fct_utilitaires.h"
+#include "include/quad.h"
+extern quad globalcode[100];
+extern int nextquad;
+extern int ntp;
 
-  void lex_free();      // Free the memory used by lex
-  void yyerror(char*);  // Just to handle custom message
-  
-  symbol st = NULL;     // The symbol table
-  quad_list qt = NULL;  // The quad list
+void yyerror(char*);
+int yylex();
+void lex_free();
 
-  extern FILE *yyin;    // The input file
-  extern int yylex();   
-  extern int yyparse();
-  
-  
-  struct expr_node_ update_expr_node(struct expr_node_, symbol, quad_list);
 
-#line 92 "build/y.scalpa.c"
+
+#line 88 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -121,8 +117,8 @@
 
 /* Use api.header.include to #include this header
    instead of duplicating it here.  */
-#ifndef YY_YY_BUILD_Y_SCALPA_H_INCLUDED
-# define YY_YY_BUILD_Y_SCALPA_H_INCLUDED
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -136,88 +132,113 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    PROGRAM = 258,
-    VAR = 259,
-    DECL = 260,
-    COMMA = 261,
-    BEGINPROG = 262,
-    ENDPROG = 263,
-    INT = 264,
-    IF = 265,
-    ELSE = 266,
-    WHILE = 267,
-    FOR = 268,
-    RETURN = 269,
-    PRINTI = 270,
-    ASSIGN = 271,
-    PLUS = 272,
-    MINUS = 273,
-    MULT = 274,
-    DIVI = 275,
-    END = 276,
-    TRUE = 277,
-    FALSE = 278,
-    OR = 279,
-    AND = 280,
-    NOT = 281,
-    CONSTANT = 282,
-    RELOP = 283,
-    IDENTIFIER = 284
+    COMMENT = 258,
+    PROGRAM = 259,
+    VAR = 260,
+    ID = 261,
+    NUM = 262,
+    UNIT = 263,
+    BOOL = 264,
+    INT = 265,
+    CHAR = 266,
+    REAL = 267,
+    PLUS = 268,
+    AFFECT = 269,
+    TIMES = 270,
+    MINUS = 271,
+    DIVIDE = 272,
+    POWER = 273,
+    TRUE = 274,
+    FALSE = 275,
+    INF = 276,
+    INFEQ = 277,
+    SUP = 278,
+    SUPEQ = 279,
+    DIFF = 280,
+    EQ = 281,
+    AND = 282,
+    OR = 283,
+    XOR = 284,
+    NOT = 285,
+    SBEGIN = 286,
+    SEND = 287,
+    WRITE = 288,
+    READ = 289,
+    IF = 290,
+    THEN = 291,
+    ELSE = 292,
+    ENDIF = 293,
+    WHILE = 294,
+    DO = 295,
+    DONE = 296,
+    RETURN = 297,
+    SFUNCTION = 298,
+    NEG = 299
   };
 #endif
 /* Tokens.  */
-#define PROGRAM 258
-#define VAR 259
-#define DECL 260
-#define COMMA 261
-#define BEGINPROG 262
-#define ENDPROG 263
-#define INT 264
-#define IF 265
-#define ELSE 266
-#define WHILE 267
-#define FOR 268
-#define RETURN 269
-#define PRINTI 270
-#define ASSIGN 271
-#define PLUS 272
-#define MINUS 273
-#define MULT 274
-#define DIVI 275
-#define END 276
-#define TRUE 277
-#define FALSE 278
-#define OR 279
-#define AND 280
-#define NOT 281
-#define CONSTANT 282
-#define RELOP 283
-#define IDENTIFIER 284
+#define COMMENT 258
+#define PROGRAM 259
+#define VAR 260
+#define ID 261
+#define NUM 262
+#define UNIT 263
+#define BOOL 264
+#define INT 265
+#define CHAR 266
+#define REAL 267
+#define PLUS 268
+#define AFFECT 269
+#define TIMES 270
+#define MINUS 271
+#define DIVIDE 272
+#define POWER 273
+#define TRUE 274
+#define FALSE 275
+#define INF 276
+#define INFEQ 277
+#define SUP 278
+#define SUPEQ 279
+#define DIFF 280
+#define EQ 281
+#define AND 282
+#define OR 283
+#define XOR 284
+#define NOT 285
+#define SBEGIN 286
+#define SEND 287
+#define WRITE 288
+#define READ 289
+#define IF 290
+#define THEN 291
+#define ELSE 292
+#define ENDIF 293
+#define WHILE 294
+#define DO 295
+#define DONE 296
+#define RETURN 297
+#define SFUNCTION 298
+#define NEG 299
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 23 "yacc/scalpa.y"
+#line 19 "ar.y"
 
-  // for identifiers 
-  char* string;
-  // for numbers and relops (==, !=, <= ...) 
-  int value;
-  // head : a link to the first quad of the statement
-  // next : list of quad that needs to be completed
-  struct statement_node_ {
-    struct quad_list_* head;
-    struct quad_list_* next;
-  } statementData;
-  // head : link to the first quad
-  // ptr : the resulting symbol 
-  struct expr_node_ {
-     struct quad_list_* ql;
-     struct symbol_* ptr;
-  } exprData;
+	char *strval;
+	int intval;
+	struct P_symb **psymb;
+	struct ident_list* list;
+	struct quadop* exprval;
+	struct {
+		struct lpos* true;
+		struct lpos* false;
+	} tf;
+	struct lpos* lpos;
+	int actualquad;
 
-#line 221 "build/y.scalpa.c"
+#line 242 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -230,7 +251,7 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_BUILD_Y_SCALPA_H_INCLUDED  */
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
 
 
 
@@ -536,19 +557,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   54
+#define YYLAST   133
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  32
+#define YYNTOKENS  50
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  8
+#define YYNNTS  20
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  19
+#define YYNRULES  61
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  47
+#define YYNSTATES  115
 
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   284
+#define YYMAXUTOK   299
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -564,8 +585,8 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      30,    31,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      46,    47,     2,     2,    49,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,    48,    45,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -588,15 +609,21 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    75,    75,    84,   101,   110,   111,   112,   119,   133,
-     156,   189,   208,   220,   230,   235,   237,   249,   257,   264
+       0,    66,    66,    69,    70,    76,    77,    79,    81,    82,
+      83,    85,    91,    92,    93,    96,    99,   100,   103,   106,
+     107,   108,   109,   110,   113,   118,   123,   132,   143,   148,
+     153,   154,   155,   160,   167,   168,   169,   173,   174,   175,
+     176,   183,   192,   198,   204,   209,   214,   223,   230,   239,
+     240,   241,   242,   243,   246,   247,   248,   249,   250,   251,
+     253,   257
 };
 #endif
 
@@ -605,12 +632,15 @@ static const yytype_int16 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "PROGRAM", "VAR", "DECL", "COMMA",
-  "BEGINPROG", "ENDPROG", "INT", "IF", "ELSE", "WHILE", "FOR", "RETURN",
-  "PRINTI", "ASSIGN", "PLUS", "MINUS", "MULT", "DIVI", "END", "TRUE",
-  "FALSE", "OR", "AND", "NOT", "CONSTANT", "RELOP", "IDENTIFIER", "'('",
-  "')'", "$accept", "axiom", "statement_list", "statement",
-  "declare_statement", "assign_statement", "expr_statement", "expr", YY_NULLPTR
+  "$end", "error", "$undefined", "COMMENT", "PROGRAM", "VAR", "ID", "NUM",
+  "UNIT", "BOOL", "INT", "CHAR", "REAL", "PLUS", "AFFECT", "TIMES",
+  "MINUS", "DIVIDE", "POWER", "TRUE", "FALSE", "INF", "INFEQ", "SUP",
+  "SUPEQ", "DIFF", "EQ", "AND", "OR", "XOR", "NOT", "SBEGIN", "SEND",
+  "WRITE", "READ", "IF", "THEN", "ELSE", "ENDIF", "WHILE", "DO", "DONE",
+  "RETURN", "SFUNCTION", "NEG", "';'", "'('", "')'", "':'", "','",
+  "$accept", "program", "commentary", "funcdecllist", "fundecl", "parlist",
+  "par", "vardecllist", "varsdecl", "identlist", "typename", "atomictype",
+  "instr", "sequence", "E", "cond", "opb", "oprel", "M", "tag", YY_NULLPTR
 };
 #endif
 
@@ -622,16 +652,17 @@ static const yytype_int16 yytoknum[] =
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-      40,    41
+     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
+     295,   296,   297,   298,   299,    59,    40,    41,    58,    44
 };
 # endif
 
-#define YYPACT_NINF (-14)
+#define YYPACT_NINF (-56)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
 
-#define YYTABLE_NINF (-1)
+#define YYTABLE_NINF (-36)
 
 #define yytable_value_is_error(Yyn) \
   0
@@ -640,11 +671,18 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       5,   -10,    22,    38,   -14,     1,    -2,   -14,    13,    -9,
-      -4,   -14,   -14,   -14,   -14,    15,    -3,    -9,   -14,    -7,
-     -14,   -14,    -9,    -9,    -9,    -9,   -14,    35,    17,    20,
-     -14,   -13,   -13,   -14,   -14,    26,    37,   -14,   -14,    39,
-      21,    28,    46,   -14,    43,    32,   -14
+      -1,   -56,     4,     3,   -56,    11,    25,    29,    14,   -35,
+     -56,   -33,    50,    36,    17,    25,   118,    52,    26,    59,
+       5,     7,    70,    13,   -56,     7,   -56,    14,   -56,   -56,
+     -56,   -56,   -56,   -56,   -56,   -56,   -56,    71,     7,   -56,
+      34,    42,   -56,   -56,     7,     7,    68,   -56,   -56,   -56,
+      13,    13,    99,    18,    13,    68,   -56,    32,    40,    39,
+      68,    57,   -56,   -56,    48,   -56,   -56,   -56,   -56,   -56,
+       7,   -56,    85,    21,   -56,   -56,   -56,   -56,   -56,   -56,
+       7,   -56,   -56,   -56,    -6,   118,    44,    71,    36,   -56,
+      68,   -56,    68,    13,    13,    36,   -56,   -56,   118,   -56,
+     -56,   -56,    63,    56,    36,    25,   -56,    60,   -56,    36,
+     -56,   -56,    36,    66,   -56
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -652,23 +690,32 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,     0,     0,     1,     0,     0,    14,    13,     0,
-       0,     4,     6,     5,     7,     0,     0,     0,    13,     0,
-       2,     3,     0,     0,     0,     0,    12,     0,     0,     0,
-      15,    16,    17,    18,    19,     0,     0,    11,     8,     0,
-       0,     0,     0,     9,     0,     0,    10
+       4,     3,     0,     0,     1,     0,    14,     0,     5,    12,
+      16,     0,     0,     0,     0,    14,     0,     0,     0,     0,
+       0,     0,     0,     0,    60,    29,     2,     5,    13,    19,
+      20,    21,    23,    22,    15,    18,    17,     8,     0,    31,
+      36,     0,    37,    38,     0,     0,    33,    32,    47,    48,
+       0,     0,     0,     0,     0,    28,     6,     0,     0,     9,
+      24,    60,    30,    41,     0,    49,    51,    50,    52,    53,
+       0,    44,     0,     0,    54,    55,    56,    57,    59,    58,
+       0,    60,    60,    60,     0,     0,     0,     8,     0,    39,
+      40,    45,    46,     0,     0,     0,    60,    11,     0,    10,
+      34,    43,    42,    61,     0,    14,    25,     0,    27,     0,
+      60,     7,     0,     0,    26
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -14,   -14,   -14,    44,   -14,   -14,   -14,    -8
+     -56,   -56,   -56,    78,   -56,    31,   -56,   -12,   -56,   -56,
+      28,    33,   -13,    45,   -20,   -42,   -56,   -56,   -55,   -56
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,    10,    11,    12,    13,    14,    15
+      -1,     2,     3,    13,    14,    58,    59,     8,     9,    11,
+      34,    35,    40,    41,    52,    53,    70,    80,    54,   107
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -676,47 +723,80 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       6,    19,    27,    28,    20,     6,    24,    25,     1,    29,
-      22,    23,    24,    25,    31,    32,    33,    34,     7,     3,
-      18,     9,     4,     7,    30,     8,     9,    16,     7,    17,
-       8,     9,    22,    23,    24,    25,    26,    22,    23,    24,
-      25,    37,    39,    40,    35,     5,    36,    38,    41,    43,
-      42,    44,    45,    46,    21
+      26,    46,     1,    28,     4,    55,    88,     5,    71,    73,
+      15,    19,    84,    42,    43,    16,    17,     6,    60,    42,
+      43,    81,    82,    44,    63,    64,    93,    94,    95,    44,
+       7,    72,    48,    49,    96,    10,    20,    39,    21,    22,
+      23,   104,    19,    50,    24,    81,    82,    25,    81,    82,
+      90,   101,   102,    45,    83,   112,    18,    12,    36,    51,
+      92,    65,    27,    66,    67,    68,    69,    20,    91,    21,
+      22,    23,    37,    38,    62,    24,    47,    57,    25,    61,
+      85,    65,   103,    66,    67,    68,    69,    86,    87,   -35,
+      81,   108,    98,   109,   106,    89,   111,   110,    65,   113,
+      66,    67,    68,    69,   114,    56,    74,    75,    76,    77,
+      78,    79,    65,    97,    66,    67,    68,    69,    99,     0,
+      74,    75,    76,    77,    78,    79,    29,    30,    31,    32,
+      33,   105,    89,   100
 };
 
 static const yytype_int8 yycheck[] =
 {
-       4,     9,     5,     6,     8,     4,    19,    20,     3,    17,
-      17,    18,    19,    20,    22,    23,    24,    25,    27,    29,
-      29,    30,     0,    27,    31,    29,    30,    29,    27,    16,
-      29,    30,    17,    18,    19,    20,    21,    17,    18,    19,
-      20,    21,     5,     6,     9,     7,    29,    21,     9,    21,
-      29,     5,     9,    21,    10
+      13,    21,     3,    15,     0,    25,    61,     4,    50,    51,
+      45,     6,    54,     6,     7,    48,    49,     6,    38,     6,
+       7,    27,    28,    16,    44,    45,    81,    82,    83,    16,
+       5,    51,    19,    20,    40,     6,    31,    32,    33,    34,
+      35,    96,     6,    30,    39,    27,    28,    42,    27,    28,
+      70,    93,    94,    46,    36,   110,     6,    43,     6,    46,
+      80,    13,    45,    15,    16,    17,    18,    31,    47,    33,
+      34,    35,    46,    14,    32,    39,     6,     6,    42,    45,
+      48,    13,    95,    15,    16,    17,    18,    47,    49,    32,
+      27,   104,    48,   105,    38,    47,   109,    37,    13,   112,
+      15,    16,    17,    18,    38,    27,    21,    22,    23,    24,
+      25,    26,    13,    85,    15,    16,    17,    18,    87,    -1,
+      21,    22,    23,    24,    25,    26,     8,     9,    10,    11,
+      12,    98,    47,    88
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    33,    29,     0,     7,     4,    27,    29,    30,
-      34,    35,    36,    37,    38,    39,    29,    16,    29,    39,
-       8,    35,    17,    18,    19,    20,    21,     5,     6,    39,
-      31,    39,    39,    39,    39,     9,    29,    21,    21,     5,
-       6,     9,    29,    21,     5,     9,    21
+       0,     3,    51,    52,     0,     4,     6,     5,    57,    58,
+       6,    59,    43,    53,    54,    45,    48,    49,     6,     6,
+      31,    33,    34,    35,    39,    42,    62,    45,    57,     8,
+       9,    10,    11,    12,    60,    61,     6,    46,    14,    32,
+      62,    63,     6,     7,    16,    46,    64,     6,    19,    20,
+      30,    46,    64,    65,    68,    64,    53,     6,    55,    56,
+      64,    45,    32,    64,    64,    13,    15,    16,    17,    18,
+      66,    65,    64,    65,    21,    22,    23,    24,    25,    26,
+      67,    27,    28,    36,    65,    48,    47,    49,    68,    47,
+      64,    47,    64,    68,    68,    68,    40,    60,    48,    55,
+      63,    65,    65,    62,    68,    61,    38,    69,    62,    57,
+      37,    62,    68,    62,    38
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    32,    33,    34,    34,    35,    35,    35,    36,    36,
-      36,    37,    38,    39,    39,    39,    39,    39,    39,    39
+       0,    50,    51,    52,    52,    53,    53,    54,    55,    55,
+      55,    56,    57,    57,    57,    58,    59,    59,    60,    61,
+      61,    61,    61,    61,    62,    62,    62,    62,    62,    62,
+      62,    62,    62,    62,    63,    63,    63,    64,    64,    64,
+      64,    64,    65,    65,    65,    65,    65,    65,    65,    66,
+      66,    66,    66,    66,    67,    67,    67,    67,    67,    67,
+      68,    69
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     5,     2,     1,     1,     1,     1,     5,     7,
-       9,     4,     2,     1,     1,     3,     3,     3,     3,     3
+       0,     2,     6,     1,     0,     0,     3,     9,     0,     1,
+       3,     3,     1,     3,     0,     4,     1,     3,     1,     1,
+       1,     1,     1,     1,     3,     6,    10,     6,     2,     1,
+       3,     2,     2,     2,     4,     2,     1,     1,     1,     3,
+       3,     2,     4,     4,     2,     3,     3,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+       0,     0
 };
 
 
@@ -1411,266 +1491,417 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2:
-#line 75 "yacc/scalpa.y"
-                                                        {
-	printf("Match !!!\n");
-	quad_list_free((yyvsp[-1].statementData).next, false);
-	// End of the program, next won't be completed
-}
-#line 1422 "build/y.scalpa.c"
-    break;
-
   case 3:
-#line 84 "yacc/scalpa.y"
-                             {
-		fprintf(stderr, "statement_list statement\n");
-		// Complete previous quads with new statement's head quad
-		if ((yyvsp[0].statementData).head != NULL) {
-			quad_list_complete((yyval.statementData).next, (yyvsp[0].statementData).head->q);
-			// free list
-			quad_list_free((yyval.statementData).next, false);
-			// Each list is a new allocated one, so we need to free it
-			// Heriting
-			(yyval.statementData).next = (yyvsp[0].statementData).next;
-		} else {
-			// If next line isnt an instruction (int a;)
-			quad_list ql = quad_list_concat((yyval.statementData).next, (yyvsp[0].statementData).next);
-			quad_list_free((yyval.statementData).next, false);
-			(yyval.statementData).next = ql;
-		}
-	}
-#line 1444 "build/y.scalpa.c"
+#line 69 "ar.y"
+                    {}
+#line 1498 "y.tab.c"
     break;
 
   case 4:
-#line 101 "yacc/scalpa.y"
-                {
-		fprintf(stderr, "statement\n");
-		// First
-		(yyval.statementData).next = (yyvsp[0].statementData).next;
-		(yyval.statementData).head = (yyvsp[0].statementData).head;
-	}
-#line 1455 "build/y.scalpa.c"
+#line 70 "ar.y"
+                          {}
+#line 1504 "y.tab.c"
     break;
 
   case 5:
-#line 110 "yacc/scalpa.y"
-                         { (yyval.statementData) = (yyvsp[0].statementData); }
-#line 1461 "build/y.scalpa.c"
+#line 76 "ar.y"
+              {}
+#line 1510 "y.tab.c"
     break;
 
   case 6:
-#line 111 "yacc/scalpa.y"
-                            { (yyval.statementData) = (yyvsp[0].statementData); }
-#line 1467 "build/y.scalpa.c"
-    break;
-
-  case 7:
-#line 112 "yacc/scalpa.y"
-                         { (yyval.statementData) = (yyvsp[0].statementData); }
-#line 1473 "build/y.scalpa.c"
+#line 77 "ar.y"
+                                                   {}
+#line 1516 "y.tab.c"
     break;
 
   case 8:
-#line 119 "yacc/scalpa.y"
-                                    {
-		// New integer
-		fprintf(stderr, "int identifier ;\n");
-		// Look for id in sym table
-		symbol s = symbol_find(st, (yyvsp[-3].string));
-		if (s != NULL) {
-			fprintf(stderr, "The variable %s already exists.\n", (yyvsp[-3].string));
-			YYABORT;
-		}
-		s = symbol_new(&st, (yyvsp[-3].string));
-		(yyval.statementData).head = NULL;
-		(yyval.statementData).next = NULL;
-		free((yyvsp[-3].string));
-	}
-#line 1492 "build/y.scalpa.c"
-    break;
-
-  case 9:
-#line 133 "yacc/scalpa.y"
-                                                       {
-		// New integer
-		fprintf(stderr, "int identifier ;\n");
-		// Look for id in sym table
-		symbol s = symbol_find(st, (yyvsp[-5].string));
-		if (s != NULL) {
-			fprintf(stderr, "The variable %s already exists.\n", (yyvsp[-5].string));
-			YYABORT;
-		}
-		s = symbol_new(&st, (yyvsp[-5].string));
-		// Look for id in sym table
-		s = symbol_find(st, (yyvsp[-3].string));
-		if (s != NULL) {
-			fprintf(stderr, "The variable %s already exists.\n", (yyvsp[-3].string));
-			YYABORT;
-		}
-		s = symbol_new(&st, (yyvsp[-3].string));
-
-		(yyval.statementData).head = NULL;
-		(yyval.statementData).next = NULL;
-		free((yyvsp[-5].string));
-		free((yyvsp[-3].string));
-	}
-#line 1520 "build/y.scalpa.c"
-    break;
-
-  case 10:
-#line 156 "yacc/scalpa.y"
-                                                                        {
-		// New integer
-		fprintf(stderr, "int identifier ;\n");
-		// Look for id in sym table
-		symbol s = symbol_find(st, (yyvsp[-7].string));
-		if (s != NULL) {
-			fprintf(stderr, "The variable %s already exists.\n", (yyvsp[-7].string));
-			YYABORT;
-		}
-		s = symbol_new(&st, (yyvsp[-7].string));
-		// Look for id in sym table
-		s = symbol_find(st, (yyvsp[-5].string));
-		if (s != NULL) {
-			fprintf(stderr, "The variable %s already exists.\n", (yyvsp[-5].string));
-			YYABORT;
-		}
-		s = symbol_new(&st, (yyvsp[-5].string));
-		// Look for id in sym table
-		s = symbol_find(st, (yyvsp[-3].string));
-		if (s != NULL) {
-			fprintf(stderr, "The variable %s already exists.\n", (yyvsp[-3].string));
-			YYABORT;
-		}
-		s = symbol_new(&st, (yyvsp[-3].string));
-		(yyval.statementData).head = NULL;
-		(yyval.statementData).next = NULL;
-		free((yyvsp[-7].string));
-		free((yyvsp[-5].string));
-		free((yyvsp[-3].string));
-	}
-#line 1555 "build/y.scalpa.c"
-    break;
-
-  case 11:
-#line 189 "yacc/scalpa.y"
-                                   {
-		// a = something
-		fprintf(stderr, "id = EXPRESSION ;\n");
-		symbol s = symbol_find(st, (yyvsp[-3].string));
-		if (s == NULL) {
-			fprintf(stderr, "The variable %s isn't declared.\n", (yyvsp[-3].string));
-			YYABORT;
-		}
-		quad_list ql =
-			quad_add(&qt, quad_unary_gen(QUAD_UOP_ASSIGN, s, (yyvsp[-1].exprData).ptr));
-		(yyvsp[-1].exprData) = update_expr_node((yyvsp[-1].exprData), s, ql);
-
-		(yyval.statementData).next = NULL;
-		(yyval.statementData).head = (yyvsp[-1].exprData).ql;
-		free((yyvsp[-3].string));
-	}
-#line 1576 "build/y.scalpa.c"
+#line 81 "ar.y"
+          {}
+#line 1522 "y.tab.c"
     break;
 
   case 12:
-#line 208 "yacc/scalpa.y"
-             {
-		fprintf(stderr, "expression ;\n");
-		(yyval.statementData).next = NULL;
-		if ((yyvsp[-1].exprData).ql == NULL || (yyvsp[-1].exprData).ql->q == NULL) {
-			fprintf(stderr,
-					"ERROR: No instruction generated for the expression.\n");
-			YYABORT;
-		}
-		(yyval.statementData).head = (yyvsp[-1].exprData).ql;
-	}
-#line 1591 "build/y.scalpa.c"
+#line 91 "ar.y"
+                      {}
+#line 1528 "y.tab.c"
     break;
 
   case 13:
-#line 220 "yacc/scalpa.y"
-                   {
-		fprintf(stderr, "identifier\n");
-		symbol s = symbol_must_find(st, (yyvsp[0].string));
-		if (s == NULL) {
-			YYABORT;
-		}
-		(yyval.exprData) = update_expr_node((yyval.exprData), s, NULL);
-		free((yyvsp[0].string));
-	}
-#line 1605 "build/y.scalpa.c"
+#line 92 "ar.y"
+                                       {}
+#line 1534 "y.tab.c"
     break;
 
   case 14:
-#line 230 "yacc/scalpa.y"
-                   {
-		fprintf(stderr, "constant\n");
-		(yyval.exprData) = update_expr_node((yyval.exprData), symbol_new_const(&st, (yyvsp[0].value)), NULL);
-	}
-#line 1614 "build/y.scalpa.c"
+#line 93 "ar.y"
+                          {}
+#line 1540 "y.tab.c"
     break;
 
   case 15:
-#line 235 "yacc/scalpa.y"
-                       { (yyval.exprData) = (yyvsp[-1].exprData); }
-#line 1620 "build/y.scalpa.c"
+#line 96 "ar.y"
+                                     {create_symblist("var",(yyvsp[-2].list), (yyvsp[0].strval));}
+#line 1546 "y.tab.c"
     break;
 
   case 16:
-#line 237 "yacc/scalpa.y"
-                         {
-		fprintf(stderr, "expr plus expr\n");
-		(yyval.exprData) = (yyvsp[0].exprData);
-		// Create a temporary symbol
-		symbol s = symbol_new_temp(&st);
-		// Generate and add the quad (+, temporary_symbol, expr1, expr2) to the
-		// quad table
-		quad_list ql = quad_add(&qt, quad_gen(QUAD_OP_PLUS, s, (yyvsp[-2].exprData).ptr, (yyvsp[0].exprData).ptr));
-		// Return the expression's info : its symbols & its quad list
-		(yyval.exprData) = update_expr_node((yyval.exprData), s, ql);
-	}
-#line 1636 "build/y.scalpa.c"
+#line 99 "ar.y"
+                              {(yyval.list) = create_identlist((yyvsp[0].strval));}
+#line 1552 "y.tab.c"
     break;
 
   case 17:
-#line 249 "yacc/scalpa.y"
-                          {
-		(yyval.exprData) = (yyvsp[-2].exprData);
-		symbol s = symbol_new_temp(&st);
-		quad_list ql =
-			quad_add(&qt, quad_gen(QUAD_OP_MINUS, s, (yyvsp[-2].exprData).ptr, (yyvsp[0].exprData).ptr));
-		(yyval.exprData) = update_expr_node((yyval.exprData), s, ql);
-	}
-#line 1648 "build/y.scalpa.c"
+#line 100 "ar.y"
+                              {(yyval.list) = add_to_identlist((yyvsp[-2].list), (yyvsp[0].strval));}
+#line 1558 "y.tab.c"
     break;
 
   case 18:
-#line 257 "yacc/scalpa.y"
-                         {
-		(yyval.exprData) = (yyvsp[0].exprData);
-		symbol s = symbol_new_temp(&st);
-		quad_list ql = quad_add(&qt, quad_gen(QUAD_OP_MULT, s, (yyvsp[-2].exprData).ptr, (yyvsp[0].exprData).ptr));
-		(yyval.exprData) = update_expr_node((yyval.exprData), s, ql);
-	}
-#line 1659 "build/y.scalpa.c"
+#line 103 "ar.y"
+                       {(yyval.strval) = (yyvsp[0].strval);}
+#line 1564 "y.tab.c"
     break;
 
   case 19:
-#line 264 "yacc/scalpa.y"
-                         {
-		(yyval.exprData) = (yyvsp[0].exprData);
-		symbol s = symbol_new_temp(&st);
-		quad_list ql = quad_add(&qt, quad_gen(QUAD_OP_DIVI, s, (yyvsp[-2].exprData).ptr, (yyvsp[0].exprData).ptr));
-		(yyval.exprData) = update_expr_node((yyval.exprData), s, ql);
+#line 106 "ar.y"
+                  {(yyval.strval) = "unit";}
+#line 1570 "y.tab.c"
+    break;
+
+  case 20:
+#line 107 "ar.y"
+                  {(yyval.strval) = "bool";}
+#line 1576 "y.tab.c"
+    break;
+
+  case 21:
+#line 108 "ar.y"
+                  {(yyval.strval) = "int";}
+#line 1582 "y.tab.c"
+    break;
+
+  case 22:
+#line 109 "ar.y"
+                  {(yyval.strval) = "real";}
+#line 1588 "y.tab.c"
+    break;
+
+  case 23:
+#line 110 "ar.y"
+                          {(yyval.strval) = "char";}
+#line 1594 "y.tab.c"
+    break;
+
+  case 24:
+#line 114 "ar.y"
+          {
+	 	  quad q = quad_make(Q_AFFECT, (yyvsp[0].exprval), NULL, quadop_name((yyvsp[-2].strval)));
+	 	  gencode(q);
+	  }
+#line 1603 "y.tab.c"
+    break;
+
+  case 25:
+#line 119 "ar.y"
+          {
+		  complete((yyvsp[-4].tf).true,(yyvsp[-2].actualquad));
+		  (yyval.lpos) = concat((yyvsp[-4].tf).false,crelist(nextquad));
+	  }
+#line 1612 "y.tab.c"
+    break;
+
+  case 26:
+#line 124 "ar.y"
+          {
+		  complete((yyvsp[-8].tf).true, (yyvsp[-6].actualquad));
+		  complete((yyvsp[-8].tf).false, (yyvsp[-2].actualquad));
+		  (yyval.lpos) = concat((yyvsp[-5].lpos), (yyvsp[-4].lpos));
+		  (yyval.lpos) = concat((yyval.lpos), crelist(nextquad));
+		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
+		  gencode(q);
+	  }
+#line 1625 "y.tab.c"
+    break;
+
+  case 27:
+#line 133 "ar.y"
+          {
+		  	printf("1");
+	  		complete((yyvsp[-3].tf).true, (yyvsp[-1].actualquad));
+			printf("2");
+			complete((yyvsp[0].lpos), (yyvsp[-4].actualquad));
+			printf("3");
+			quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst((yyvsp[-4].actualquad)));
+			gencode(q);
+			(yyval.lpos) = (yyvsp[-3].tf).false;
+    }
+#line 1640 "y.tab.c"
+    break;
+
+  case 28:
+#line 144 "ar.y"
+          {
+		  quad q = quad_make(Q_RET,NULL,NULL,(yyvsp[0].exprval));
+		  gencode(q);
+	  }
+#line 1649 "y.tab.c"
+    break;
+
+  case 29:
+#line 149 "ar.y"
+          {
+		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
+		  gencode(q);
+	  }
+#line 1658 "y.tab.c"
+    break;
+
+  case 30:
+#line 153 "ar.y"
+                                 { (yyval.lpos) = (yyvsp[-1].lpos); }
+#line 1664 "y.tab.c"
+    break;
+
+  case 31:
+#line 154 "ar.y"
+                         { }
+#line 1670 "y.tab.c"
+    break;
+
+  case 32:
+#line 156 "ar.y"
+          {
+		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name((yyvsp[0].strval)));
+		  gencode(q);
+	  }
+#line 1679 "y.tab.c"
+    break;
+
+  case 33:
+#line 161 "ar.y"
+          {
+		  quad q = quad_make(Q_WRITE, NULL, NULL, (yyvsp[0].exprval));
+		  gencode(q);
+	  }
+#line 1688 "y.tab.c"
+    break;
+
+  case 34:
+#line 167 "ar.y"
+                                { complete((yyvsp[-3].lpos), (yyvsp[-1].actualquad)); (yyval.lpos) = (yyvsp[0].lpos); }
+#line 1694 "y.tab.c"
+    break;
+
+  case 35:
+#line 168 "ar.y"
+                             { (yyval.lpos) = (yyvsp[-1].lpos); }
+#line 1700 "y.tab.c"
+    break;
+
+  case 36:
+#line 169 "ar.y"
+                         { (yyval.lpos) = (yyvsp[0].lpos); }
+#line 1706 "y.tab.c"
+    break;
+
+  case 37:
+#line 173 "ar.y"
+       { (yyval.exprval) = quadop_name((yyvsp[0].strval));}
+#line 1712 "y.tab.c"
+    break;
+
+  case 38:
+#line 174 "ar.y"
+      { (yyval.exprval) = quadop_cst((yyvsp[0].intval));}
+#line 1718 "y.tab.c"
+    break;
+
+  case 39:
+#line 175 "ar.y"
+            { (yyval.exprval) = (yyvsp[-1].exprval);}
+#line 1724 "y.tab.c"
+    break;
+
+  case 40:
+#line 177 "ar.y"
+{
+	  quadop* t = new_temp();
+	  quad q = quad_make((yyvsp[-1].intval), (yyvsp[-2].exprval), (yyvsp[0].exprval), t);
+	  gencode(q);
+	  (yyval.exprval) = t;
+}
+#line 1735 "y.tab.c"
+    break;
+
+  case 41:
+#line 184 "ar.y"
+{
+	quadop* t = new_temp();
+	quad q = quad_make(Q_NEG, (yyvsp[0].exprval), NULL, t);
+	gencode(q);
+	(yyval.exprval) = t;
+}
+#line 1746 "y.tab.c"
+    break;
+
+  case 42:
+#line 193 "ar.y"
+        {
+		(yyval.tf).true = concat ((yyvsp[-3].tf).true, (yyvsp[0].tf).true);
+		complete((yyvsp[-3].tf).false, (yyvsp[-1].actualquad));
+		(yyval.tf).false = (yyvsp[0].tf).false;
 	}
-#line 1670 "build/y.scalpa.c"
+#line 1756 "y.tab.c"
+    break;
+
+  case 43:
+#line 199 "ar.y"
+        {
+		(yyval.tf).false = concat ((yyvsp[-3].tf).false, (yyvsp[0].tf).false);
+		complete((yyvsp[-3].tf).true, (yyvsp[-1].actualquad));
+		(yyval.tf).true = (yyvsp[0].tf).true;
+	}
+#line 1766 "y.tab.c"
+    break;
+
+  case 44:
+#line 205 "ar.y"
+        {
+		(yyval.tf).true = (yyvsp[0].tf).false;
+		(yyval.tf).false = (yyvsp[0].tf).true;
+	}
+#line 1775 "y.tab.c"
+    break;
+
+  case 45:
+#line 210 "ar.y"
+        {
+		(yyval.tf).true = (yyvsp[-1].tf).true;
+		(yyval.tf).false = (yyvsp[-1].tf).false;
+	}
+#line 1784 "y.tab.c"
+    break;
+
+  case 46:
+#line 215 "ar.y"
+        {
+		(yyval.tf).true = crelist(nextquad);
+		quad q = quad_make((yyvsp[-1].intval),(yyvsp[-2].exprval),(yyvsp[0].exprval),NULL);
+		gencode (q); // if ($1 rel $3)     goto ?
+		(yyval.tf).false = crelist(nextquad);
+		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
+		gencode(q2);
+	}
+#line 1797 "y.tab.c"
+    break;
+
+  case 47:
+#line 224 "ar.y"
+        {
+		(yyval.tf).true = crelist(nextquad);
+		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
+		gencode(q2);
+		(yyval.tf).false = NULL;
+	}
+#line 1808 "y.tab.c"
+    break;
+
+  case 48:
+#line 231 "ar.y"
+        {
+		(yyval.tf).false = crelist(nextquad);
+		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
+		gencode(q2);
+		(yyval.tf).true = NULL;
+	}
+#line 1819 "y.tab.c"
+    break;
+
+  case 49:
+#line 239 "ar.y"
+           { (yyval.intval) = Q_PLUS; }
+#line 1825 "y.tab.c"
+    break;
+
+  case 50:
+#line 240 "ar.y"
+                { (yyval.intval) = Q_MINUS; }
+#line 1831 "y.tab.c"
+    break;
+
+  case 51:
+#line 241 "ar.y"
+                { (yyval.intval) = Q_TIMES; }
+#line 1837 "y.tab.c"
+    break;
+
+  case 52:
+#line 242 "ar.y"
+                 { (yyval.intval) = Q_DIVIDE; }
+#line 1843 "y.tab.c"
+    break;
+
+  case 53:
+#line 243 "ar.y"
+                { (yyval.intval) = Q_POWER; }
+#line 1849 "y.tab.c"
+    break;
+
+  case 54:
+#line 246 "ar.y"
+            { (yyval.intval) = Q_INF; }
+#line 1855 "y.tab.c"
+    break;
+
+  case 55:
+#line 247 "ar.y"
+                  { (yyval.intval) = Q_INFEQ; }
+#line 1861 "y.tab.c"
+    break;
+
+  case 56:
+#line 248 "ar.y"
+                { (yyval.intval) = Q_SUP; }
+#line 1867 "y.tab.c"
+    break;
+
+  case 57:
+#line 249 "ar.y"
+                  { (yyval.intval) = Q_SUPEQ; }
+#line 1873 "y.tab.c"
+    break;
+
+  case 58:
+#line 250 "ar.y"
+               { (yyval.intval) = Q_EQ; }
+#line 1879 "y.tab.c"
+    break;
+
+  case 59:
+#line 251 "ar.y"
+                 { (yyval.intval) = Q_DIFF; }
+#line 1885 "y.tab.c"
+    break;
+
+  case 60:
+#line 253 "ar.y"
+    { (yyval.actualquad) = nextquad; }
+#line 1891 "y.tab.c"
+    break;
+
+  case 61:
+#line 257 "ar.y"
+{
+	  (yyval.lpos) = crelist(nextquad);
+	  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
+	  gencode(q);
+}
+#line 1901 "y.tab.c"
     break;
 
 
-#line 1674 "build/y.scalpa.c"
+#line 1905 "y.tab.c"
 
       default: break;
     }
@@ -1902,70 +2133,37 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 270 "yacc/scalpa.y"
+#line 264 "ar.y"
 
-  
 void yyerror (char *s) {
-    fprintf(stderr, "[Yacc] error: %s\n", s);
+	fprintf(stderr, "[Yacc] error: %s\n", s);
 }
 
-struct expr_node_ update_expr_node(struct expr_node_ node, symbol s, quad_list q){
-    node.ptr = s;
-	// First initialization
-    if(q == NULL)
-        node.ql = 0;
-    else if(node.ql == NULL && q!= NULL)
-        node.ql = q;
 
-    return node;
+int main() {
+	init_symb_tab();
+	printf("Enter your code:\n");
+
+	yyparse();
+	printf("-----------------\nSymbol table:\n-----------------\n");
+	print_tab();
+	printf("Quad list:\n");
+	for (int i=0; i<nextquad; i++) {
+		affiche(globalcode[i]);
+	}
+
+	// Be clean.===> Ofc As always
+	lex_free();
+	return 0;
 }
 
-int main(int argc, const char** argv) {
-    int status = 0;
-
-    // Args check
-    if(argc == 1)
-    {
-        fprintf(stdout, "Usage: %s [input [output]]\n", argv[0]);
-        fprintf(stdout, "Reading from standard input.\n");
-        fprintf(stdout, "Output will be saved to out.asm.\n");
-		printf("********************************\n");
-		printf("********VERBAL HISTORY**********\n");
-		printf("********************************\n");
-        status = yyparse(); // Default parsing
-    }
-	
-    // Set uncompleted branches to end (exit)
-    int rmQuad = 0;
-    rmQuad = quad_list_clean_gotos(qt);
-    // Debug
-    symbol_list_print(st);
-    quad_list_print(qt);
-
-    printf("Cleaned %d quad(s) with undefined branch\n", rmQuad);
-	
-    // Mips
-    FILE * out = stdout;
-    if(argc == 3)
-        out = fopen(argv[2], "w");
-    else
-        out = fopen("out.asm", "w");
-    if(!out) {
-        fprintf(stderr, "ERROR: Unable to open the output file for writing.\n");
-        return -2;
-    }
-
-	// Print mips code
-    toMips(st,qt, out); 
-    fclose(out);
-
-    // End, 
-    printf("Cleaning...");
-    quad_list_free(qt, true);
-    symbol_free_memory(st);
-    lex_free();
-    printf("OK\n");
-    printf("YACC Exit code: %d\n", status);
-
-    return status;
-}
+/*
+*	Test fonctionnel : creation de variable:
+*
+*	Ce test contient tout type de symbole afin de recouvrir la totalité
+*	des cas : symboles doublons d'indice de hachage mais symb différent,
+*	test avec symbole doublon (et donc refus d'ajouter dans la table),
+*	ajout symbole classique.
+*
+*	./ar < file_test/test_declaration_var
+*/
