@@ -14,7 +14,8 @@
 %}
 
 identifier [a-zA-Z_]+[0-9a-zA-Z_]*
-number     [1-9][0-9]*
+number     [1-9][0-9]*|"0"
+comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 
 %%
 
@@ -57,11 +58,11 @@ number     [1-9][0-9]*
 "write"		 { return WRITE; }
 "read"		 { return READ; }
 
-{identifier} {yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
+{identifier} { yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
-"0" 		 { yylval.intval = atoi(yytext); return NUM; }
 
-[();:,]       {return yytext[0]; }
+{comment}    { printf("%s\n", yytext);}
+[();:,]      { return yytext[0]; }
 \n           { }
 [\t ]        { }
 .            { printf("Caractere inconnu: %s", yytext);}
