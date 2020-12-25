@@ -30,9 +30,37 @@ number     [1-9][0-9]*
 "begin"   			{output("begin");return SBEGIN;}
 "end"   				{output("end");return SEND;}
 
+"+"          { return PLUS; }
+"*"          { return TIMES; }
+"-"          { return MINUS; }
+"/"          { return DIVIDE; }
+"^"          { return POWER; }
+":="         { return AFFECT; }
+"<"          { return INF; }
+">"          { return SUP; }
+"<="         { return INFEQ; }
+">="         { return SUPEQ; }
+"<>"         { return DIFF; }
+"="          { return EQ; }
+"true"       { return TRUE; }
+"false"      { return FALSE; }
+"and"        { return AND; }
+"or"         { return OR; }
+"xor"        { return XOR; }
+"not"        { return NOT; }
+"if"         { return IF; }
+"then"       { return THEN; }
+"else"       { return ELSE; }
+"endif"      { return ENDIF; }
+"while"      { return WHILE; }
+"done"       { return DONE; }
+"do"         { return DO; }
+"return"	 { return RETURN; }
 
 {identifier} {yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
+"0" 		 { yylval.intval = atoi(yytext); return NUM; }
+
 [();:,]       {return yytext[0]; }
 \n           { }
 [\t ]        { }

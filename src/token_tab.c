@@ -1,5 +1,7 @@
 #include "../include/token_tab.h"
 
+P_symb** symb_tab; 
+
 /******************** begining of the functions ********************/
 
 void init_symb_tab()

@@ -50,14 +50,6 @@ typedef struct P_symb
 } P_symb ;
 
 
-
-
-
-/******************** Symbole table ********************/
-P_symb** symb_tab; 
-
-
-
 /******************** FUNCTIONS ********************/
 /*
 * Just dynamic init for token table
