@@ -1,0 +1,8 @@
+program maxi 
+var i, j, max, dfd :int;
+begin
+max:=4;
+j := 4;
+if 5<6 then max :=8 endif;
+a :=4
+end;

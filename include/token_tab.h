@@ -27,7 +27,7 @@ typedef enum ident_type
 // le fichier y.tab.h
 typedef enum atomic_type
 {
-    T_INT , T_REAL , T_BOOL , T_CHAR
+    T_INT , T_UNIT , T_BOOL
 } atomic_type ;
 
 typedef struct ident_list
@@ -48,14 +48,6 @@ typedef struct P_symb
     int                 scope;          // globale/locale, begin with 0 for globable and +1 for each new bloc, but we begin without it.
     struct P_symb* next_doublon;
 } P_symb ;
-
-
-
-
-
-/******************** Symbole table ********************/
-P_symb** symb_tab; 
-
 
 
 /******************** FUNCTIONS ********************/
