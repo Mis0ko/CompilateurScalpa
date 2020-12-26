@@ -5,10 +5,6 @@
 #include <string.h>
 #include "fct_utilitaires.h"
 
-#define DINT 0
-#define DBOOL 1
-#define DUNIT 2
-
 struct P_symb;
 struct ident_list;
 #define SIZE_HASH_TABLE 1000

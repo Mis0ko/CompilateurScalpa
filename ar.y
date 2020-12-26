@@ -23,8 +23,8 @@ void lex_free();
 	struct ident_list* list;
 	struct quadop* exprval;
 	struct {
-		struct lpos* true;
 		struct lpos* false;
+		struct lpos* true;
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
@@ -63,7 +63,7 @@ void lex_free();
 
 
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: PROGRAM ID vardecllist instr
+program: PROGRAM ID vardecllist instr {printf("oui\n" );}
         ;
 
 vardecllist: varsdecl {}
@@ -88,11 +88,14 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
 	 	  gencode(q);
+		  $$ = crelist(nextquad);
+		  printf("fin affect\n");
 	  }
 	  | IF cond THEN M instr ENDIF
 	  {
 		  complete($2.true,$4);
 		  $$ = concat($2.false,crelist(nextquad));
+		  printf("fin if\n" );
 	  }
 	  | IF cond THEN M instr tag ELSE M instr ENDIF
 	  {
@@ -110,6 +113,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 			quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst($2));
 			gencode(q);
 			$$ = $3.false;
+			printf("fin while\n" );
     }
 	  | RETURN E
 	  {
@@ -121,7 +125,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
 		  gencode(q);
 	  }
-	  | SBEGIN sequence SEND ';'{$$ = $2; }
+	  | SBEGIN sequence SEND ';'{$$ = $2;}
 	  | SBEGIN SEND  { }
 	  | READ ID //lvalue a l'origine, a changer apres les tableaux
 	  {
@@ -135,17 +139,23 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  }
 	  ;
 
-sequence : instr ';' M sequence { $1 = crelist(nextquad);complete($1, $3); $$ = $4;}
-		 | instr ';' { $$ = $1; }
+sequence : sequence M instr {complete($1, $2);$$ = $3;}
+		 | instr ';' { $$ = $1;}
 		 | instr { $$ = $1; }
 		 ;
 
 
 E : ID { $$ = quadop_name($1);}
 | NUM { $$ = quadop_cst($1);}
+| STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
 | E opb E
 {
+	  if ($1->type == QO_STR || $3->type == QO_STR)
+	  {
+		  yyerror("erreur de type");
+		  return 1;
+	  }
 	  quadop* t = new_temp();
 	  quad q = quad_make($2, $1, $3, t);
 	  gencode(q);
@@ -153,6 +163,11 @@ E : ID { $$ = quadop_name($1);}
 }
 | MINUS E %prec NEG
 {
+	if ($2->type == QO_STR)
+	{
+		yyerror("erreur de type");
+		return 1;
+	}
 	quadop* t = new_temp();
 	quad q = quad_make(Q_NEG, $2, NULL, t);
 	gencode(q);
@@ -184,6 +199,11 @@ cond : cond OR M cond
 	}
 	| E oprel E
 	{
+		if ($1->type == QO_STR || $3->type == QO_STR)
+		{
+			yyerror("erreur de type");
+			return 1;
+		}
 		$$.true = crelist(nextquad);
 		quad q = quad_make($2,$1,$3,NULL);
 		gencode (q); // if ($1 rel $3)     goto ?
@@ -221,7 +241,7 @@ oprel :	INF { $$ = Q_INF; }
 	  | EQ { $$ = Q_EQ; }
 	  | DIFF { $$ = Q_DIFF; }
 
-M : { $$ = nextquad; }
+M : { $$ = nextquad;}
 ;
 
 tag:
@@ -247,6 +267,7 @@ int main() {
 	print_tab();
 	printf("Quad list:\n");
 	for (int i=0; i<nextquad; i++) {
+		printf("%i ", i);
 		affiche(globalcode[i]);
 	}
 

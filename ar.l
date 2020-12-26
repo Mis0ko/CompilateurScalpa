@@ -16,6 +16,7 @@
 identifier [a-zA-Z_]+[0-9a-zA-Z_]*
 number     [1-9][0-9]*|"0"
 comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
+string     ["]([^"]|\\(.|\n))*["]
 
 %%
 
@@ -51,16 +52,20 @@ comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 "then"       { return THEN; }
 "else"       { return ELSE; }
 "endif"      { return ENDIF; }
-"while"      { return WHILE; }
-"done"       { return DONE; }
-"do"         { return DO; }
+"while"      { output(yytext);return WHILE; }
+"done"       { output(yytext);return DONE; }
+"do"         { output(yytext);return DO; }
 "return"	 { return RETURN; }
 "write"		 { return WRITE; }
 "read"		 { return READ; }
 
 {identifier} { yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
-
+{string} {        yylval.strval = malloc(yyleng -1);
+          memcpy(yylval.strval, yytext + 1, yyleng - 2);
+          yylval.strval[yyleng - 2] = 0;
+		  output(yylval.strval); return STR;
+        }
 {comment}    { printf("%s\n", yytext);}
 [();:,]      { return yytext[0]; }
 \n           { }

@@ -1,9 +1,9 @@
 #include "../include/quad.h"
 
 
-quad globalcode[100];
+quad globalcode[100]; //array of quadruplet
 int nextquad =0;
-int ntp=0;
+int ntp=0; //for the number of temporary variables
 
 quadop* quadop_cst(int val)
 {
@@ -17,8 +17,18 @@ quadop* quadop_name(char *str)
 {
 	quadop *res = malloc(sizeof(quadop));
 	res->type = QO_NAME;
-	res->u.name = str;
+	res->u.name = malloc(100);
+	sprintf(res->u.name,"%s",str);
 	return res;
+}
+
+quadop* quadop_str(char *str)
+{
+	quadop *res = malloc(sizeof(quadop));
+	res->type = QO_STR;
+	res->u.str = str;
+	return res;
+
 }
 
 
@@ -257,9 +267,9 @@ void affiche(quad q)
 			break;
 		case Q_WRITE:
 			printf("write ");
-			/*if (q.res->type == QO_CST)
+			if (q.res->type == QO_CST)
 				printf("%dbla%i\n", q.res->u.cst, QO_CST);
-			else*/
+			else
 				printf("%s\n", q.res->u.name);
 			break;
 		case Q_RET:
@@ -295,8 +305,9 @@ lpos* concat(lpos* l1, lpos* l2) {
 }
 
 void complete(lpos* liste, int cible) {
-	if (liste == NULL)
+	if (liste == NULL || cible == liste->position)
 		return;
+
 	globalcode[liste->position].res = quadop_cst(cible);
 	while (liste->suivant != NULL) {
 		liste = liste->suivant;
