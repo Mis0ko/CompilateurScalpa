@@ -1,3 +1,10 @@
 program maxi
-var i,j,max : int;
-if i < max then j := 5 endif
+var i, j, max, dfd :int;
+begin
+b:=10
+if 5<4 then max := 4 endif
+a:=7
+a:=6
+while 4<5 do a:= 4 done
+b:=9
+end;

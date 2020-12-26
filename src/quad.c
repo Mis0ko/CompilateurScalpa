@@ -5,6 +5,9 @@ quad globalcode[100]; //array of quadruplet
 int nextquad =0;
 int ntp=0; //for the number of temporary variables
 
+
+
+
 quadop* quadop_cst(int val)
 {
 	quadop *res = malloc(sizeof(quadop));
@@ -17,8 +20,7 @@ quadop* quadop_name(char *str)
 {
 	quadop *res = malloc(sizeof(quadop));
 	res->type = QO_NAME;
-	res->u.name = malloc(100);
-	sprintf(res->u.name,"%s",str);
+	res->u.name = strdup(str);
 	return res;
 }
 
@@ -26,7 +28,7 @@ quadop* quadop_str(char *str)
 {
 	quadop *res = malloc(sizeof(quadop));
 	res->type = QO_STR;
-	res->u.str = str;
+	res->u.str = strdup(str);
 	return res;
 
 }
@@ -309,8 +311,10 @@ void complete(lpos* liste, int cible) {
 		return;
 
 	globalcode[liste->position].res = quadop_cst(cible);
+
 	while (liste->suivant != NULL) {
 		liste = liste->suivant;
-		globalcode[liste->position].res = quadop_cst(cible);
+		if (cible != liste->position)
+			globalcode[liste->position].res = quadop_cst(cible);
 	}
 }

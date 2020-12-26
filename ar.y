@@ -63,7 +63,7 @@ void lex_free();
 
 
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: PROGRAM ID vardecllist instr {printf("oui\n" );}
+program: PROGRAM ID vardecllist instr
         ;
 
 vardecllist: varsdecl {}
@@ -87,15 +87,14 @@ atomictype: UNIT  {$$ = "unit";}
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
-	 	  gencode(q);
+		  gencode(q);
 		  $$ = crelist(nextquad);
-		  printf("fin affect\n");
 	  }
 	  | IF cond THEN M instr ENDIF
 	  {
+		  $$ = NULL;
 		  complete($2.true,$4);
-		  $$ = concat($2.false,crelist(nextquad));
-		  printf("fin if\n" );
+		  $$ = concat($2.false,$5);
 	  }
 	  | IF cond THEN M instr tag ELSE M instr ENDIF
 	  {
@@ -113,7 +112,6 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 			quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst($2));
 			gencode(q);
 			$$ = $3.false;
-			printf("fin while\n" );
     }
 	  | RETURN E
 	  {
