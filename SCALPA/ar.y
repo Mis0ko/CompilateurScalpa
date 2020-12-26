@@ -5,13 +5,110 @@
 #include "include/token_tab.h"
 #include "include/fct_utilitaires.h"
 #include "include/quad.h"
-extern quad globalcode[100];
+extern quad globalcode[1000];
 extern int nextquad;
 extern int ntp;
 
+symbol st = NULL;     // The symbol table
+  
 void yyerror(char*);
 int yylex();
 void lex_free();
+
+
+int quad_compt;
+
+void translatemips(quad q, FILE* os) {
+	if(q.type==Q_AFFECT){
+		return ;
+	}
+	quad_compt++;
+	fprintf(os, "\nLABEL_Q_%d:\n", quad_compt);
+	switch (q.type) {
+		case Q_PLUS:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Addition operation
+			fprintf(os, "    add $t2, $t0, $t1\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;
+		case Q_MINUS:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Substraction operation
+			fprintf(os, "    sub $t2, $t0, $t1\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;
+		case Q_DIVIDE:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Signed Division operation
+			fprintf(os, "    div $t0, $t1\n");
+			// 32 most significant bits of multiplication to $t2
+			fprintf(os, "    mflo $t2\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;
+		case Q_TIMES:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Signed Multioperation
+			fprintf(os, "    mult $t0, $t1\n");
+			// 32 most significant bits of multiplication to $t2
+			fprintf(os, "    mflo $t2\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;			
+	}
+}
+
+void tomips(quad* globalcode, symbol st, FILE* os) {
+	fprintf(os, ".data\n");
+
+	while (st != NULL) {
+		{
+			fprintf(os, "VAR_%s_:\t.word %d\n", st->name, st->value);
+		}
+		st = st->next;
+	}
+	fprintf(os, ".text\n");
+	fprintf(os, "main:\n");
+	quad_compt = 0;
+	for (int i = 0; i < nextquad; i++) {
+		translatemips(globalcode[i], os);
+	}
+}
+
 
 
 %}
@@ -93,12 +190,27 @@ vardecllist: varsdecl {}
 			| {} //element vide
             ;
 /*je sais pas pk tu remontais la liste crée jusqu'en haut mais pour l'instant on a pas besoin*/
-varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
+varsdecl: VAR identlist ':' typename {//create_symblist("var",$2, $4);
+}
         ;
-
-identlist: ID                 {$$ = create_identlist($1);}
-         | identlist ',' ID   {$$ = add_to_identlist($1, $3);}
-         ;
+identlist : ID {
+				symbol s = symbol_find(st, $1);
+				if (s != NULL) {
+					fprintf(stderr, "The variable %s already exists.\n", $1);
+					YYABORT;
+				}
+				s = symbol_new(&st, $1);
+				//$$ = create_identlist($1);
+			}
+			| identlist ',' ID {
+				symbol s = symbol_find(st, $3);
+				if (s != NULL) {
+					fprintf(stderr, "The variable %s already exists.\n", $3);
+					YYABORT;
+				}
+				s = symbol_new(&st, $3);
+				//$$ = add_to_identlist($1, $3);
+			};
 
 typename: atomictype   {$$ = $1;}
 		;
@@ -112,6 +224,11 @@ atomictype: UNIT  {$$ = "unit";}
 
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
+		  symbol s = symbol_find(st, $1);
+       	 	if(s == NULL){
+            fprintf(stderr, "The variable %s isn't declared.\n", $1);
+            YYABORT;
+        	}
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
 	 	  gencode(q);
 	  }
@@ -120,7 +237,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  complete($2.true,$4);
 		  $$ = concat($2.false,crelist(nextquad));
 	  }
-	  | IF cond THEN M instr tag ELSE M instr ENDIF
+	  | IF cond THEN M instr tag ELSE M instr ENDIF 
 	  {
 		  complete($2.true, $4);
 		  complete($2.false, $8);
@@ -267,18 +384,35 @@ void yyerror (char *s) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
 	init_symb_tab();
 	printf("Enter your code:\n");
 
 	yyparse();
 	printf("-----------------\nSymbol table:\n-----------------\n");
-	print_tab();
+	//print_tab();
 	printf("Quad list:\n");
 	for (int i=0; i<nextquad; i++) {
 		affiche(globalcode[i]);
 	}
+	symbol_list_print(st);
+	FILE * out = stdout;
 
+    if(argc == 3)
+
+        out = fopen(argv[2], "w");
+    else
+        out = fopen("out.asm", "w");
+
+    if(!out) {
+        fprintf(stderr, "ERROR: Unable to open the output file for writing.\n");
+        return -2;
+    }
+
+    tomips(globalcode, st,out); // donner out ici
+    fclose(out);
+
+    symbol_free_memory(st);
 	// Be clean.===> Ofc As always
 	lex_free();
 	return 0;

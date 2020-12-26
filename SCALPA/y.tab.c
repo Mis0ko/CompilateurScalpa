@@ -74,17 +74,114 @@
 #include "include/token_tab.h"
 #include "include/fct_utilitaires.h"
 #include "include/quad.h"
-extern quad globalcode[100];
+extern quad globalcode[1000];
 extern int nextquad;
 extern int ntp;
 
+  symbol st = NULL;     // The symbol table
+  
 void yyerror(char*);
 int yylex();
 void lex_free();
 
 
+int quad_compt;
 
-#line 88 "y.tab.c"
+void translatemips(quad q, FILE* os) {
+	if(q.type==Q_AFFECT){
+		return ;
+	}
+	quad_compt++;
+	fprintf(os, "\nLABEL_Q_%d:\n", quad_compt);
+	switch (q.type) {
+		case Q_PLUS:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Addition operation
+			fprintf(os, "    add $t2, $t0, $t1\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;
+		case Q_MINUS:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Substraction operation
+			fprintf(os, "    sub $t2, $t0, $t1\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;
+		case Q_DIVIDE:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Signed Division operation
+			fprintf(os, "    div $t0, $t1\n");
+			// 32 most significant bits of multiplication to $t2
+			fprintf(os, "    mflo $t2\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;
+		case Q_TIMES:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+			else
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+			else
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
+			// Signed Multioperation
+			fprintf(os, "    mult $t0, $t1\n");
+			// 32 most significant bits of multiplication to $t2
+			fprintf(os, "    mflo $t2\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
+			break;			
+	}
+}
+
+void tomips(quad* globalcode, symbol st, FILE* os) {
+	fprintf(os, ".data\n");
+
+	while (st != NULL) {
+		{
+			fprintf(os, "VAR_%s_:\t.word %d\n", st->name, st->value);
+		}
+		st = st->next;
+	}
+	fprintf(os, ".text\n");
+	fprintf(os, "main:\n");
+	quad_compt = 0;
+	for (int i = 0; i < nextquad; i++) {
+		translatemips(globalcode[i], os);
+	}
+}
+
+
+
+
+#line 185 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -224,7 +321,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "ar.y"
+#line 116 "ar.y"
 
 	char *strval;
 	int intval;
@@ -238,7 +335,7 @@ union YYSTYPE
 	struct lpos* lpos;
 	int actualquad;
 
-#line 242 "y.tab.c"
+#line 339 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -617,13 +714,13 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    66,    66,    69,    70,    76,    77,    79,    81,    82,
-      83,    85,    91,    92,    93,    96,    99,   100,   103,   106,
-     107,   108,   109,   110,   113,   118,   123,   132,   143,   148,
-     153,   154,   155,   160,   167,   168,   169,   173,   174,   175,
-     176,   183,   192,   198,   204,   209,   214,   223,   230,   239,
-     240,   241,   242,   243,   246,   247,   248,   249,   250,   251,
-     253,   257
+       0,   163,   163,   166,   167,   173,   174,   176,   178,   179,
+     180,   182,   188,   189,   190,   193,   196,   205,   215,   218,
+     219,   220,   221,   222,   225,   235,   240,   249,   260,   265,
+     270,   271,   272,   277,   284,   285,   286,   290,   291,   292,
+     293,   300,   309,   315,   321,   326,   331,   340,   347,   356,
+     357,   358,   359,   360,   363,   364,   365,   366,   367,   368,
+     370,   374
 };
 #endif
 
@@ -1492,127 +1589,149 @@ yyreduce:
   switch (yyn)
     {
   case 3:
-#line 69 "ar.y"
+#line 166 "ar.y"
                     {}
-#line 1498 "y.tab.c"
+#line 1595 "y.tab.c"
     break;
 
   case 4:
-#line 70 "ar.y"
+#line 167 "ar.y"
                           {}
-#line 1504 "y.tab.c"
+#line 1601 "y.tab.c"
     break;
 
   case 5:
-#line 76 "ar.y"
+#line 173 "ar.y"
               {}
-#line 1510 "y.tab.c"
+#line 1607 "y.tab.c"
     break;
 
   case 6:
-#line 77 "ar.y"
+#line 174 "ar.y"
                                                    {}
-#line 1516 "y.tab.c"
+#line 1613 "y.tab.c"
     break;
 
   case 8:
-#line 81 "ar.y"
+#line 178 "ar.y"
           {}
-#line 1522 "y.tab.c"
+#line 1619 "y.tab.c"
     break;
 
   case 12:
-#line 91 "ar.y"
+#line 188 "ar.y"
                       {}
-#line 1528 "y.tab.c"
+#line 1625 "y.tab.c"
     break;
 
   case 13:
-#line 92 "ar.y"
+#line 189 "ar.y"
                                        {}
-#line 1534 "y.tab.c"
+#line 1631 "y.tab.c"
     break;
 
   case 14:
-#line 93 "ar.y"
+#line 190 "ar.y"
                           {}
-#line 1540 "y.tab.c"
+#line 1637 "y.tab.c"
     break;
 
   case 15:
-#line 96 "ar.y"
-                                     {create_symblist("var",(yyvsp[-2].list), (yyvsp[0].strval));}
-#line 1546 "y.tab.c"
+#line 193 "ar.y"
+                                     {//create_symblist("var",$2, $4);
+}
+#line 1644 "y.tab.c"
     break;
 
   case 16:
-#line 99 "ar.y"
-                              {(yyval.list) = create_identlist((yyvsp[0].strval));}
-#line 1552 "y.tab.c"
+#line 196 "ar.y"
+               {
+				symbol s = symbol_find(st, (yyvsp[0].strval));
+				if (s != NULL) {
+					fprintf(stderr, "The variable %s already exists.\n", (yyvsp[0].strval));
+					YYABORT;
+				}
+				s = symbol_new(&st, (yyvsp[0].strval));
+				//$$ = create_identlist($1);
+			}
+#line 1658 "y.tab.c"
     break;
 
   case 17:
-#line 100 "ar.y"
-                              {(yyval.list) = add_to_identlist((yyvsp[-2].list), (yyvsp[0].strval));}
-#line 1558 "y.tab.c"
+#line 205 "ar.y"
+                                           {
+				symbol s = symbol_find(st, (yyvsp[0].strval));
+				if (s != NULL) {
+					fprintf(stderr, "The variable %s already exists.\n", (yyvsp[0].strval));
+					YYABORT;
+				}
+				s = symbol_new(&st, (yyvsp[0].strval));
+				//$$ = add_to_identlist($1, $3);
+			}
+#line 1672 "y.tab.c"
     break;
 
   case 18:
-#line 103 "ar.y"
+#line 215 "ar.y"
                        {(yyval.strval) = (yyvsp[0].strval);}
-#line 1564 "y.tab.c"
+#line 1678 "y.tab.c"
     break;
 
   case 19:
-#line 106 "ar.y"
+#line 218 "ar.y"
                   {(yyval.strval) = "unit";}
-#line 1570 "y.tab.c"
+#line 1684 "y.tab.c"
     break;
 
   case 20:
-#line 107 "ar.y"
+#line 219 "ar.y"
                   {(yyval.strval) = "bool";}
-#line 1576 "y.tab.c"
+#line 1690 "y.tab.c"
     break;
 
   case 21:
-#line 108 "ar.y"
+#line 220 "ar.y"
                   {(yyval.strval) = "int";}
-#line 1582 "y.tab.c"
+#line 1696 "y.tab.c"
     break;
 
   case 22:
-#line 109 "ar.y"
+#line 221 "ar.y"
                   {(yyval.strval) = "real";}
-#line 1588 "y.tab.c"
+#line 1702 "y.tab.c"
     break;
 
   case 23:
-#line 110 "ar.y"
+#line 222 "ar.y"
                           {(yyval.strval) = "char";}
-#line 1594 "y.tab.c"
+#line 1708 "y.tab.c"
     break;
 
   case 24:
-#line 114 "ar.y"
+#line 226 "ar.y"
           {
+		  symbol s = symbol_find(st, (yyvsp[-2].strval));
+       	 	if(s == NULL){
+            fprintf(stderr, "The variable %s isn't declared.\n", (yyvsp[-2].strval));
+            YYABORT;
+        	}
 	 	  quad q = quad_make(Q_AFFECT, (yyvsp[0].exprval), NULL, quadop_name((yyvsp[-2].strval)));
 	 	  gencode(q);
 	  }
-#line 1603 "y.tab.c"
+#line 1722 "y.tab.c"
     break;
 
   case 25:
-#line 119 "ar.y"
+#line 236 "ar.y"
           {
 		  complete((yyvsp[-4].tf).true,(yyvsp[-2].actualquad));
 		  (yyval.lpos) = concat((yyvsp[-4].tf).false,crelist(nextquad));
 	  }
-#line 1612 "y.tab.c"
+#line 1731 "y.tab.c"
     break;
 
   case 26:
-#line 124 "ar.y"
+#line 241 "ar.y"
           {
 		  complete((yyvsp[-8].tf).true, (yyvsp[-6].actualquad));
 		  complete((yyvsp[-8].tf).false, (yyvsp[-2].actualquad));
@@ -1621,11 +1740,11 @@ yyreduce:
 		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		  gencode(q);
 	  }
-#line 1625 "y.tab.c"
+#line 1744 "y.tab.c"
     break;
 
   case 27:
-#line 133 "ar.y"
+#line 250 "ar.y"
           {
 		  	printf("1");
 	  		complete((yyvsp[-3].tf).true, (yyvsp[-1].actualquad));
@@ -1636,155 +1755,155 @@ yyreduce:
 			gencode(q);
 			(yyval.lpos) = (yyvsp[-3].tf).false;
     }
-#line 1640 "y.tab.c"
+#line 1759 "y.tab.c"
     break;
 
   case 28:
-#line 144 "ar.y"
+#line 261 "ar.y"
           {
 		  quad q = quad_make(Q_RET,NULL,NULL,(yyvsp[0].exprval));
 		  gencode(q);
 	  }
-#line 1649 "y.tab.c"
+#line 1768 "y.tab.c"
     break;
 
   case 29:
-#line 149 "ar.y"
+#line 266 "ar.y"
           {
 		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
 		  gencode(q);
 	  }
-#line 1658 "y.tab.c"
+#line 1777 "y.tab.c"
     break;
 
   case 30:
-#line 153 "ar.y"
+#line 270 "ar.y"
                                  { (yyval.lpos) = (yyvsp[-1].lpos); }
-#line 1664 "y.tab.c"
+#line 1783 "y.tab.c"
     break;
 
   case 31:
-#line 154 "ar.y"
+#line 271 "ar.y"
                          { }
-#line 1670 "y.tab.c"
+#line 1789 "y.tab.c"
     break;
 
   case 32:
-#line 156 "ar.y"
+#line 273 "ar.y"
           {
 		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name((yyvsp[0].strval)));
 		  gencode(q);
 	  }
-#line 1679 "y.tab.c"
+#line 1798 "y.tab.c"
     break;
 
   case 33:
-#line 161 "ar.y"
+#line 278 "ar.y"
           {
 		  quad q = quad_make(Q_WRITE, NULL, NULL, (yyvsp[0].exprval));
 		  gencode(q);
 	  }
-#line 1688 "y.tab.c"
+#line 1807 "y.tab.c"
     break;
 
   case 34:
-#line 167 "ar.y"
+#line 284 "ar.y"
                                 { complete((yyvsp[-3].lpos), (yyvsp[-1].actualquad)); (yyval.lpos) = (yyvsp[0].lpos); }
-#line 1694 "y.tab.c"
+#line 1813 "y.tab.c"
     break;
 
   case 35:
-#line 168 "ar.y"
+#line 285 "ar.y"
                              { (yyval.lpos) = (yyvsp[-1].lpos); }
-#line 1700 "y.tab.c"
+#line 1819 "y.tab.c"
     break;
 
   case 36:
-#line 169 "ar.y"
+#line 286 "ar.y"
                          { (yyval.lpos) = (yyvsp[0].lpos); }
-#line 1706 "y.tab.c"
+#line 1825 "y.tab.c"
     break;
 
   case 37:
-#line 173 "ar.y"
+#line 290 "ar.y"
        { (yyval.exprval) = quadop_name((yyvsp[0].strval));}
-#line 1712 "y.tab.c"
+#line 1831 "y.tab.c"
     break;
 
   case 38:
-#line 174 "ar.y"
+#line 291 "ar.y"
       { (yyval.exprval) = quadop_cst((yyvsp[0].intval));}
-#line 1718 "y.tab.c"
+#line 1837 "y.tab.c"
     break;
 
   case 39:
-#line 175 "ar.y"
+#line 292 "ar.y"
             { (yyval.exprval) = (yyvsp[-1].exprval);}
-#line 1724 "y.tab.c"
+#line 1843 "y.tab.c"
     break;
 
   case 40:
-#line 177 "ar.y"
+#line 294 "ar.y"
 {
 	  quadop* t = new_temp();
 	  quad q = quad_make((yyvsp[-1].intval), (yyvsp[-2].exprval), (yyvsp[0].exprval), t);
 	  gencode(q);
 	  (yyval.exprval) = t;
 }
-#line 1735 "y.tab.c"
+#line 1854 "y.tab.c"
     break;
 
   case 41:
-#line 184 "ar.y"
+#line 301 "ar.y"
 {
 	quadop* t = new_temp();
 	quad q = quad_make(Q_NEG, (yyvsp[0].exprval), NULL, t);
 	gencode(q);
 	(yyval.exprval) = t;
 }
-#line 1746 "y.tab.c"
+#line 1865 "y.tab.c"
     break;
 
   case 42:
-#line 193 "ar.y"
+#line 310 "ar.y"
         {
 		(yyval.tf).true = concat ((yyvsp[-3].tf).true, (yyvsp[0].tf).true);
 		complete((yyvsp[-3].tf).false, (yyvsp[-1].actualquad));
 		(yyval.tf).false = (yyvsp[0].tf).false;
 	}
-#line 1756 "y.tab.c"
+#line 1875 "y.tab.c"
     break;
 
   case 43:
-#line 199 "ar.y"
+#line 316 "ar.y"
         {
 		(yyval.tf).false = concat ((yyvsp[-3].tf).false, (yyvsp[0].tf).false);
 		complete((yyvsp[-3].tf).true, (yyvsp[-1].actualquad));
 		(yyval.tf).true = (yyvsp[0].tf).true;
 	}
-#line 1766 "y.tab.c"
+#line 1885 "y.tab.c"
     break;
 
   case 44:
-#line 205 "ar.y"
+#line 322 "ar.y"
         {
 		(yyval.tf).true = (yyvsp[0].tf).false;
 		(yyval.tf).false = (yyvsp[0].tf).true;
 	}
-#line 1775 "y.tab.c"
+#line 1894 "y.tab.c"
     break;
 
   case 45:
-#line 210 "ar.y"
+#line 327 "ar.y"
         {
 		(yyval.tf).true = (yyvsp[-1].tf).true;
 		(yyval.tf).false = (yyvsp[-1].tf).false;
 	}
-#line 1784 "y.tab.c"
+#line 1903 "y.tab.c"
     break;
 
   case 46:
-#line 215 "ar.y"
+#line 332 "ar.y"
         {
 		(yyval.tf).true = crelist(nextquad);
 		quad q = quad_make((yyvsp[-1].intval),(yyvsp[-2].exprval),(yyvsp[0].exprval),NULL);
@@ -1793,115 +1912,115 @@ yyreduce:
 		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		gencode(q2);
 	}
-#line 1797 "y.tab.c"
+#line 1916 "y.tab.c"
     break;
 
   case 47:
-#line 224 "ar.y"
+#line 341 "ar.y"
         {
 		(yyval.tf).true = crelist(nextquad);
 		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		gencode(q2);
 		(yyval.tf).false = NULL;
 	}
-#line 1808 "y.tab.c"
+#line 1927 "y.tab.c"
     break;
 
   case 48:
-#line 231 "ar.y"
+#line 348 "ar.y"
         {
 		(yyval.tf).false = crelist(nextquad);
 		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		gencode(q2);
 		(yyval.tf).true = NULL;
 	}
-#line 1819 "y.tab.c"
+#line 1938 "y.tab.c"
     break;
 
   case 49:
-#line 239 "ar.y"
+#line 356 "ar.y"
            { (yyval.intval) = Q_PLUS; }
-#line 1825 "y.tab.c"
+#line 1944 "y.tab.c"
     break;
 
   case 50:
-#line 240 "ar.y"
+#line 357 "ar.y"
                 { (yyval.intval) = Q_MINUS; }
-#line 1831 "y.tab.c"
+#line 1950 "y.tab.c"
     break;
 
   case 51:
-#line 241 "ar.y"
+#line 358 "ar.y"
                 { (yyval.intval) = Q_TIMES; }
-#line 1837 "y.tab.c"
+#line 1956 "y.tab.c"
     break;
 
   case 52:
-#line 242 "ar.y"
+#line 359 "ar.y"
                  { (yyval.intval) = Q_DIVIDE; }
-#line 1843 "y.tab.c"
+#line 1962 "y.tab.c"
     break;
 
   case 53:
-#line 243 "ar.y"
+#line 360 "ar.y"
                 { (yyval.intval) = Q_POWER; }
-#line 1849 "y.tab.c"
+#line 1968 "y.tab.c"
     break;
 
   case 54:
-#line 246 "ar.y"
+#line 363 "ar.y"
             { (yyval.intval) = Q_INF; }
-#line 1855 "y.tab.c"
+#line 1974 "y.tab.c"
     break;
 
   case 55:
-#line 247 "ar.y"
+#line 364 "ar.y"
                   { (yyval.intval) = Q_INFEQ; }
-#line 1861 "y.tab.c"
+#line 1980 "y.tab.c"
     break;
 
   case 56:
-#line 248 "ar.y"
+#line 365 "ar.y"
                 { (yyval.intval) = Q_SUP; }
-#line 1867 "y.tab.c"
+#line 1986 "y.tab.c"
     break;
 
   case 57:
-#line 249 "ar.y"
+#line 366 "ar.y"
                   { (yyval.intval) = Q_SUPEQ; }
-#line 1873 "y.tab.c"
+#line 1992 "y.tab.c"
     break;
 
   case 58:
-#line 250 "ar.y"
+#line 367 "ar.y"
                { (yyval.intval) = Q_EQ; }
-#line 1879 "y.tab.c"
+#line 1998 "y.tab.c"
     break;
 
   case 59:
-#line 251 "ar.y"
+#line 368 "ar.y"
                  { (yyval.intval) = Q_DIFF; }
-#line 1885 "y.tab.c"
+#line 2004 "y.tab.c"
     break;
 
   case 60:
-#line 253 "ar.y"
+#line 370 "ar.y"
     { (yyval.actualquad) = nextquad; }
-#line 1891 "y.tab.c"
+#line 2010 "y.tab.c"
     break;
 
   case 61:
-#line 257 "ar.y"
+#line 374 "ar.y"
 {
 	  (yyval.lpos) = crelist(nextquad);
 	  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 	  gencode(q);
 }
-#line 1901 "y.tab.c"
+#line 2020 "y.tab.c"
     break;
 
 
-#line 1905 "y.tab.c"
+#line 2024 "y.tab.c"
 
       default: break;
     }
@@ -2133,25 +2252,42 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 264 "ar.y"
+#line 381 "ar.y"
 
 void yyerror (char *s) {
 	fprintf(stderr, "[Yacc] error: %s\n", s);
 }
 
 
-int main() {
+int main(int argc, char** argv) {
 	init_symb_tab();
 	printf("Enter your code:\n");
 
 	yyparse();
 	printf("-----------------\nSymbol table:\n-----------------\n");
-	print_tab();
+	//print_tab();
 	printf("Quad list:\n");
 	for (int i=0; i<nextquad; i++) {
 		affiche(globalcode[i]);
 	}
+	symbol_list_print(st);
+	FILE * out = stdout;
 
+    if(argc == 3)
+
+        out = fopen(argv[2], "w");
+    else
+        out = fopen("out.asm", "w");
+
+    if(!out) {
+        fprintf(stderr, "ERROR: Unable to open the output file for writing.\n");
+        return -2;
+    }
+
+    tomips(globalcode, st,out); // donner out ici
+    fclose(out);
+
+    symbol_free_memory(st);
 	// Be clean.===> Ofc As always
 	lex_free();
 	return 0;

@@ -1,3 +1,6 @@
 program maxi
 var i,j,max : int;
-if i < max then j := 5 endif
+begin
+if i < max then j := 5 endif;
+write max;
+end
