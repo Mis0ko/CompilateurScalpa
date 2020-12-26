@@ -1,0 +1,5 @@
+program maxi
+begin 
+var a : int ;
+a:=51;
+end
