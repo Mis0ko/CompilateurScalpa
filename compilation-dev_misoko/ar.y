@@ -9,52 +9,11 @@ extern quad globalcode[100];
 extern int nextquad;
 extern int ntp;
 
-
-
-int yydebug = 1;
-
-
 void yyerror(char*);
 int yylex();
 void lex_free();
 
-//*********ADDITION*********
 
-typedef struct dim_list {
-	int min_dim;
-	int max_dim;
-	struct dim_list* next;
-} dim_list;
-
-dim_list* add_dim(int dim_inf, int dim_sup){
-	dim_list * st_dimension = malloc(sizeof(dim_list)) ;
-	st_dimension -> min_dim = dim_inf ;
-	st_dimension -> max_dim = dim_sup ;
-	st_dimension -> next = NULL ;
-	return st_dimension;
-}
-
-dim_list* add_dims(dim_list* old_list, int dim_inf, int dim_sup){
-	
-    dim_list *loop_dim = old_list;
-    while (loop_dim->next != NULL)
-        loop_dim = loop_dim -> next;
-    loop_dim->next = add_dim(dim_inf, dim_sup);
-    return old_list;
-
-}
-
-void print_dims(dim_list* dims_list){
-	
-    dim_list *loop_dim = dims_list;
-    while (loop_dim->next != NULL)
-	{	
-		printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
-        loop_dim = loop_dim->next;
-	}	
-
-}
-//************************
 %}
 
 %union {
@@ -69,14 +28,13 @@ void print_dims(dim_list* dims_list){
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
-	struct dim_list* dim_list;
 }
 
-%token PROGRAM  VAR SARRAY SOF //ADDITION
-%token <strval> ID STR 
-%token <intval> NUM UNIT BOOL INT 
-%token INTRV_SEP
-%token <intval> PLUS AFFECT TIMES MINUS DIVIDE POWER TRUE FALSE 
+%token PROGRAM  VAR
+%token <strval> ID STR
+%token <intval> NUM UNIT BOOL INT
+
+%token <intval> PLUS AFFECT TIMES MINUS DIVIDE POWER TRUE FALSE
 %token <intval> INF INFEQ SUP SUPEQ DIFF EQ
 %token <intval> AND OR XOR NOT
 
@@ -91,7 +49,6 @@ void print_dims(dim_list* dims_list){
 %type <tf> cond
 %type <actualquad> M
 %type <lpos> instr tag sequence
-%type <dim_list> rangelist arraytype //ADDITION
 
 
 %left INF INFEQ SUP SUPEQ DIFF EQ
@@ -114,27 +71,14 @@ vardecllist: varsdecl {}
 			| {} //element vide
             ;
 varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
-		| VAR identlist ':' arraytype {create_symblist("var",$2, "yo");}	
-        //| VAR identlist ':' SARRAY '(' INT INTRV_SEP INT ')' SOF INT  //REGARDE_ICI
-		;
+        ;
 
 identlist: ID                 {$$ = create_identlist($1);}
          | identlist ',' ID   {$$ = add_to_identlist($1, $3);}
          ;
- //**********************ADDITION*************************************
-typename: atomictype   {$$ = $1;} 
-		//| arraytype 
-		;
 
+typename: atomictype   {$$ = $1;}
 
-arraytype : SARRAY '(' rangelist ')' SOF INT  //atomic_type
-			{$$=$3;print_dims($3);};
-
-rangelist : INT INTRV_SEP INT { $$ = add_dim($1,$3);	}
-		| rangelist ',' INT INTRV_SEP INT  { $$ = add_dims($1,$3,$5);printf("%d %d\n",$3,$5);}
-		;
-
-//**************************************************************
 atomictype: UNIT  {$$ = "unit";}
           | BOOL  {$$ = "bool";}
           | INT   {$$ = "int";}
@@ -143,15 +87,14 @@ atomictype: UNIT  {$$ = "unit";}
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
-	 	  gencode(q);
+		  gencode(q);
 		  $$ = crelist(nextquad);
-		  printf("fin affect\n");
 	  }
 	  | IF cond THEN M instr ENDIF
 	  {
+		  $$ = NULL;
 		  complete($2.true,$4);
-		  $$ = concat($2.false,crelist(nextquad));
-		  printf("fin if\n" );
+		  $$ = concat($2.false,$5);
 	  }
 	  | IF cond THEN M instr tag ELSE M instr ENDIF
 	  {
@@ -169,8 +112,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 			quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst($2));
 			gencode(q);
 			$$ = $3.false;
-			printf("fin while\n" );
-   		}
+    }
 	  | RETURN E
 	  {
 		  quad q = quad_make(Q_RET,NULL,NULL,$2);
@@ -195,17 +137,23 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  }
 	  ;
 
-sequence : instr ';' M sequence {printf("seq%i\n", $1->position);complete($1, $3);$$ = $4;}
-		 | instr ';' { $$ = $1; printf(";seq%i\n", $1->position);}
-		 | instr { $$ = $1; printf("seq%i\n", $1->position);}
+sequence : sequence M instr {complete($1, $2);$$ = $3;}
+		 | instr ';' { $$ = $1;}
+		 | instr { $$ = $1; }
 		 ;
 
 
 E : ID { $$ = quadop_name($1);}
 | NUM { $$ = quadop_cst($1);}
+| STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
 | E opb E
 {
+	  if ($1->type == QO_STR || $3->type == QO_STR)
+	  {
+		  yyerror("erreur de type");
+		  return 1;
+	  }
 	  quadop* t = new_temp();
 	  quad q = quad_make($2, $1, $3, t);
 	  gencode(q);
@@ -213,6 +161,11 @@ E : ID { $$ = quadop_name($1);}
 }
 | MINUS E %prec NEG
 {
+	if ($2->type == QO_STR)
+	{
+		yyerror("erreur de type");
+		return 1;
+	}
 	quadop* t = new_temp();
 	quad q = quad_make(Q_NEG, $2, NULL, t);
 	gencode(q);
@@ -244,6 +197,11 @@ cond : cond OR M cond
 	}
 	| E oprel E
 	{
+		if ($1->type == QO_STR || $3->type == QO_STR)
+		{
+			yyerror("erreur de type");
+			return 1;
+		}
 		$$.true = crelist(nextquad);
 		quad q = quad_make($2,$1,$3,NULL);
 		gencode (q); // if ($1 rel $3)     goto ?

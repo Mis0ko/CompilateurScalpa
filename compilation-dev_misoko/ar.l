@@ -16,6 +16,7 @@
 identifier [a-zA-Z_]+[0-9a-zA-Z_]*
 number     [1-9][0-9]*|"0"
 comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
+string     ["]([^"]|\\(.|\n))*["]
 
 %%
 
@@ -25,13 +26,10 @@ comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 "int"   				{output("int");return INT;}
 "bool"  				{output("bool");return BOOL;}
 "unit"          	{output("unit");return UNIT; }
-"array"          	{output("array");return SARRAY; } 
-"of"          	{output("of");return SOF; }
 
 "begin"   			{output("begin");return SBEGIN;}
 "end"   				{output("end");return SEND;}
 
-".."		 {return INTRV_SEP;}
 "+"          { return PLUS; }
 "*"          { return TIMES; }
 "-"          { return MINUS; }
@@ -63,9 +61,13 @@ comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 
 {identifier} { yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
-
+{string} {        yylval.strval = malloc(yyleng -1);
+          memcpy(yylval.strval, yytext + 1, yyleng - 2);
+          yylval.strval[yyleng - 2] = 0;
+		  output(yylval.strval); return STR;
+        }
 {comment}    { printf("%s\n", yytext);}
-[();:,]      { printf("%s\n", yytext); return yytext[0]; }
+[();:,]      { return yytext[0]; }
 \n           { }
 [\t ]        { }
 .            { printf("Caractere inconnu: %s", yytext);}
