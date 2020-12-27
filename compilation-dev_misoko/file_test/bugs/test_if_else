@@ -1,0 +1,10 @@
+program maxi 
+var i, j, max, dfd :int;
+var floata : int (* (*ceci est un commentaire*) *)
+begin
+i:=5;
+j:=6;
+max:=7;
+if 5<6 then max := 0 else max:=1 endif;
+i:=i+1 ;
+end;
