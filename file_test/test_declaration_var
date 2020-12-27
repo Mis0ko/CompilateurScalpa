@@ -1,7 +1,6 @@
 program maxi
 var i, example, machin, test, nimhca, exemple, example, machni : int ;
-var j, k : uint ;
-var lettre : char;
+var j, k : unit ;
 var mesboules : bool;
-var monreel : real;
-var mesbouless, etpasque : bool;
+var mesbouless, etpasque : bool
+i := 5

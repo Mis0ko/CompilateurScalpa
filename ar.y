@@ -4,7 +4,6 @@
 #include <string.h>
 #include "include/token_tab.h"
 #include "include/fct_utilitaires.h"
-#include "include/quad.h"
 extern quad globalcode[100];
 extern int nextquad;
 extern int ntp;
@@ -86,16 +85,28 @@ atomictype: UNIT  {$$ = "unit";}
 
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
+
+		  chk_symb_declared($1);
+		  chk_symb_type($1,$3);
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
-	 	  gencode(q);
+		  gencode(q);
 		  $$ = crelist(nextquad);
-		  printf("fin affect\n");
+	  }
+	  | ID AFFECT cond
+	  {
+		  printf("oui1\n");
+
+		  chk_symb_declared($1);
+		  chk_symb_type($1,NULL);
+		  quad q = quad_make(Q_AFFECT, reify($3.true, $3.false), NULL, quadop_name($1));
+		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | IF cond THEN M instr ENDIF
 	  {
+		  $$ = NULL;
 		  complete($2.true,$4);
-		  $$ = concat($2.false,crelist(nextquad));
-		  printf("fin if\n" );
+		  $$ = concat($2.false,$5);
 	  }
 	  | IF cond THEN M instr tag ELSE M instr ENDIF
 	  {
@@ -113,7 +124,6 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 			quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst($2));
 			gencode(q);
 			$$ = $3.false;
-			printf("fin while\n" );
     }
 	  | RETURN E
 	  {
@@ -139,17 +149,23 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  }
 	  ;
 
-sequence : instr ';' M sequence {printf("seq%i\n", $1->position);complete($1, $3);$$ = $4;}
-		 | instr ';' { $$ = $1; printf(";seq%i\n", $1->position);}
-		 | instr { $$ = $1; printf("seq%i\n", $1->position);}
+sequence : sequence M instr {complete($1, $2);$$ = $3;}
+		 | instr ';' { $$ = $1;}
+		 | instr { $$ = $1; }
 		 ;
 
 
-E : ID { $$ = quadop_name($1);}
-| NUM { $$ = quadop_cst($1);}
+E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
+| NUM {	$$ = quadop_cst($1);}
+| STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
 | E opb E
 {
+	  if ($1->type == QO_STR || $3->type == QO_STR)
+	  {
+		  yyerror("erreur de type");
+		  return 1;
+	  }
 	  quadop* t = new_temp();
 	  quad q = quad_make($2, $1, $3, t);
 	  gencode(q);
@@ -157,6 +173,11 @@ E : ID { $$ = quadop_name($1);}
 }
 | MINUS E %prec NEG
 {
+	if ($2->type == QO_STR)
+	{
+		yyerror("erreur de type");
+		return 1;
+	}
 	quadop* t = new_temp();
 	quad q = quad_make(Q_NEG, $2, NULL, t);
 	gencode(q);
@@ -188,6 +209,7 @@ cond : cond OR M cond
 	}
 	| E oprel E
 	{
+		chk_symb_typeE($1, $3);
 		$$.true = crelist(nextquad);
 		quad q = quad_make($2,$1,$3,NULL);
 		gencode (q); // if ($1 rel $3)     goto ?

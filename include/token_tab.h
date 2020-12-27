@@ -4,10 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "fct_utilitaires.h"
-
-#define DINT 0
-#define DBOOL 1
-#define DUNIT 2
+#include "quad.h"
 
 struct P_symb;
 struct ident_list;
@@ -97,6 +94,26 @@ int add_symb(P_symb* symb);
 
 int search_symb(P_symb* symb);
 
+int search_symb_char(char *id);
+
+/*
+* return error message when a variable is used and not declared
+* and exits the program
+*/
+void chk_symb_declared(char *id);
+
+/*
+* return error message when types of the 2 operands don't match
+* and exits the program
+*/
+
+void chk_symb_type(char *id, quadop* op1);
+
+/*
+* return error message when types of the 2 operands don't match
+* and exits the program
+*/
+void chk_symb_typeE(quadop* op1, quadop* op2);
 
 /*
 * compare 2 symbs base on all their arguments

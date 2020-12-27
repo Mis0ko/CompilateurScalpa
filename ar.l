@@ -16,6 +16,7 @@
 identifier [a-zA-Z_]+[0-9a-zA-Z_]*
 number     [1-9][0-9]*|"0"
 comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
+string     ["]([^"]|\\(.|\n))*["]
 
 %%
 
@@ -60,7 +61,11 @@ comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 
 {identifier} { yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
-
+{string} {        yylval.strval = malloc(yyleng -1);
+          memcpy(yylval.strval, yytext + 1, yyleng - 2);
+          yylval.strval[yyleng - 2] = 0;
+		  output(yylval.strval); return STR;
+        }
 {comment}    { printf("%s\n", yytext);}
 [();:,]      { return yytext[0]; }
 \n           { }

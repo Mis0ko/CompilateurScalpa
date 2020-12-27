@@ -1,0 +1,8 @@
+program maxi
+var i, j, max, dfd :int;
+var bo : bool;
+var p : int;
+begin
+i := 5
+bo := 4<5
+end;
