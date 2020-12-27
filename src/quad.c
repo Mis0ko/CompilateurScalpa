@@ -318,3 +318,18 @@ void complete(lpos* liste, int cible) {
 			globalcode[liste->position].res = quadop_cst(cible);
 	}
 }
+
+
+quadop* reify(lpos* true, lpos* false)
+{
+	quadop* t = new_temp();
+	int nq = nextquad;
+	gencode(quad_make(Q_AFFECT, quadop_cst(1), NULL, t));
+	gencode(quad_make(Q_GOTO, NULL, NULL, quadop_cst(nq+3)));
+	gencode(quad_make(Q_AFFECT, quadop_cst(0), NULL, t));
+	complete(true, nq);
+	complete(false, nq+2);
+	return t;
+
+
+}

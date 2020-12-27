@@ -4,7 +4,6 @@
 #include <string.h>
 #include "include/token_tab.h"
 #include "include/fct_utilitaires.h"
-#include "include/quad.h"
 extern quad globalcode[100];
 extern int nextquad;
 extern int ntp;
@@ -86,7 +85,21 @@ atomictype: UNIT  {$$ = "unit";}
 
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
+
+		  chk_symb_declared($1);
+		  chk_symb_type($1,$3);
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
+		  gencode(q);
+		  $$ = crelist(nextquad);
+		  printf("affect\n" );
+	  }
+	  | ID AFFECT cond
+	  {
+		  printf("oui1\n");
+
+		  chk_symb_declared($1);
+		  chk_symb_type($1,NULL);
+		  quad q = quad_make(Q_AFFECT, reify($3.true, $3.false), NULL, quadop_name($1));
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
@@ -117,11 +130,13 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 		  quad q = quad_make(Q_RET,NULL,NULL,$2);
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | RETURN
 	  {
 		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | SBEGIN sequence SEND ';'{$$ = $2;}
 	  | SBEGIN SEND  { }
@@ -129,11 +144,14 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name($2));
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | WRITE E
 	  {
 		  quad q = quad_make(Q_WRITE, NULL, NULL, $2);
 		  gencode(q);
+		  $$ = crelist(nextquad);
+
 	  }
 	  ;
 
@@ -143,8 +161,8 @@ sequence : sequence M instr {complete($1, $2);$$ = $3;}
 		 ;
 
 
-E : ID { $$ = quadop_name($1);}
-| NUM { $$ = quadop_cst($1);}
+E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
+| NUM {	$$ = quadop_cst($1);}
 | STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
 | E opb E
@@ -197,11 +215,7 @@ cond : cond OR M cond
 	}
 	| E oprel E
 	{
-		if ($1->type == QO_STR || $3->type == QO_STR)
-		{
-			yyerror("erreur de type");
-			return 1;
-		}
+		chk_symb_typeE($1, $3);
 		$$.true = crelist(nextquad);
 		quad q = quad_make($2,$1,$3,NULL);
 		gencode (q); // if ($1 rel $3)     goto ?
