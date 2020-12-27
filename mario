@@ -1,0 +1,17 @@
+quad pas encore pris en charge
+quad pas encore pris en charge
+blt $i, $j, QUAD_4
+quad pas encore pris en charge
+quad pas encore pris en charge
+ble $i, $j, QUAD_7
+quad pas encore pris en charge
+quad pas encore pris en charge
+quad pas encore pris en charge
+bgt $i, $j, QUAD_11
+quad pas encore pris en charge
+quad pas encore pris en charge
+quad pas encore pris en charge
+bge $i, $j, QUAD_15
+quad pas encore pris en charge
+quad pas encore pris en charge
+quad pas encore pris en charge

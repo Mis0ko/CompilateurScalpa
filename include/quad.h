@@ -1,4 +1,5 @@
 #ifndef QUAD_H
+#define QUAD_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

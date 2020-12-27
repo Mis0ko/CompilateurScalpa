@@ -1,6 +1,6 @@
 #include "../include/token_tab.h"
 
-P_symb** symb_tab;
+P_symb **symb_tab;
 
 /******************** begining of the functions ********************/
 
@@ -145,28 +145,35 @@ void print_symb(P_symb *symb)
         printf("|\t\t%i\t\t|\t\t%s\t|", symb->idx, symb->name);
     else
         printf("|\t\t%i\t\t|\t\t%s\t\t|", symb->idx, symb->name);
-	if (symb->type_I == VARIABLE)
-		switch (symb->type_A) {
-			case T_INT:
-				printf("int|\n");
-				break;
-			case T_BOOL:
-				printf("bool|\n");
-				break;
-			case T_UNIT:
-				printf("unit|\n");
-				break;
-		}
-	else
-		printf("\n" );
+    if (symb->type_I == VARIABLE)
+    {
+        printf("\t\t");
+        switch (symb->type_A)
+        {
+        case T_INT:
+            printf("int");
+            break;
+        case T_BOOL:
+            printf("bool");
+            break;
+        case T_UNIT:
+            printf("unit");
+            break;
+        }
+        printf("\t\t|\n");
+    }
+    else
+        printf("\n");
 }
 
 void print_tab()
 {
     printf("|-------------------------------|");
+    printf("-------------------------------|");
     printf("-------------------------------|\n");
-    printf("|\t\tindex\t\t|\t\tident\t\t|\n");
+    printf("|\t\tindex\t\t|\t\tident \t\t|\t\tatomic_type\t|\n");
     printf("|-------------------------------|");
+    printf("-------------------------------|");
     printf("-------------------------------|\n");
     for (int i = 0; i < SIZE_HASH_TABLE; i++)
     {
@@ -185,5 +192,6 @@ void print_tab()
         }
     }
     printf("|-------------------------------|");
+    printf("-------------------------------|");
     printf("-------------------------------|\n");
 }

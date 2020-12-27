@@ -1,17 +1,98 @@
 %{
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "include/token_tab.h"
 #include "include/fct_utilitaires.h"
 #include "include/quad.h"
-extern quad globalcode[100];
+#include "include/mips.h"
+extern quad globalcode[300];
 extern int nextquad;
 extern int ntp;
 
 void yyerror(char*);
 int yylex();
 void lex_free();
+
+int file_code_mips;
+
+#define SIZE_INSTR 100
+void MIPS_OPREL_COMP(quad* q)
+{
+    char instr[SIZE_INSTR];
+    switch (q->type)
+    {
+    case Q_SUP:
+        snprintf(instr, SIZE_INSTR - strlen(instr), "bgt ");
+        break;
+
+    case Q_SUPEQ:
+        snprintf(instr, SIZE_INSTR - strlen(instr), "bge ");
+        break;
+    case Q_INF:
+        snprintf(instr, SIZE_INSTR - strlen(instr), "blt ");
+        break;
+    case Q_INFEQ:
+        snprintf(instr, SIZE_INSTR - strlen(instr), "ble ");
+        break;
+    case Q_EQ:
+        snprintf(instr, SIZE_INSTR - strlen(instr), "ble ");
+        break;
+    }
+
+    if (strlen(instr) != 0 && (q->type == Q_SUP || q->type == Q_SUPEQ || q->type == Q_INF || q->type == Q_INFEQ || q->type == Q_EQ))
+    {
+        if (q->op1->type == QO_CST)
+            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "%i, ", q->op1->u.cst);
+        else
+            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "$%s, ", q->op1->u.name);
+
+        if (q->op2->type == QO_CST)
+            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "%i, ", q->op2->u.cst);
+        else
+            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "$%s, ", q->op2->u.name);
+
+        snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "QUAD_%i\n", q->res->u.cst);
+		//printf("%s\n", instr);
+	}
+    else {
+        snprintf(instr, SIZE_INSTR, "quad pas encore pris en charge\n");
+    }
+	instr[strlen(instr)]='\0';
+	//printf("chaine :%s:\n", instr);
+	write(file_code_mips, instr, strlen(instr));
+}
+
+
+// void MIPS_OPREL_COMP(quad* q){
+
+
+// }
+
+
+void trad_mips_all(int argc, char **argv)
+{
+    file_code_mips = open(argv[1], O_CREAT | O_APPEND | O_WRONLY | O_TRUNC);
+    if (file_code_mips == -1)
+    {
+        fprintf(stderr, "Erreur durant l'ouverture du fichier\n");
+        exit(-1);
+    }
+	for(int i = 0 ; i < nextquad; i++){
+		//printf("%i %i\n", i, nextquad);
+		MIPS_OPREL_COMP(&globalcode[i]);
+	}
+    int ret_close = close(file_code_mips);
+    if (ret_close == -1)
+    {
+        fprintf(stderr, "Erreur durant la fermeture du fichier\n");
+        exit(-1);
+    }
+}
 
 
 %}
@@ -238,7 +319,7 @@ void yyerror (char *s) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
 	init_symb_tab();
 	printf("Enter your code:\n");
 
@@ -247,9 +328,9 @@ int main() {
 	print_tab();
 	printf("Quad list:\n");
 	for (int i=0; i<nextquad; i++) {
-		affiche(globalcode[i]);
+		printf("idx : %i\t\t", i);affiche(globalcode[i]);
 	}
-
+	trad_mips_all(argc, argv);
 	// Be clean.===> Ofc As always
 	lex_free();
 	return 0;
@@ -264,4 +345,17 @@ int main() {
 *	ajout symbole classique.
 *
 *	./ar < file_test/test_declaration_var
+*	./ar < file_test/test_instr
+*	./ar < file_test/test_suite_instr
+*
+*
+*	changement fait par rapport branche dev:
+*	fonction affichage des tokens de la tab
+*   toutes les fonctions liés au mips 
+*
+*   commande pour tester la fonctionnalité (yet):
+*   ./ar mario < file_test/test_suite_instr
+*   (mario cest le fichier decriture, pas d'inspiration pour le nom
+*   et vu que je suis en kigu de mario toute la journée voila)
+*
 */
