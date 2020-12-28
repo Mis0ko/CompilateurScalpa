@@ -19,20 +19,96 @@ void lex_free();
 int quad_compt;
 
 void translatemips(quad q, FILE* os) {
-	if(q.type==Q_AFFECT){
-		return ;
-	}
+	
 	quad_compt++;
 	fprintf(os, "\nLABEL_Q_%d:\n", quad_compt);
 	switch (q.type) {
+		case Q_XOR:
+			if (q.op1->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t1, %d\n", q.op2->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);	
+			// XOR operation
+			fprintf(os, "    xor $t2, $t0, $t1\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);	
+			break;
+		case Q_AND:
+			if (q.op1->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t1, %d\n", q.op2->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);	
+			// AND operation
+			fprintf(os, "    and $t2, $t0, $t1\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);	
+			break;
+		case Q_OR:
+			if (q.op1->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			if (q.op2->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t1, %d\n", q.op2->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);	
+			// OR operation
+			fprintf(os, "    or $t2, $t0, $t1\n");
+			// Storing the result
+			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);	
+			break;
+		case Q_NOT:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			// NOT operation	
+			fprintf(os, "    not $t1, $t0\n");
+			// Storing the value in the register in a variable	
+			fprintf(os, "    sw $t1, VAR_%s_\n", q.res->u.name);
+			break;	
+		case Q_AFFECT:
+			// Loading in register depending on type
+			if (q.op1->type == QO_CST)
+				// Load Integer in case of a cst
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
+			else
+				// Load a word in case of a var
+				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
+			// Storing the value in the register in a variable	
+			fprintf(os, "    sw $t0, VAR_%s_\n", q.res->u.name);
+			break;
 		case Q_PLUS:
 			// Loading in register depending on type
 			if (q.op1->type == QO_CST)
-				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
 			else
 				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
 			if (q.op2->type == QO_CST)
-				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+				fprintf(os, "    li $t1, %d\n", q.op2->u.cst);
 			else
 				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
 			// Addition operation
@@ -43,11 +119,11 @@ void translatemips(quad q, FILE* os) {
 		case Q_MINUS:
 			// Loading in register depending on type
 			if (q.op1->type == QO_CST)
-				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
 			else
 				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
 			if (q.op2->type == QO_CST)
-				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+				fprintf(os, "    li $t1, %d\n", q.op2->u.cst);
 			else
 				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
 			// Substraction operation
@@ -58,11 +134,11 @@ void translatemips(quad q, FILE* os) {
 		case Q_DIVIDE:
 			// Loading in register depending on type
 			if (q.op1->type == QO_CST)
-				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
 			else
 				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
 			if (q.op2->type == QO_CST)
-				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+				fprintf(os, "    li $t1, %d\n", q.op2->u.cst);
 			else
 				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
 			// Signed Division operation
@@ -75,26 +151,60 @@ void translatemips(quad q, FILE* os) {
 		case Q_TIMES:
 			// Loading in register depending on type
 			if (q.op1->type == QO_CST)
-				fprintf(os, "    lw $t0, %d\n", q.op1->u.cst);
+				fprintf(os, "    li $t0, %d\n", q.op1->u.cst);
 			else
 				fprintf(os, "    lw $t0, VAR_%s_\n", q.op1->u.name);
 			if (q.op2->type == QO_CST)
-				fprintf(os, "    lw $t1, %d\n", q.op2->u.cst);
+				fprintf(os, "    li $t1, %d\n", q.op2->u.cst);
 			else
 				fprintf(os, "    lw $t1, VAR_%s_\n", q.op2->u.name);
 			// Signed Multioperation
-			fprintf(os, "    mult $t0, $t1\n");
+			fprintf(os, "	 mult $t0, $t1\n");
 			// 32 most significant bits of multiplication to $t2
 			fprintf(os, "    mflo $t2\n");
 			// Storing the result
 			fprintf(os, "    sw $t2, VAR_%s_\n", q.res->u.name);
-			break;			
+			break;	
+		case Q_RET:
+			// return from function call
+			fprintf(os, "	 jr $ra");
+			break;
+		case Q_WRITE:
+			if (q.res->type == QO_CST)
+				// Load integer to print
+				fprintf(os, "    li $a0, %d\n", q.res->u.cst);
+			else
+				// Load variable to print
+				fprintf(os, "    lw $a0, %d\n", q.res->u.cst);
+			// system call code for print_int				
+			fprintf(os, "    li $v0, 1\n");
+			fprintf(os, "    syscall\n");			
+			break;
+		case Q_READ:
+			if (q.res->type == QO_CST)
+				// Load integer to print
+				fprintf(os, "    li $t0, %d\n", q.res->u.cst);
+			else
+				// Load variable to print
+				fprintf(os, "    lw $t0, %d\n", q.res->u.cst);
+			// system call code for read_int				
+			fprintf(os, "    li $v0, 5\n");
+			fprintf(os, "    syscall\n");	
+			// Moving the integer input to another register (is it necessary?)
+			fprintf(os, "    move $t0, $v0\n");
+			// save in var
+			fprintf(os, "    sw $t0, VAR_%s_\n", q.res->u.name);
+			break;
 	}
+	fprintf(os, "\nLABEL_END:\n");
+	// Exit code
+	fprintf(os, "    li $v0, 10\n");
+	fprintf(os, "    syscall\n");	
 }
 
 void tomips(quad* globalcode, symbol st, FILE* os) {
 	fprintf(os, ".data\n");
-
+	// Should be changed to Mich's table
 	while (st != NULL) {
 		{
 			fprintf(os, "VAR_%s_:\t.word %d\n", st->name, st->value);
