@@ -35,7 +35,7 @@ dim_list* add_dim(int dim_inf, int dim_sup){
 }
 
 dim_list* add_dims(dim_list* old_list, int dim_inf, int dim_sup){
-	
+
     dim_list *loop_dim = old_list;
     while (loop_dim->next != NULL)
         loop_dim = loop_dim -> next;
@@ -45,13 +45,13 @@ dim_list* add_dims(dim_list* old_list, int dim_inf, int dim_sup){
 }
 
 void print_dims(dim_list* dims_list){
-	
+
     dim_list *loop_dim = dims_list;
     while (loop_dim->next != NULL)
-	{	
+	{
 		printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
         loop_dim = loop_dim->next;
-	}	
+	}
 
 }
 //************************
@@ -73,10 +73,10 @@ void print_dims(dim_list* dims_list){
 }
 
 %token PROGRAM  VAR SARRAY SOF //ADDITION
-%token <strval> ID STR 
-%token <intval> NUM UNIT BOOL INT 
+%token <strval> ID STR
+%token <intval> NUM UNIT BOOL INT
 %token INTRV_SEP
-%token <intval> PLUS AFFECT TIMES MINUS DIVIDE POWER TRUE FALSE 
+%token <intval> PLUS AFFECT TIMES MINUS DIVIDE POWER TRUE FALSE
 %token <intval> INF INFEQ SUP SUPEQ DIFF EQ
 %token <intval> AND OR XOR NOT
 
@@ -114,7 +114,7 @@ vardecllist: varsdecl {}
 			| {} //element vide
             ;
 varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
-		| VAR identlist ':' arraytype {create_symblist("var",$2, "yo");}	
+		| VAR identlist ':' arraytype {create_symblist("var",$2, "yo");}
         //| VAR identlist ':' SARRAY '(' INT INTRV_SEP INT ')' SOF INT  //REGARDE_ICI
 		;
 
@@ -122,16 +122,16 @@ identlist: ID                 {$$ = create_identlist($1);}
          | identlist ',' ID   {$$ = add_to_identlist($1, $3);}
          ;
  //**********************ADDITION*************************************
-typename: atomictype   {$$ = $1;} 
-		//| arraytype 
+typename: atomictype   {$$ = $1;}
+		//| arraytype
 		;
 
 
-arraytype : SARRAY '(' rangelist ')' SOF INT  //atomic_type
+arraytype : SARRAY '[' rangelist ']' SOF atomictype
 			{$$=$3;print_dims($3);};
 
-rangelist : INT INTRV_SEP INT { $$ = add_dim($1,$3);	}
-		| rangelist ',' INT INTRV_SEP INT  { $$ = add_dims($1,$3,$5);printf("%d %d\n",$3,$5);}
+rangelist : NUM INTRV_SEP NUM { $$ = add_dim($1,$3);	}
+		| rangelist ',' NUM INTRV_SEP NUM  { $$ = add_dims($1,$3,$5);printf("%d %d\n",$3,$5);}
 		;
 
 //**************************************************************

@@ -25,7 +25,7 @@ comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 "int"   				{output("int");return INT;}
 "bool"  				{output("bool");return BOOL;}
 "unit"          	{output("unit");return UNIT; }
-"array"          	{output("array");return SARRAY; } 
+"array"          	{output("array");return SARRAY; }
 "of"          	{output("of");return SOF; }
 
 "begin"   			{output("begin");return SBEGIN;}
@@ -65,7 +65,9 @@ comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
 
 {comment}    { printf("%s\n", yytext);}
-[();:,]      { printf("%s\n", yytext); return yytext[0]; }
+[();:,]      { return yytext[0]; }
+"["			 { output(yytext); return yytext[0];}
+"]"			 { output(yytext); return yytext[0];}
 \n           { }
 [\t ]        { }
 .            { printf("Caractere inconnu: %s", yytext);}
