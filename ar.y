@@ -38,7 +38,7 @@ void lex_free();
 %token <intval> AND OR XOR NOT
 
 %token SBEGIN SEND WRITE READ
-%token IF THEN ELSE ENDIF WHILE DO DONE RETURN
+%token IF THEN ELSE WHILE DO RETURN 
 
 
 %type <list> identlist
@@ -49,12 +49,14 @@ void lex_free();
 %type <actualquad> M
 %type <lpos> instr tag sequence
 
-
+%left RETURN
 %left INF INFEQ SUP SUPEQ DIFF EQ
+%right AFFECT
 %left PLUS MINUS OR XOR
 %left TIMES DIVIDE AND
 %right POWER
 %left NEG NOT
+%left ID
 
 
 %start program
@@ -85,31 +87,27 @@ atomictype: UNIT  {$$ = "unit";}
 
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
-
 		  chk_symb_declared($1);
 		  chk_symb_type($1,$3);
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
 		  gencode(q);
 		  $$ = crelist(nextquad);
-		  printf("affect\n" );
 	  }
 	  | ID AFFECT cond
 	  {
-		  printf("oui1\n");
-
 		  chk_symb_declared($1);
 		  chk_symb_type($1,NULL);
 		  quad q = quad_make(Q_AFFECT, reify($3.true, $3.false), NULL, quadop_name($1));
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
-	  | IF cond THEN M instr ENDIF
+	  | IF cond THEN M instr
 	  {
 		  $$ = NULL;
 		  complete($2.true,$4);
 		  $$ = concat($2.false,$5);
 	  }
-	  | IF cond THEN M instr tag ELSE M instr ENDIF
+	  | IF cond THEN M instr tag ELSE M instr
 	  {
 		  complete($2.true, $4);
 		  complete($2.false, $8);
@@ -118,7 +116,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		  gencode(q);
 	  }
-	  | WHILE M cond DO M instr DONE
+	  | WHILE M cond DO M instr
 	  {
 	  		complete($3.true, $5);
 			complete($6, $2);
@@ -138,7 +136,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
-	  | SBEGIN sequence SEND ';'{$$ = $2;}
+	  | SBEGIN sequence SEND semcol{$$ = $2;}
 	  | SBEGIN SEND  { }
 	  | READ ID //lvalue a l'origine, a changer apres les tableaux
 	  {
@@ -155,17 +153,17 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  }
 	  ;
 
-sequence : sequence M instr {complete($1, $2);$$ = $3;}
-		 | instr ';' { $$ = $1;}
-		 | instr { $$ = $1; }
+sequence : sequence M instr semcol {complete($1, $2);$$ = $3;}
+		 | instr semcol { $$ = $1;}
 		 ;
 
+semcol : ';' | ;
 
 E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 | NUM {	$$ = quadop_cst($1);}
 | STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
-| E opb E
+| E %prec ID opb E //%prec ID pour regler conflits avec opb
 {
 	  if ($1->type == QO_STR || $3->type == QO_STR)
 	  {
@@ -173,6 +171,7 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 		  return 1;
 	  }
 	  quadop* t = new_temp();
+	  create_symblist("var", create_identlist(t->u.name), "int");
 	  quad q = quad_make($2, $1, $3, t);
 	  gencode(q);
 	  $$ = t;
@@ -185,6 +184,7 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 		return 1;
 	}
 	quadop* t = new_temp();
+	create_symblist("var", create_identlist(t->u.name), "int");
 	quad q = quad_make(Q_NEG, $2, NULL, t);
 	gencode(q);
 	$$ = t;
