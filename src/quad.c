@@ -309,7 +309,7 @@ lpos* concat(lpos* l1, lpos* l2) {
 void complete(lpos* liste, int cible) {
 	if (liste == NULL || cible == liste->position)
 		return;
-
+	printf("complete %i avec %i\n", liste->position, cible);
 	globalcode[liste->position].res = quadop_cst(cible);
 
 	while (liste->suivant != NULL) {

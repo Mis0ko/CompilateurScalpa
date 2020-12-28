@@ -149,10 +149,8 @@ void chk_symb_type(char *id, quadop* op1)
 {
 	int pos = hachage(id);
 	P_symb *symb_loop = symb_tab[pos];
-
 	while (strcmp(symb_loop->name, id))
 		symb_loop = symb_loop->next_doublon;
-
 	if (op1 == NULL && symb_loop->type_I == VARIABLE
 		&& symb_loop->type_A == T_BOOL) // if op1 is a condition and id a boolean
 		return;
@@ -166,6 +164,7 @@ void chk_symb_type(char *id, quadop* op1)
 	if (symb_loop->type_I == VARIABLE && symb_loop->type_A == T_INT
 		&& op1->type == QO_CST) // if op1 and id are int
 		return;
+
 	if (op1->type == QO_NAME) // if op1 is an identifier
 	{
 		int pos2 = hachage(op1->u.name);

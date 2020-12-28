@@ -1,4 +1,5 @@
 #ifndef QUAD_H
+#define QUAD
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,8 +19,8 @@ typedef struct quadop
 typedef enum quad_type
 {
 	Q_PLUS, Q_TIMES, Q_MINUS, Q_DIVIDE, Q_NEG, Q_POWER,
-	Q_AFFECT, Q_SUP, Q_SUPEQ, Q_INF, Q_INFEQ, Q_DIFF, Q_EQ, Q_OR, Q_AND,
-	Q_XOR, Q_NOT,Q_GOTO, Q_RET, Q_READ, Q_WRITE} quad_type ;
+	Q_AFFECT,Q_RET, Q_READ, Q_WRITE, Q_SUP, Q_SUPEQ, Q_INF, Q_INFEQ, Q_DIFF, Q_EQ, Q_OR, Q_AND,
+	Q_XOR, Q_NOT,Q_GOTO} quad_type ;
 
 typedef struct quad
 {
@@ -86,6 +87,11 @@ lpos* crelist(int position);
 void complete(lpos* liste, int cible);
 lpos* concat(lpos* l1, lpos* l2);
 
+/*
+* gives the value 0 or 1 to the temp t
+* according the value of the condition
+*/
+quadop* reify(lpos* true, lpos* false);
 
 
 #endif
