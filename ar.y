@@ -38,7 +38,7 @@ void lex_free();
 %token <intval> AND OR XOR NOT
 
 %token SBEGIN SEND WRITE READ
-%token IF THEN ELSE WHILE DO RETURN 
+%token IF THEN ELSE WHILE DO RETURN
 
 
 %type <list> identlist
@@ -48,6 +48,9 @@ void lex_free();
 %type <tf> cond
 %type <actualquad> M
 %type <lpos> instr tag sequence
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 
 %left RETURN
 %left INF INFEQ SUP SUPEQ DIFF EQ
@@ -101,17 +104,17 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
-	  | IF cond THEN M instr
+	  | IF cond THEN M instr %prec LOWER_THAN_ELSE
 	  {
 		  $$ = NULL;
 		  complete($2.true,$4);
 		  $$ = concat($2.false,$5);
 	  }
-	  | IF cond THEN M instr tag ELSE M instr
+	  | IF cond THEN M instr ELSE tag M instr
 	  {
 		  complete($2.true, $4);
 		  complete($2.false, $8);
-		  $$ = concat($5, $6);
+		  $$ = concat($5, $7);
 		  $$ = concat($$, crelist(nextquad));
 		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		  gencode(q);
@@ -153,7 +156,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  }
 	  ;
 
-sequence : sequence M instr semcol {complete($1, $2);$$ = $3;}
+sequence : sequence semcol M instr semcol {complete($1, $3);$$ = $4;}
 		 | instr semcol { $$ = $1;}
 		 ;
 
