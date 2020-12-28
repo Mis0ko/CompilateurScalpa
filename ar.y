@@ -67,10 +67,31 @@ void MIPS_OPREL_COMP(quad* q)
 	write(file_code_mips, instr, strlen(instr));
 }
 
+// void MIPS_OPREL_RESTE(quad* q)
+// {
+//     char instr[SIZE_INSTR];
+//     switch (q->type)
+//     {
+//     case Q_GOTO:
+//         snprintf(instr, SIZE_INSTR - strlen(instr), "j QUAD_%i\n", q->res->u.cst);
+//         break;
+// 	// case Q_AFFECT: aucune idée de comment récupérer le registre de la variable initiale
+//     //     snprintf(instr, SIZE_INSTR - strlen(instr), "lw $t0, %i\n", q->res->u.cst);
+//     //     break;
 
-// void MIPS_OPREL_COMP(quad* q){
+//     case Q_WRITE:
+//         snprintf(instr, SIZE_INSTR - strlen(instr), "li $v0 ";
+// 		if(q->res->type == QO_CST)
+// 			snprintf(instr, SIZE_INSTR - strlen(instr), "1\nlw $a0, %i", q->res->u.cst);
+// 		else//QO_NAME
+// 			snprintf(instr, SIZE_INSTR - strlen(instr), "1\nlw $a0, %s", q->res->u.name);
+// 		snprintf(instr, SIZE_INSTR - strlen(instr), "\nsyscall");
+//         break;
+//     }
 
-
+// 	instr[strlen(instr)]='\0';
+// 	printf("chaine :%s:\n", instr);
+// 	write(file_code_mips, instr, strlen(instr));
 // }
 
 

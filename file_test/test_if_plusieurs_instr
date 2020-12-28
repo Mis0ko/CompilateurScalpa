@@ -1,0 +1,15 @@
+program maxi
+var i,j,k,max : int;
+begin
+i:= 3;
+if i < max then 
+    begin
+      j := 5;
+      j:= j+1;
+    end;
+else 
+    j := 2
+endif;
+k := 3;
+if i < k then max := j endif;
+end;
