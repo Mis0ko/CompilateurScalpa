@@ -1,5 +1,0 @@
-(* This is a comment *)
-program maxi
-	var j, k : uint ;
-begin 
-end

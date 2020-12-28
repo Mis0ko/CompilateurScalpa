@@ -4,10 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "fct_utilitaires.h"
-
-#define DINT 0
-#define DBOOL 1
-#define DUNIT 2
+#include "quad.h"
 
 struct P_symb;
 struct ident_list;
@@ -27,7 +24,7 @@ typedef enum ident_type
 // le fichier y.tab.h
 typedef enum atomic_type
 {
-    T_INT , T_REAL , T_BOOL , T_CHAR
+    T_INT , T_UNIT , T_BOOL
 } atomic_type ;
 
 typedef struct ident_list
@@ -97,6 +94,26 @@ int add_symb(P_symb* symb);
 
 int search_symb(P_symb* symb);
 
+int search_symb_char(char *id);
+
+/*
+* return error message when a variable is used and not declared
+* and exits the program
+*/
+void chk_symb_declared(char *id);
+
+/*
+* return error message when types of the 2 operands don't match
+* and exits the program
+*/
+
+void chk_symb_type(char *id, quadop* op1);
+
+/*
+* return error message when types of the 2 operands don't match
+* and exits the program
+*/
+void chk_symb_typeE(quadop* op1, quadop* op2);
 
 /*
 * compare 2 symbs base on all their arguments
@@ -123,102 +140,4 @@ ident_list* add_to_identlist(ident_list* old_list, char* ident);
 void print_symb(P_symb* symb);
 void print_tab();
 
-
-/** @enum symbol_typ
-  * @brief Type of a symbol.
-  */
-typedef enum{
-    SYMBOL_INT,
-    SYMBOL_FUNC,
-    SYMBOL_CST
-} symbol_type;
-
-/** @struct symbol_
-  * @brief A symbol
-  * @member name    The variable's name
-  * @member type    The symbol's type
-  * @member value   The symbol's value if any
-  * @member next    The next symbol after this one in the chained list
-  */
-typedef struct symbol_{
-    char*           name;
-    symbol_type     type;
-    int             value;
-    struct symbol_* next;
-} symbol_, *symbol;
-
-/**
- * @brief Alloc in memory a new symbol
- * @return The allocated symbol
- */
-symbol symbol_alloc();
-
-/**
-  * Create a new ID symbol with a given name
-  * @param  The head of the symbol list
-  * @param  The name of the symbol
-  * @return The added symbol
-  */
-symbol symbol_new(symbol *, char *);
-
-/**
- * @brief Create a new TEMPORARY symbol
- * @param   The symbol list
- * @return  The added symbol
- */
-symbol symbol_new_temp(symbol *);
-
-/**
- * @brief Create a new CONST symbol
- * @param   The symbol list
- * @param   The const value
- * @return  The added symbol
- */
-symbol symbol_new_const(symbol *, int);
-
-/**
- * @brief Add a given symbol in a given list
- * @param       A pointer to the pointer of the list
- * @param       The symbol's pointer
- * @return      The added symbol
- */
-symbol symbol_list_add(symbol *, symbol);
-
-/**
-  * @brief Find a symbol with the given name in a given list and yell if nothing is found.
-  * @param      The symbol list
-  * @param      The symbol name
-  * @return     The symbol or NULL
-  */
-symbol symbol_must_find(symbol, char *);
-
-/**
- * @brief Same as symbol_must_find but doesn't yell.
- * @param      The symbol list
- * @param      The symbol name
- * @return      The symbol or NULL
- */
-symbol symbol_find(symbol, char*);
-
-/**
- * @brief Print a given symbol
- * @param       The symbol
- */
-void symbol_print(symbol);
-
-/**
- * @brief Prints all the symbols of the given list.
- * @param       The symbol list
- */
-void symbol_list_print(symbol);
-
-/**
- * @brief Free the memory used by the given symbol list
- * @param   The symbol list
- */
-void symbol_free_memory(symbol);
-
-//void tomips(FILE* os);
-
 #endif
-

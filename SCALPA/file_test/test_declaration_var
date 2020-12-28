@@ -5,5 +5,3 @@ var lettre : char;
 var mesboules : bool;
 var monreel : real;
 var mesbouless, etpasque : bool;
-begin
-end

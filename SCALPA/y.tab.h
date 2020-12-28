@@ -49,99 +49,91 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    COMMENT = 258,
-    PROGRAM = 259,
-    VAR = 260,
-    ID = 261,
+    PROGRAM = 258,
+    VAR = 259,
+    ID = 260,
+    STR = 261,
     NUM = 262,
     UNIT = 263,
     BOOL = 264,
     INT = 265,
-    CHAR = 266,
-    REAL = 267,
-    PLUS = 268,
-    AFFECT = 269,
-    TIMES = 270,
-    MINUS = 271,
-    DIVIDE = 272,
-    POWER = 273,
-    TRUE = 274,
-    FALSE = 275,
-    INF = 276,
-    INFEQ = 277,
-    SUP = 278,
-    SUPEQ = 279,
-    DIFF = 280,
-    EQ = 281,
-    AND = 282,
-    OR = 283,
-    XOR = 284,
-    NOT = 285,
-    SBEGIN = 286,
-    SEND = 287,
-    WRITE = 288,
-    READ = 289,
-    IF = 290,
-    THEN = 291,
-    ELSE = 292,
-    ENDIF = 293,
-    WHILE = 294,
-    DO = 295,
-    DONE = 296,
-    RETURN = 297,
-    SFUNCTION = 298,
-    NEG = 299
+    PLUS = 266,
+    AFFECT = 267,
+    TIMES = 268,
+    MINUS = 269,
+    DIVIDE = 270,
+    POWER = 271,
+    TRUE = 272,
+    FALSE = 273,
+    INF = 274,
+    INFEQ = 275,
+    SUP = 276,
+    SUPEQ = 277,
+    DIFF = 278,
+    EQ = 279,
+    AND = 280,
+    OR = 281,
+    XOR = 282,
+    NOT = 283,
+    SBEGIN = 284,
+    SEND = 285,
+    WRITE = 286,
+    READ = 287,
+    IF = 288,
+    THEN = 289,
+    ELSE = 290,
+    WHILE = 291,
+    DO = 292,
+    RETURN = 293,
+    LOWER_THAN_ELSE = 294,
+    NEG = 295
   };
 #endif
 /* Tokens.  */
-#define COMMENT 258
-#define PROGRAM 259
-#define VAR 260
-#define ID 261
+#define PROGRAM 258
+#define VAR 259
+#define ID 260
+#define STR 261
 #define NUM 262
 #define UNIT 263
 #define BOOL 264
 #define INT 265
-#define CHAR 266
-#define REAL 267
-#define PLUS 268
-#define AFFECT 269
-#define TIMES 270
-#define MINUS 271
-#define DIVIDE 272
-#define POWER 273
-#define TRUE 274
-#define FALSE 275
-#define INF 276
-#define INFEQ 277
-#define SUP 278
-#define SUPEQ 279
-#define DIFF 280
-#define EQ 281
-#define AND 282
-#define OR 283
-#define XOR 284
-#define NOT 285
-#define SBEGIN 286
-#define SEND 287
-#define WRITE 288
-#define READ 289
-#define IF 290
-#define THEN 291
-#define ELSE 292
-#define ENDIF 293
-#define WHILE 294
-#define DO 295
-#define DONE 296
-#define RETURN 297
-#define SFUNCTION 298
-#define NEG 299
+#define PLUS 266
+#define AFFECT 267
+#define TIMES 268
+#define MINUS 269
+#define DIVIDE 270
+#define POWER 271
+#define TRUE 272
+#define FALSE 273
+#define INF 274
+#define INFEQ 275
+#define SUP 276
+#define SUPEQ 277
+#define DIFF 278
+#define EQ 279
+#define AND 280
+#define OR 281
+#define XOR 282
+#define NOT 283
+#define SBEGIN 284
+#define SEND 285
+#define WRITE 286
+#define READ 287
+#define IF 288
+#define THEN 289
+#define ELSE 290
+#define WHILE 291
+#define DO 292
+#define RETURN 293
+#define LOWER_THAN_ELSE 294
+#define NEG 295
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 116 "ar.y"
+#line 216 "ar.y"
 
 	char *strval;
 	int intval;
@@ -149,13 +141,13 @@ union YYSTYPE
 	struct ident_list* list;
 	struct quadop* exprval;
 	struct {
-		struct lpos* true;
 		struct lpos* false;
+		struct lpos* true;
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
 
-#line 159 "y.tab.h"
+#line 151 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -14,60 +14,58 @@
 %}
 
 identifier [a-zA-Z_]+[0-9a-zA-Z_]*
-number     [1-9][0-9]*
+number     [1-9][0-9]*|"0"
+comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
+string     ["]([^"]|\\(.|\n))*["]
 
 %%
 
-
-\(\*.*\*\)			  	{output("This is a comment (* *) \n"); return COMMENT;}
-
 "program"   			{output("program");return PROGRAM ;}
-"function"				{output("function"); return SFUNCTION;}
 
 "var"   				{output("var");return VAR;}
 "int"   				{output("int");return INT;}
 "bool"  				{output("bool");return BOOL;}
-"char"  				{output("char");return CHAR;}
-"real"  				{output("real");return REAL;}
-"uint"          {output("unit");return UNIT; }
+"unit"          	{output("unit");return UNIT; }
 
 "begin"   			{output("begin");return SBEGIN;}
 "end"   				{output("end");return SEND;}
 
-"+"          { return PLUS; }
-"*"          { return TIMES; }
-"-"          { return MINUS; }
-"/"          { return DIVIDE; }
-"^"          { return POWER; }
-":="         { return AFFECT; }
-"<"          { return INF; }
-">"          { return SUP; }
-"<="         { return INFEQ; }
-">="         { return SUPEQ; }
-"<>"         { return DIFF; }
-"="          { return EQ; }
+"+"          { output(yytext);return PLUS; }
+"*"          { output(yytext);return TIMES; }
+"-"          { output(yytext);return MINUS; }
+"/"          { output(yytext);return DIVIDE; }
+"^"          { output(yytext);return POWER; }
+":="         { output(yytext);return AFFECT; }
+"<"          { output(yytext);return INF; }
+">"          { output(yytext);return SUP; }
+"<="         { output(yytext);return INFEQ; }
+">="         { output(yytext);return SUPEQ; }
+"<>"         { output(yytext);return DIFF; }
+"="          { output(yytext);return EQ; }
 "true"       { return TRUE; }
 "false"      { return FALSE; }
 "and"        { return AND; }
 "or"         { return OR; }
 "xor"        { return XOR; }
-"not"        { return NOT; }
-"if"         { return IF; }
-"then"       { return THEN; }
-"else"       { return ELSE; }
-"endif"      { return ENDIF; }
-"while"      { return WHILE; }
-"done"       { return DONE; }
-"do"         { return DO; }
-"return"	 { return RETURN; }
-"write"		 { return WRITE; }
-"read"		 { return READ; }
+"not"        { output(yytext);return NOT; }
+"if"         { output(yytext);return IF; }
+"then"       { output(yytext);return THEN; }
+"else"       { output(yytext);return ELSE; }
+"while"      { output(yytext);return WHILE; }
+"do"         { output(yytext);return DO; }
+"return"	 { output(yytext);return RETURN; }
+"write"		 { output(yytext);return WRITE; }
+"read"		 { output(yytext);return READ; }
 
-{identifier} {yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
+{identifier} { yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
-"0" 		 { yylval.intval = atoi(yytext); return NUM; }
-
-[();:,]       {return yytext[0]; }
+{string} {        yylval.strval = malloc(yyleng -1);
+          memcpy(yylval.strval, yytext + 1, yyleng - 2);
+          yylval.strval[yyleng - 2] = 0;
+		  output(yylval.strval); return STR;
+        }
+{comment}    { printf("%s\n", yytext);}
+[();:,]      { output(yytext);return yytext[0]; }
 \n           { }
 [\t ]        { }
 .            { printf("Caractere inconnu: %s", yytext);}

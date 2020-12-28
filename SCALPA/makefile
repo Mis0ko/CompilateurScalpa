@@ -1,7 +1,7 @@
 CC = gcc
 LEX = lex
 YACC = yacc -d 
-CFLAGS = -O2 -Wall -g --track-origins=yes
+CFLAGS = -O2 -Wall
 LDFLAGS = -lfl # Linux: -lfl / OSX: -ll
 EXEC = ar
 SRC = src/*
