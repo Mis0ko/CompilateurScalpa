@@ -6,11 +6,6 @@ i := j+1;
 i := j-1;
 i := j*1;
 i := max+1;
-j := 11 OR 10;
-j := 11 AND 10;
-j := 11 XOR 10;
-i := 010;
-j :=  NOT i ;
 read i;
 write i;
 end
