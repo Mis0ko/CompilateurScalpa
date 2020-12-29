@@ -187,9 +187,9 @@ void affiche(quad q)
 		case Q_INFEQ:
 			printf("if ");
 			if (q.op1->type == QO_CST)
-				printf("%d < ", q.op1->u.cst);
+				printf("%d <= ", q.op1->u.cst);
 			else
-				printf("%s < ", q.op1->u.name);
+				printf("%s <= ", q.op1->u.name);
 			if (q.op2->type == QO_CST)
 				printf("%d ", q.op2->u.cst);
 			else

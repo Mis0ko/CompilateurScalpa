@@ -1,6 +1,6 @@
 program maxi 
-var i, j, max, dfd :int;
+var i, j, max, dfd ,a :int;
 begin
 max:=4;
-while "dkflk" < 5 do a:=6 done;
+while 1 < 5 do a:=6 done;
 end;
