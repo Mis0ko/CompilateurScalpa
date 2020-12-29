@@ -328,11 +328,67 @@ void affect_symb(char *ident, quadop *qsymb)
     return;
 }
 
+quadop *affect_opb(quadop *q1, int opb, quadop *q2)
+{
+    quadop *q3;
+    int v1, v2, v3;
+    v3 = -1;
+    if (q2 == NULL){
+        bug("affect_opb: q2 NULL");
+        return NULL;
+    }
+
+    if (q2->type == QO_NAME)
+        v2 = get_CSTval_symb_ident(q2->u.name);
+    else
+        v2 = q2->u.cst;
+
+    if (q1 == NULL && q2 != NULL)       // case opb == NEG
+    {
+        if (opb == Q_NEG)
+        {
+            v3 = -v2;
+        }
+    }
+
+    if (q1->type == QO_NAME)
+        v1 = get_CSTval_symb_ident(q1->u.name);
+    else
+        v1 = q1->u.cst;
+
+    switch (opb)
+    {
+    case Q_PLUS:
+        v3 = v1 + v2;
+        break;
+
+    case Q_TIMES:
+        v3 = v1 * v2;
+        break;
+
+    case Q_POWER:
+        v3 = pow(v1, v2);
+        break;
+
+    case Q_MINUS:
+        v3 = v1 - v2;
+        break;
+
+    case Q_DIVIDE:
+        v3 = v1 / v2;
+        break;
+
+    default:
+        printf("affect_opb : pas compris\n");
+        break;
+    }
+
+    q3->type = QO_CST;
+    q3->u.cst = v3;
+    return q3;
+}
+
 /************** pour quand ya un opb ***********************/
-
-
-
-
 
 // commentaire de quadop_str a changé, str et pas name (détail)
 

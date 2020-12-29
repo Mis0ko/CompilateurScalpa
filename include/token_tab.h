@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "fct_utilitaires.h"
 #include "quad.h"
+
 
 struct P_symb;
 struct ident_list;
@@ -149,4 +151,6 @@ P_symb *get_symb_char(char *id);
 int get_symb_type_A(char *id);
 int get_CSTval_symb_ident(char *id);
 void affect_symb(char* ident, quadop* qsymb);
+quadop *affect_opb(quadop *q1, int opb, quadop *q2);
+//affect_symb(t->u.name, t);
 #endif

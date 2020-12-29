@@ -176,7 +176,9 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 	  }
 	  quadop* t = new_temp();
 	  create_symblist("var", create_identlist(t->u.name), "int");
+	  
 	  quad q = quad_make($2, $1, $3, t);
+	  $$ = affect_opb($1, opb, $3);
 	  gencode(q);
 	  printf("\n\n\nquadop* : type: %i ", t->type);
 	  if(t->u.name != NULL)
@@ -295,7 +297,7 @@ int main() {
 	return 0;
 }
 
-/*
+/***
 *	Test fonctionnel : creation de variable:
 *
 *	Ce test contient tout type de symbole afin de recouvrir la totalité
@@ -304,4 +306,10 @@ int main() {
 *	ajout symbole classique.
 *
 *	./ar < file_test/test_declaration_var
-*/
+*
+*
+*	les modifs dans ce fichier :
+*	les fonctions dans token_tab.c qui soint entre commentaires
+*	dans la grammaire la partie affectation de variable (faut comparer)
+*	fichier quad.c : partie opb pour sommer des variables
+****/

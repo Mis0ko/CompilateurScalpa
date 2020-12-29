@@ -534,9 +534,9 @@ static const yytype_uint16 yyrline[] =
        0,    70,    70,    73,    74,    75,    77,    80,    81,    84,
       86,    87,    88,    91,   100,   108,   114,   123,   131,   137,
      143,   144,   145,   151,   160,   161,   164,   164,   166,   167,
-     168,   169,   170,   186,   201,   207,   213,   218,   223,   233,
-     240,   249,   250,   251,   252,   253,   256,   257,   258,   259,
-     260,   261,   263,   267
+     168,   169,   170,   188,   203,   209,   215,   220,   225,   235,
+     242,   251,   252,   253,   254,   255,   258,   259,   260,   261,
+     262,   263,   265,   269
 };
 #endif
 
@@ -1593,18 +1593,20 @@ yyreduce:
 	  }
 	  quadop* t = new_temp();
 	  create_symblist("var", create_identlist(t->u.name), "int");
+	  
 	  quad q = quad_make((yyvsp[-1].intval), (yyvsp[-2].exprval), (yyvsp[0].exprval), t);
+	  (yyval.exprval) = affect_opb((yyvsp[-2].exprval), opb, (yyvsp[0].exprval));
 	  gencode(q);
 	  printf("\n\n\nquadop* : type: %i ", t->type);
 	  if(t->u.name != NULL)
 	  	printf("%s\n", t->u.name);
 	  (yyval.exprval) = t;
 }
-#line 1604 "y.tab.c" /* yacc.c:1646  */
+#line 1606 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 187 "ar.y" /* yacc.c:1646  */
+#line 189 "ar.y" /* yacc.c:1646  */
     {
 	if ((yyvsp[0].exprval)->type == QO_STR)
 	{
@@ -1617,49 +1619,49 @@ yyreduce:
 	gencode(q);
 	(yyval.exprval) = t;
 }
-#line 1621 "y.tab.c" /* yacc.c:1646  */
+#line 1623 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 202 "ar.y" /* yacc.c:1646  */
+#line 204 "ar.y" /* yacc.c:1646  */
     {
 		(yyval.tf).true = concat ((yyvsp[-3].tf).true, (yyvsp[0].tf).true);
 		complete((yyvsp[-3].tf).false, (yyvsp[-1].actualquad));
 		(yyval.tf).false = (yyvsp[0].tf).false;
 	}
-#line 1631 "y.tab.c" /* yacc.c:1646  */
+#line 1633 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 208 "ar.y" /* yacc.c:1646  */
+#line 210 "ar.y" /* yacc.c:1646  */
     {
 		(yyval.tf).false = concat ((yyvsp[-3].tf).false, (yyvsp[0].tf).false);
 		complete((yyvsp[-3].tf).true, (yyvsp[-1].actualquad));
 		(yyval.tf).true = (yyvsp[0].tf).true;
 	}
-#line 1641 "y.tab.c" /* yacc.c:1646  */
+#line 1643 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 214 "ar.y" /* yacc.c:1646  */
+#line 216 "ar.y" /* yacc.c:1646  */
     {
 		(yyval.tf).true = (yyvsp[0].tf).false;
 		(yyval.tf).false = (yyvsp[0].tf).true;
 	}
-#line 1650 "y.tab.c" /* yacc.c:1646  */
+#line 1652 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 219 "ar.y" /* yacc.c:1646  */
+#line 221 "ar.y" /* yacc.c:1646  */
     {
 		(yyval.tf).true = (yyvsp[-1].tf).true;
 		(yyval.tf).false = (yyvsp[-1].tf).false;
 	}
-#line 1659 "y.tab.c" /* yacc.c:1646  */
+#line 1661 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 224 "ar.y" /* yacc.c:1646  */
+#line 226 "ar.y" /* yacc.c:1646  */
     {
 		chk_symb_typeE((yyvsp[-2].exprval), (yyvsp[0].exprval));
 		(yyval.tf).true = crelist(nextquad);
@@ -1669,115 +1671,115 @@ yyreduce:
 		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		gencode(q2);
 	}
-#line 1673 "y.tab.c" /* yacc.c:1646  */
+#line 1675 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 234 "ar.y" /* yacc.c:1646  */
+#line 236 "ar.y" /* yacc.c:1646  */
     {
 		(yyval.tf).true = crelist(nextquad);
 		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		gencode(q2);
 		(yyval.tf).false = NULL;
 	}
-#line 1684 "y.tab.c" /* yacc.c:1646  */
+#line 1686 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 241 "ar.y" /* yacc.c:1646  */
+#line 243 "ar.y" /* yacc.c:1646  */
     {
 		(yyval.tf).false = crelist(nextquad);
 		quad q2 = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		gencode(q2);
 		(yyval.tf).true = NULL;
 	}
-#line 1695 "y.tab.c" /* yacc.c:1646  */
+#line 1697 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 249 "ar.y" /* yacc.c:1646  */
+#line 251 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_PLUS; }
-#line 1701 "y.tab.c" /* yacc.c:1646  */
+#line 1703 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 250 "ar.y" /* yacc.c:1646  */
+#line 252 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_MINUS; }
-#line 1707 "y.tab.c" /* yacc.c:1646  */
+#line 1709 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 251 "ar.y" /* yacc.c:1646  */
+#line 253 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_TIMES; }
-#line 1713 "y.tab.c" /* yacc.c:1646  */
+#line 1715 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 252 "ar.y" /* yacc.c:1646  */
+#line 254 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_DIVIDE; }
-#line 1719 "y.tab.c" /* yacc.c:1646  */
+#line 1721 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 253 "ar.y" /* yacc.c:1646  */
+#line 255 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_POWER; }
-#line 1725 "y.tab.c" /* yacc.c:1646  */
+#line 1727 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 256 "ar.y" /* yacc.c:1646  */
+#line 258 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_INF; }
-#line 1731 "y.tab.c" /* yacc.c:1646  */
+#line 1733 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 257 "ar.y" /* yacc.c:1646  */
+#line 259 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_INFEQ; }
-#line 1737 "y.tab.c" /* yacc.c:1646  */
+#line 1739 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 258 "ar.y" /* yacc.c:1646  */
+#line 260 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_SUP; }
-#line 1743 "y.tab.c" /* yacc.c:1646  */
+#line 1745 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 259 "ar.y" /* yacc.c:1646  */
+#line 261 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_SUPEQ; }
-#line 1749 "y.tab.c" /* yacc.c:1646  */
+#line 1751 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 260 "ar.y" /* yacc.c:1646  */
+#line 262 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_EQ; }
-#line 1755 "y.tab.c" /* yacc.c:1646  */
+#line 1757 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 261 "ar.y" /* yacc.c:1646  */
+#line 263 "ar.y" /* yacc.c:1646  */
     { (yyval.intval) = Q_DIFF; }
-#line 1761 "y.tab.c" /* yacc.c:1646  */
+#line 1763 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 263 "ar.y" /* yacc.c:1646  */
+#line 265 "ar.y" /* yacc.c:1646  */
     { (yyval.actualquad) = nextquad;}
-#line 1767 "y.tab.c" /* yacc.c:1646  */
+#line 1769 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 267 "ar.y" /* yacc.c:1646  */
+#line 269 "ar.y" /* yacc.c:1646  */
     {
 	  (yyval.lpos) = crelist(nextquad);
 	  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 	  gencode(q);
 }
-#line 1777 "y.tab.c" /* yacc.c:1646  */
+#line 1779 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1781 "y.tab.c" /* yacc.c:1646  */
+#line 1783 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2005,7 +2007,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 274 "ar.y" /* yacc.c:1906  */
+#line 276 "ar.y" /* yacc.c:1906  */
 
 void yyerror (char *s) {
 	fprintf(stderr, "[Yacc] error: %s\n", s);
@@ -2030,7 +2032,7 @@ int main() {
 	return 0;
 }
 
-/*
+/***
 *	Test fonctionnel : creation de variable:
 *
 *	Ce test contient tout type de symbole afin de recouvrir la totalité
@@ -2039,4 +2041,10 @@ int main() {
 *	ajout symbole classique.
 *
 *	./ar < file_test/test_declaration_var
-*/
+*
+*
+*	les modifs dans ce fichier :
+*	les fonctions dans token_tab.c qui soint entre commentaires
+*	dans la grammaire la partie affectation de variable (faut comparer)
+*	fichier quad.c : partie opb pour sommer des variables
+****/
