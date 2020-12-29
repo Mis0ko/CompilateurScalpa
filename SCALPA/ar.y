@@ -14,7 +14,7 @@ void lex_free();
 
 
 int quad_compt;
-
+int number_strings;
 void translatemips(quad q, FILE* os) {
 
 
@@ -34,9 +34,11 @@ void translatemips(quad q, FILE* os) {
 			case Q_EQ :
 				// Branch in case it's not eq => bne
 				fprintf(os, "\t\tbne $t1, $t2, LABEL_%d\n", q.res->u.cst);
+				break;
 			case Q_DIFF :
 				// Branch in case it's equal => beq
-				fprintf(os, "\t\tbeq $t1, $t2, LABEL_%d\n", q.res->u.cst);						
+				fprintf(os, "\t\tbeq $t1, $t2, LABEL_%d\n", q.res->u.cst);	
+				break;					
 			case Q_SUP :
 				// Branch in case it's not sup = less or eq => ble
 				fprintf(os, "\t\tble $t1, $t2, LABEL_%d\n", q.res->u.cst);	
@@ -86,13 +88,18 @@ void translatemips(quad q, FILE* os) {
 	}	
 	switch (q.type) {
 		case Q_GOTO:
-			fprintf(os, "\t\tj LABEL_%d\n", q.res->u.cst);
+			if(q.res->u.cst==-1)
+				fprintf(os, "\t\tj LABEL_END\n");
+			else	
+				fprintf(os, "\t\tj LABEL_%d\n", q.res->u.cst);
 			break;
 		case Q_WRITE:
 			if (q.res->type == QO_STR){
-				fprintf(os, "\t\tlw $a0 STR_1\n"); // TO COMPLETE
+				number_strings++;
+				fprintf(os, "\t\tlw $a0 STR_%d\n",number_strings); // TO COMPLETE
 				fprintf(os, "\t\tli $v0, 4\n");
 				fprintf(os, "\t\tsyscall\n");
+				break;
 			}
 			if (q.res->type == QO_CST)
 				// Load integer to print
@@ -212,10 +219,12 @@ void tomips(quad* globalcode, FILE* os) {
 	// Should be changed to Mich's table
 	// Loop on table and show vars
 
-	// Cheating
+	// ASCIZZ write "string"
+	int number_str=0;
 	for (int i = 0; i < nextquad; i++) {
-		if(globalcode[i].type == Q_WRITE){
-			fprintf(os,"STR_1: .asciiz\t \"%s\" \n", globalcode[i].res->u.str);  
+		if(globalcode[i].type == Q_WRITE && globalcode[i].res->type==QO_STR ){
+			number_str++;
+			fprintf(os,"STR_%d: .asciiz\t \"%s\" \n", number_str, globalcode[i].res->u.str);  
 		}
 	}
 	fprintf(os, "\n.text\n");
