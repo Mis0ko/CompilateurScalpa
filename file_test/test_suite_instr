@@ -1,12 +1,8 @@
 program maxi 
 var i, j, max :int;
 begin
-i:= 3;
+i:= 1;
 j := 2;
 if i < j then max := j endif;
-if i <= j then max := j+1 endif;
-if i > j then max := j+2 endif;
-if i >= j then max := j+3 endif;
-if i == j then max := j+4 endif;
 write max
 end

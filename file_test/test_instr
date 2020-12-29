@@ -1,11 +1,10 @@
 program maxi
-var i,j,max : int;
+var i, j, max, b, a :int;
+var mesboules1, mesboules2 : bool;
 begin
-i:= 3;
-if i < max 
-then 
-j := 5
-else 
-j := 2
-endif
+b:=10;
+mesboules1:=true
+if 5<4 then max := 4; 
+a:=7;
+b:= 9 + 2;
 end;

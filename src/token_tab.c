@@ -107,6 +107,34 @@ int search_symb(P_symb *symb)
     return -1;
 }
 
+int search_symb_char(char *id)
+{
+    int pos = hachage(id);
+
+    if (symb_tab[pos] == NULL)
+        return -1;
+
+    P_symb *symb_loop = symb_tab[pos];
+
+    while (symb_loop != NULL)
+    {
+        if (!strcmp(symb_loop->name, id))
+            return 1;
+        symb_loop = symb_loop->next_doublon;
+    }
+    return -1;
+}
+
+void chk_symb_declared(char *id)
+{
+    if (search_symb_char(id) == -1) //if symb not declared
+    {
+        printf("error : %s not declared\n", id);
+        exit(1);
+    }
+    return;
+}
+
 int same_symb(P_symb *symb1, P_symb *symb2)
 {
     if (!strcmp(symb1->name, symb2->name))
@@ -116,6 +144,199 @@ int same_symb(P_symb *symb1, P_symb *symb2)
     }
     return 0;
 }
+
+void chk_symb_type(char *id, quadop *op1)
+{
+    int pos = hachage(id);
+    P_symb *symb_loop = symb_tab[pos];
+    while (strcmp(symb_loop->name, id))
+        symb_loop = symb_loop->next_doublon;
+    if (op1 == NULL && symb_loop->type_I == VARIABLE && symb_loop->type_A == T_BOOL) // if op1 is a condition and id a boolean
+        return;
+    else if (op1 == NULL)
+    {
+        printf("erreur typage de %s\n", id);
+        exit(1);
+    }
+
+    if (symb_loop->type_I == VARIABLE && symb_loop->type_A == T_INT && op1->type == QO_CST) // if op1 and id are int
+        return;
+
+    if (op1->type == QO_NAME) // if op1 is an identifier
+    {
+        int pos2 = hachage(op1->u.name);
+        P_symb *symb_loop2 = symb_tab[pos2];
+
+        while (strcmp(symb_loop2->name, op1->u.name))
+            symb_loop2 = symb_loop2->next_doublon;
+
+        if (symb_loop->type_A == symb_loop2->type_A && symb_loop->type_I == symb_loop2->type_I)
+            return;
+    }
+    //otherwise
+    printf("erreur typage de %s\n", id);
+    exit(1);
+}
+
+void chk_symb_typeE(quadop *op1, quadop *op2)
+{
+    if (op1->type == QO_STR || op2->type == QO_STR)
+    {
+        printf("erreur typage comparaison\n");
+        exit(1);
+    }
+    else if (op1->type == QO_CST && op2->type == QO_NAME)
+        chk_symb_type(op2->u.name, op1);
+    else if (op1->type == QO_NAME && op2->type == QO_CST)
+        chk_symb_type(op1->u.name, op2);
+
+    return;
+}
+
+/************* A ajouter dans la branche dev****************************/
+
+/***
+ * Truc ultra important! on va considéré que dans une même portée
+ * On peut trouver qu'une seule varibale de même nom et type.
+ * On se servira de scope pour faire la diff avec 2 variables
+ *  de même nom et types quand on aura fait les fonctions
+ * ça permet d'implémenter vite et simplement, faudra modifier la fonction
+ * en dessous avec la prise ne compte de scope je le fais 
+ * pas encore ça a pas d'intérêt mais à pas oublier.
+ * ***/
+
+/**
+ * return symb with the name of id, otherwise return null.
+ * **/
+P_symb *get_symb_char(char *id)
+{
+    int pos = hachage(id);
+
+    if (symb_tab[pos] == NULL)
+        return NULL;
+
+    P_symb *symb_loop = symb_tab[pos];
+
+    while (symb_loop != NULL)
+    {
+        if (!strcmp(symb_loop->name, id))
+            return symb_loop;
+        symb_loop = symb_loop->next_doublon;
+    }
+    return NULL;
+}
+
+/****
+ * return the atomic type of a symb (bool, int, char*..)
+ * with the enum arg, otherwise return -1 if symb not found. 
+ * ***/
+int get_symb_type_A(char *id)
+{
+    P_symb *symb = get_symb_char(id);
+    if (symb == NULL)
+        return -1;
+    return symb->type_A;
+}
+
+/***
+ * 
+ * return the value of a symb stored in a variable in the program
+ * (an indent) for the bool and int value
+ * ***/
+int get_CSTval_symb_ident(char *id)
+{
+    P_symb *my_symb = get_symb_char(id);
+    if (my_symb == NULL)
+        return -1;
+    if (get_symb_type_A(id) == -1)
+        return -1;
+    switch (my_symb->type_A)
+    {
+    case T_INT:
+        return my_symb->u.int_val;
+        break;
+    case T_BOOL:
+        return my_symb->u.bool_val;
+        break;
+    }
+    printf("value of this symb not known\n");
+    return -1;
+}
+
+// /***
+//  * for now this function is useless, we dont implement char* as variable
+//  *get the char* value from a sym that is a string
+//  *
+//  * ***/
+// char* get_charval_symb_ident(char *id)
+// {
+//     P_symb *my_symb = get_symb_char(id);
+//     if (my_symb == NULL)
+//         return -1;
+//     if (get_symb_type_A(id) == -1)
+//         return -1;
+//     switch (my_symb->type_A)
+//     {
+//     case T_STR:
+//         return my_symb->u.str_val;
+//         break;
+//     }
+//     printf("value of this symb not known\n");
+//     return -1;
+// }
+
+/***
+ * affect_symbole for every type of symbol, must be completed
+ * 
+ * ident := qsymb
+ * ***/
+void affect_symb(char *ident, quadop *qsymb)
+{
+    int val;
+    P_symb *my_symb = get_symb_char(ident);
+    printf("Le symbole normalement %s et sa val %i\n", my_symb->name, my_symb->u.bool_val);
+    printf("\n\n");
+    print_symb(my_symb);
+    printf("\n\n\n");
+    if (my_symb == NULL)
+    {
+        bug("affect_symb : NULL");
+        return;
+    }
+    switch (qsymb->type)
+    {
+    case QO_CST:
+        my_symb->u.int_val = qsymb->u.cst;
+        break;
+
+    case QO_NAME:
+        printf("on essaye d'affecter %s\n", qsymb->u.name);
+        if (!strcmp("true", qsymb->u.name))
+            my_symb->u.bool_val = 1;
+        else if (!strcmp("false", qsymb->u.name))
+            my_symb->u.bool_val = 0;
+        // val = get_CSTval_symb_ident(qsymb->u.name);
+        // if (val == -1)
+        // {
+        //     printf("error affect_sym, QO_NAME\n");
+        //     break;
+        // }
+        if (my_symb->type_A == T_INT)
+            my_symb->u.int_val = qsymb->u.cst;
+        break;
+    }
+    return;
+}
+
+/************** pour quand ya un opb ***********************/
+
+
+
+
+
+// commentaire de quadop_str a changé, str et pas name (détail)
+
+/*************** fin de ce qui faut ajouter dans dev *******************************/
 
 ident_list *create_identlist(char *ident)
 {
@@ -138,7 +359,6 @@ ident_list *add_to_identlist(ident_list *old_list, char *ident)
     loop_ident->next = new_ident;
     return old_list;
 }
-
 void print_symb(P_symb *symb)
 {
     if (strlen(symb->name) >= 8)
@@ -160,6 +380,18 @@ void print_symb(P_symb *symb)
             printf("unit");
             break;
         }
+        //printf("\t\t|\n");
+        printf("\t\t|");
+        printf("\t\t");
+        switch (symb->type_A)
+        {
+        case T_INT:
+            printf("%i", symb->u.int_val);
+            break;
+        case T_BOOL:
+            printf("%i", symb->u.bool_val);
+            break;
+        }
         printf("\t\t|\n");
     }
     else
@@ -170,9 +402,11 @@ void print_tab()
 {
     printf("|-------------------------------|");
     printf("-------------------------------|");
+    printf("-------------------------------|");
     printf("-------------------------------|\n");
-    printf("|\t\tindex\t\t|\t\tident \t\t|\t\tatomic_type\t|\n");
+    printf("|\t\tindex\t\t|\t\tident \t\t|\t\tatomic_type\t|\t\t value\t\t|\n");
     printf("|-------------------------------|");
+    printf("-------------------------------|");
     printf("-------------------------------|");
     printf("-------------------------------|\n");
     for (int i = 0; i < SIZE_HASH_TABLE; i++)
@@ -192,6 +426,7 @@ void print_tab()
         }
     }
     printf("|-------------------------------|");
+    printf("-------------------------------|");
     printf("-------------------------------|");
     printf("-------------------------------|\n");
 }

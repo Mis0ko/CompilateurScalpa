@@ -78,12 +78,11 @@ extern int yydebug;
     IF = 288,
     THEN = 289,
     ELSE = 290,
-    ENDIF = 291,
-    WHILE = 292,
-    DO = 293,
-    DONE = 294,
-    RETURN = 295,
-    NEG = 296
+    WHILE = 291,
+    DO = 292,
+    RETURN = 293,
+    LOWER_THAN_ELSE = 294,
+    NEG = 295
   };
 #endif
 /* Tokens.  */
@@ -120,19 +119,18 @@ extern int yydebug;
 #define IF 288
 #define THEN 289
 #define ELSE 290
-#define ENDIF 291
-#define WHILE 292
-#define DO 293
-#define DONE 294
-#define RETURN 295
-#define NEG 296
+#define WHILE 291
+#define DO 292
+#define RETURN 293
+#define LOWER_THAN_ELSE 294
+#define NEG 295
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 121 "ar.y" /* yacc.c:1909  */
+#line 18 "ar.y" /* yacc.c:1909  */
 
 	char *strval;
 	int intval;
@@ -140,13 +138,13 @@ union YYSTYPE
 	struct ident_list* list;
 	struct quadop* exprval;
 	struct {
-		struct lpos* true;
 		struct lpos* false;
+		struct lpos* true;
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
 
-#line 150 "y.tab.h" /* yacc.c:1909  */
+#line 148 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

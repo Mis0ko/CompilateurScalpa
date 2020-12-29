@@ -4,10 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "fct_utilitaires.h"
-
-#define DINT 0
-#define DBOOL 1
-#define DUNIT 2
+#include "quad.h"
 
 struct P_symb;
 struct ident_list;
@@ -27,7 +24,7 @@ typedef enum ident_type
 // le fichier y.tab.h
 typedef enum atomic_type
 {
-    T_INT , T_UNIT , T_BOOL
+    T_INT , T_UNIT , T_BOOL, T_STR //############ CHANGE
 } atomic_type ;
 
 typedef struct ident_list
@@ -44,6 +41,7 @@ typedef struct P_symb
     char*               name;           // Name of the identifier
     ident_type          type_I;         // Type of the identifier ( variable , function , array , function parameter , ... )
     atomic_type         type_A;         // atomic type of ident / return value if function (int, real, bool, char)
+    union { int int_val; char *str_val ; int bool_val ;}u;  // value of the token: int bool or char*
     unsigned int        addr;           // Memory address
     int                 scope;          // globale/locale, begin with 0 for globable and +1 for each new bloc, but we begin without it.
     struct P_symb* next_doublon;
@@ -97,6 +95,26 @@ int add_symb(P_symb* symb);
 
 int search_symb(P_symb* symb);
 
+int search_symb_char(char *id);
+
+/*
+* return error message when a variable is used and not declared
+* and exits the program
+*/
+void chk_symb_declared(char *id);
+
+/*
+* return error message when types of the 2 operands don't match
+* and exits the program
+*/
+
+void chk_symb_type(char *id, quadop* op1);
+
+/*
+* return error message when types of the 2 operands don't match
+* and exits the program
+*/
+void chk_symb_typeE(quadop* op1, quadop* op2);
 
 /*
 * compare 2 symbs base on all their arguments
@@ -123,4 +141,12 @@ ident_list* add_to_identlist(ident_list* old_list, char* ident);
 void print_symb(P_symb* symb);
 void print_tab();
 
+/***
+ * new functions for affect
+ * 
+ * **/
+P_symb *get_symb_char(char *id);
+int get_symb_type_A(char *id);
+int get_CSTval_symb_ident(char *id);
+void affect_symb(char* ident, quadop* qsymb);
 #endif

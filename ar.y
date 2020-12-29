@@ -1,119 +1,16 @@
 %{
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include "include/token_tab.h"
 #include "include/fct_utilitaires.h"
-#include "include/quad.h"
-#include "include/mips.h"
-extern quad globalcode[300];
+extern quad globalcode[100];
 extern int nextquad;
 extern int ntp;
 
 void yyerror(char*);
 int yylex();
 void lex_free();
-
-int file_code_mips;
-
-#define SIZE_INSTR 100
-void MIPS_OPREL_COMP(quad* q)
-{
-    char instr[SIZE_INSTR];
-    switch (q->type)
-    {
-    case Q_SUP:
-        snprintf(instr, SIZE_INSTR - strlen(instr), "bgt ");
-        break;
-
-    case Q_SUPEQ:
-        snprintf(instr, SIZE_INSTR - strlen(instr), "bge ");
-        break;
-    case Q_INF:
-        snprintf(instr, SIZE_INSTR - strlen(instr), "blt ");
-        break;
-    case Q_INFEQ:
-        snprintf(instr, SIZE_INSTR - strlen(instr), "ble ");
-        break;
-    case Q_EQ:
-        snprintf(instr, SIZE_INSTR - strlen(instr), "ble ");
-        break;
-    }
-
-    if (strlen(instr) != 0 && (q->type == Q_SUP || q->type == Q_SUPEQ || q->type == Q_INF || q->type == Q_INFEQ || q->type == Q_EQ))
-    {
-        if (q->op1->type == QO_CST)
-            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "%i, ", q->op1->u.cst);
-        else
-            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "$%s, ", q->op1->u.name);
-
-        if (q->op2->type == QO_CST)
-            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "%i, ", q->op2->u.cst);
-        else
-            snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "$%s, ", q->op2->u.name);
-
-        snprintf(&instr[strlen(instr)], SIZE_INSTR - strlen(instr), "QUAD_%i\n", q->res->u.cst);
-		//printf("%s\n", instr);
-	}
-    else {
-        snprintf(instr, SIZE_INSTR, "quad pas encore pris en charge\n");
-    }
-	instr[strlen(instr)]='\0';
-	//printf("chaine :%s:\n", instr);
-	write(file_code_mips, instr, strlen(instr));
-}
-
-// void MIPS_OPREL_RESTE(quad* q)
-// {
-//     char instr[SIZE_INSTR];
-//     switch (q->type)
-//     {
-//     case Q_GOTO:
-//         snprintf(instr, SIZE_INSTR - strlen(instr), "j QUAD_%i\n", q->res->u.cst);
-//         break;
-// 	// case Q_AFFECT: aucune idée de comment récupérer le registre de la variable initiale
-//     //     snprintf(instr, SIZE_INSTR - strlen(instr), "lw $t0, %i\n", q->res->u.cst);
-//     //     break;
-
-//     case Q_WRITE:
-//         snprintf(instr, SIZE_INSTR - strlen(instr), "li $v0 ";
-// 		if(q->res->type == QO_CST)
-// 			snprintf(instr, SIZE_INSTR - strlen(instr), "1\nlw $a0, %i", q->res->u.cst);
-// 		else//QO_NAME
-// 			snprintf(instr, SIZE_INSTR - strlen(instr), "1\nlw $a0, %s", q->res->u.name);
-// 		snprintf(instr, SIZE_INSTR - strlen(instr), "\nsyscall");
-//         break;
-//     }
-
-// 	instr[strlen(instr)]='\0';
-// 	printf("chaine :%s:\n", instr);
-// 	write(file_code_mips, instr, strlen(instr));
-// }
-
-
-void trad_mips_all(int argc, char **argv)
-{
-    file_code_mips = open(argv[1], O_CREAT | O_APPEND | O_WRONLY | O_TRUNC);
-    if (file_code_mips == -1)
-    {
-        fprintf(stderr, "Erreur durant l'ouverture du fichier\n");
-        exit(-1);
-    }
-	for(int i = 0 ; i < nextquad; i++){
-		//printf("%i %i\n", i, nextquad);
-		MIPS_OPREL_COMP(&globalcode[i]);
-	}
-    int ret_close = close(file_code_mips);
-    if (ret_close == -1)
-    {
-        fprintf(stderr, "Erreur durant la fermeture du fichier\n");
-        exit(-1);
-    }
-}
 
 
 %}
@@ -125,8 +22,8 @@ void trad_mips_all(int argc, char **argv)
 	struct ident_list* list;
 	struct quadop* exprval;
 	struct {
-		struct lpos* true;
 		struct lpos* false;
+		struct lpos* true;
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
@@ -141,7 +38,7 @@ void trad_mips_all(int argc, char **argv)
 %token <intval> AND OR XOR NOT
 
 %token SBEGIN SEND WRITE READ
-%token IF THEN ELSE ENDIF WHILE DO DONE RETURN
+%token IF THEN ELSE WHILE DO RETURN
 
 
 %type <list> identlist
@@ -152,12 +49,17 @@ void trad_mips_all(int argc, char **argv)
 %type <actualquad> M
 %type <lpos> instr tag sequence
 
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 
+%left RETURN
 %left INF INFEQ SUP SUPEQ DIFF EQ
+%right AFFECT
 %left PLUS MINUS OR XOR
 %left TIMES DIVIDE AND
 %right POWER
 %left NEG NOT
+%left ID
 
 
 %start program
@@ -188,24 +90,37 @@ atomictype: UNIT  {$$ = "unit";}
 
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
+		  chk_symb_declared($1);
+		  chk_symb_type($1,$3);
+		  affect_symb($1, $3);
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
-	 	  gencode(q);
+		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
-	  | IF cond THEN M instr ENDIF
+	  | ID AFFECT cond
 	  {
-		  complete($2.true,$4);
-		  $$ = concat($2.false,crelist(nextquad));
+		  chk_symb_declared($1);
+		  chk_symb_type($1,NULL);
+		  quad q = quad_make(Q_AFFECT, reify($3.true, $3.false), NULL, quadop_name($1));
+		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
-	  | IF cond THEN M instr tag ELSE M instr ENDIF
+	  | IF cond THEN M instr %prec LOWER_THAN_ELSE
+	  {
+		  $$ = NULL;
+		  complete($2.true,$4);
+		  $$ = concat($2.false,$5);
+	  }
+	  | IF cond THEN M instr ELSE tag M instr
 	  {
 		  complete($2.true, $4);
 		  complete($2.false, $8);
-		  $$ = concat($5, $6);
+		  $$ = concat($5, $7);
 		  $$ = concat($$, crelist(nextquad));
 		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		  gencode(q);
 	  }
-	  | WHILE M cond DO M instr DONE
+	  | WHILE M cond DO M instr
 	  {
 	  		complete($3.true, $5);
 			complete($6, $2);
@@ -217,45 +132,66 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 		  quad q = quad_make(Q_RET,NULL,NULL,$2);
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | RETURN
 	  {
 		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
-	  | SBEGIN sequence SEND ';'{$$ = $2; }
+	  | SBEGIN sequence SEND semcol{$$ = $2;}
 	  | SBEGIN SEND  { }
 	  | READ ID //lvalue a l'origine, a changer apres les tableaux
 	  {
 		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name($2));
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | WRITE E
 	  {
 		  quad q = quad_make(Q_WRITE, NULL, NULL, $2);
 		  gencode(q);
+		  $$ = crelist(nextquad);
+
 	  }
 	  ;
 
-sequence : instr ';' M sequence { $1 = crelist(nextquad);complete($1, $3); $$ = $4;}
-		 | instr ';' { $$ = $1; }
-		 | instr { $$ = $1; }
+sequence : sequence semcol M instr semcol {complete($1, $3);$$ = $4;}
+		 | instr semcol { $$ = $1;}
 		 ;
 
+semcol : ';' | ;
 
-E : ID { $$ = quadop_name($1);}
-| NUM { $$ = quadop_cst($1);}
+E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
+| NUM {	$$ = quadop_cst($1);}
+| STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
-| E opb E
+| E %prec ID opb E //%prec ID pour regler conflits avec opb
 {
+	  if ($1->type == QO_STR || $3->type == QO_STR)
+	  {
+		  yyerror("erreur de type");
+		  return 1;
+	  }
 	  quadop* t = new_temp();
+	  create_symblist("var", create_identlist(t->u.name), "int");
 	  quad q = quad_make($2, $1, $3, t);
 	  gencode(q);
+	  printf("\n\n\nquadop* : type: %i ", t->type);
+	  if(t->u.name != NULL)
+	  	printf("%s\n", t->u.name);
 	  $$ = t;
 }
 | MINUS E %prec NEG
 {
+	if ($2->type == QO_STR)
+	{
+		yyerror("erreur de type");
+		return 1;
+	}
 	quadop* t = new_temp();
+	create_symblist("var", create_identlist(t->u.name), "int");
 	quad q = quad_make(Q_NEG, $2, NULL, t);
 	gencode(q);
 	$$ = t;
@@ -286,6 +222,7 @@ cond : cond OR M cond
 	}
 	| E oprel E
 	{
+		chk_symb_typeE($1, $3);
 		$$.true = crelist(nextquad);
 		quad q = quad_make($2,$1,$3,NULL);
 		gencode (q); // if ($1 rel $3)     goto ?
@@ -323,7 +260,7 @@ oprel :	INF { $$ = Q_INF; }
 	  | EQ { $$ = Q_EQ; }
 	  | DIFF { $$ = Q_DIFF; }
 
-M : { $$ = nextquad; }
+M : { $$ = nextquad;}
 ;
 
 tag:
@@ -340,7 +277,7 @@ void yyerror (char *s) {
 }
 
 
-int main(int argc, char** argv) {
+int main() {
 	init_symb_tab();
 	printf("Enter your code:\n");
 
@@ -349,9 +286,10 @@ int main(int argc, char** argv) {
 	print_tab();
 	printf("Quad list:\n");
 	for (int i=0; i<nextquad; i++) {
-		printf("idx : %i\t\t", i);affiche(globalcode[i]);
+		printf("%i ", i);
+		affiche(globalcode[i]);
 	}
-	trad_mips_all(argc, argv);
+
 	// Be clean.===> Ofc As always
 	lex_free();
 	return 0;
@@ -366,17 +304,4 @@ int main(int argc, char** argv) {
 *	ajout symbole classique.
 *
 *	./ar < file_test/test_declaration_var
-*	./ar < file_test/test_instr
-*	./ar < file_test/test_suite_instr
-*
-*
-*	changement fait par rapport branche dev:
-*	fonction affichage des tokens de la tab
-*   toutes les fonctions liés au mips 
-*
-*   commande pour tester la fonctionnalité (yet):
-*   ./ar mario < file_test/test_suite_instr
-*   (mario cest le fichier decriture, pas d'inspiration pour le nom
-*   et vu que je suis en kigu de mario toute la journée voila)
-*
 */
