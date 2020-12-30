@@ -1,6 +1,6 @@
 #include "../include/token_tab.h"
 
-P_symb** symb_tab;
+P_symb **symb_tab;
 
 /******************** begining of the functions ********************/
 
@@ -109,30 +109,30 @@ int search_symb(P_symb *symb)
 
 int search_symb_char(char *id)
 {
-	int pos = hachage(id);
+    int pos = hachage(id);
 
-	if (symb_tab[pos] == NULL)
-		return -1;
+    if (symb_tab[pos] == NULL)
+        return -1;
 
-	P_symb *symb_loop = symb_tab[pos];
+    P_symb *symb_loop = symb_tab[pos];
 
-	while (symb_loop != NULL)
-	{
-		if (!strcmp(symb_loop->name, id))
-			return 1;
-		symb_loop = symb_loop->next_doublon;
-	}
-	return -1;
+    while (symb_loop != NULL)
+    {
+        if (!strcmp(symb_loop->name, id))
+            return 1;
+        symb_loop = symb_loop->next_doublon;
+    }
+    return -1;
 }
 
 void chk_symb_declared(char *id)
 {
-	if (search_symb_char(id) == -1) //if symb not declared
-	{
-		printf("error : %s not declared\n", id);
-		exit(1);
-	}
-	return ;
+    if (search_symb_char(id) == -1) //if symb not declared
+    {
+        printf("error : %s not declared\n", id);
+        exit(1);
+    }
+    return;
 }
 
 int same_symb(P_symb *symb1, P_symb *symb2)
@@ -145,59 +145,53 @@ int same_symb(P_symb *symb1, P_symb *symb2)
     return 0;
 }
 
-void chk_symb_type(char *id, quadop* op1)
+void chk_symb_type(char *id, quadop *op1)
 {
-	int pos = hachage(id);
-	P_symb *symb_loop = symb_tab[pos];
-	while (strcmp(symb_loop->name, id))
-		symb_loop = symb_loop->next_doublon;
-	if (op1 == NULL && symb_loop->type_I == VARIABLE
-		&& symb_loop->type_A == T_BOOL) // if op1 is a condition and id a boolean
-		return;
-	else if (op1 == NULL )
-	{
-		printf("erreur typage de %s\n", id);
-		exit(1);
+    int pos = hachage(id);
+    P_symb *symb_loop = symb_tab[pos];
+    while (strcmp(symb_loop->name, id))
+        symb_loop = symb_loop->next_doublon;
+    if (op1 == NULL && symb_loop->type_I == VARIABLE && symb_loop->type_A == T_BOOL) // if op1 is a condition and id a boolean
+        return;
+    else if (op1 == NULL)
+    {
+        printf("erreur typage de %s\n", id);
+        exit(1);
+    }
 
-	}
+    if (symb_loop->type_I == VARIABLE && symb_loop->type_A == T_INT && op1->type == QO_CST) // if op1 and id are int
+        return;
 
-	if (symb_loop->type_I == VARIABLE && symb_loop->type_A == T_INT
-		&& op1->type == QO_CST) // if op1 and id are int
-		return;
+    if (op1->type == QO_NAME) // if op1 is an identifier
+    {
+        int pos2 = hachage(op1->u.name);
+        P_symb *symb_loop2 = symb_tab[pos2];
 
-	if (op1->type == QO_NAME) // if op1 is an identifier
-	{
-		int pos2 = hachage(op1->u.name);
-		P_symb *symb_loop2 = symb_tab[pos2];
+        while (strcmp(symb_loop2->name, op1->u.name))
+            symb_loop2 = symb_loop2->next_doublon;
 
-		while (strcmp(symb_loop2->name, op1->u.name))
-			symb_loop2 = symb_loop2->next_doublon;
-
-		if (symb_loop->type_A == symb_loop2->type_A
-			&& symb_loop->type_I == symb_loop2->type_I)
-			return;
-	}
-	//otherwise
-	printf("erreur typage de %s\n", id);
-	exit(1);
+        if (symb_loop->type_A == symb_loop2->type_A && symb_loop->type_I == symb_loop2->type_I)
+            return;
+    }
+    //otherwise
+    printf("erreur typage de %s\n", id);
+    exit(1);
 }
 
-
-void chk_symb_typeE(quadop* op1, quadop* op2)
+void chk_symb_typeE(quadop *op1, quadop *op2)
 {
-	if (op1->type == QO_STR || op2->type == QO_STR)
-	{
-		printf("erreur typage comparaison\n");
-		exit(1);
-	}
-	else if (op1->type == QO_CST && op2->type == QO_NAME)
-		chk_symb_type(op2->u.name, op1);
-	else if (op1->type == QO_NAME && op2->type == QO_CST)
-		chk_symb_type(op1->u.name, op2);
+    if (op1->type == QO_STR || op2->type == QO_STR)
+    {
+        printf("erreur typage comparaison\n");
+        exit(1);
+    }
+    else if (op1->type == QO_CST && op2->type == QO_NAME)
+        chk_symb_type(op2->u.name, op1);
+    else if (op1->type == QO_NAME && op2->type == QO_CST)
+        chk_symb_type(op1->u.name, op2);
 
-	return;
+    return;
 }
-
 
 ident_list *create_identlist(char *ident)
 {
@@ -221,7 +215,6 @@ ident_list *add_to_identlist(ident_list *old_list, char *ident)
     return old_list;
 }
 
-
 P_symb *get_symb_char(char *id)
 {
     int pos = hachage(id);
@@ -240,7 +233,6 @@ P_symb *get_symb_char(char *id)
     return NULL;
 }
 
-
 int get_symb_type_A(char *id)
 {
     P_symb *symb = get_symb_char(id);
@@ -248,7 +240,6 @@ int get_symb_type_A(char *id)
         return -1;
     return symb->type_A;
 }
-
 
 int get_CSTval_symb_ident(char *id)
 {
@@ -292,7 +283,6 @@ int get_CSTval_symb_ident(char *id)
 //     return -1;
 // }
 
-
 void affect_symb(char *ident, quadop *qsymb)
 {
     int val;
@@ -314,7 +304,7 @@ void affect_symb(char *ident, quadop *qsymb)
     // met à jour la tab des symboles sur leur valeur, mais pas sur que ça soit ce que l'on veut ....
     case QO_NAME:
         val = get_CSTval_symb_ident(qsymb->u.name);
-        quadop* val_quadop = malloc(sizeof(quadop));//à free après
+        quadop *val_quadop = malloc(sizeof(quadop)); //à free après
         val_quadop->type = QO_CST;
         val_quadop->u.cst = val;
         affect_symb(ident, val_quadop);
@@ -322,13 +312,14 @@ void affect_symb(char *ident, quadop *qsymb)
     return;
 }
 
-void affect_opb(quadop *q1, int opb, quadop *q2, quadop* q3)
+void affect_opb(quadop *q1, int opb, quadop *q2, quadop *q3)
 {
     int v1, v2, v3;
     v3 = -1;
-    if (q2 == NULL){
+    if (q2 == NULL)
+    {
         bug("affect_opb: q2 NULL");
-        return ;
+        return;
     }
 
     if (q2->type == QO_NAME)
@@ -336,7 +327,7 @@ void affect_opb(quadop *q1, int opb, quadop *q2, quadop* q3)
     else
         v2 = q2->u.cst;
 
-    if (q1 == NULL && q2 != NULL)       // case opb == NEG
+    if (q1 == NULL && q2 != NULL) // case opb == NEG
     {
         if (opb == Q_NEG)
         {
@@ -382,10 +373,26 @@ void affect_opb(quadop *q1, int opb, quadop *q2, quadop* q3)
 }
 
 /************** pour quand ya un opb ***********************/
+void print_intvar_name()
+{
 
-
-
-
+     for (int i = 0; i < SIZE_HASH_TABLE; i++)
+    {
+        if (symb_tab[i] != NULL && symb_tab[i]->type_A == T_INT)
+        {
+            printf("%s\n", symb_tab[i]->name);
+            if (symb_tab[i]->next_doublon != NULL)
+            {
+                P_symb *symb_parcour = symb_tab[i]->next_doublon;
+                while (symb_parcour != NULL)
+                {
+                    printf("%s\n", symb_tab[i]->name);
+                    symb_parcour = symb_parcour->next_doublon;
+                }
+            }
+        }
+    }
+}
 
 void print_symb(P_symb *symb)
 {

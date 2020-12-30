@@ -181,4 +181,6 @@ void affect_opb(quadop *q1, int opb, quadop *q2, quadop* q3);
 void print_symb(P_symb* symb);
 void print_tab();
 
+void print_intvar_name();
+
 #endif

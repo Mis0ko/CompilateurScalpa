@@ -293,7 +293,9 @@ int main() {
 	yyparse();
 	printf("-----------------\nSymbol table:\n-----------------\n");
 	print_tab();
-	printf("Quad list:\n");
+	printf("-----------------\nSymbol integer:\n-----------------\n");
+	print_intvar_name();
+	printf("-----------------\nQuad List:\n-----------------\n");
 	for (int i=0; i<nextquad; i++) {
 		printf("%i ", i);
 		affiche(globalcode[i]);
