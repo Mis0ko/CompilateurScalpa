@@ -96,7 +96,7 @@ void translatemips(quad q, FILE* os) {
 		case Q_WRITE:
 			if (q.res->type == QO_STR){
 				number_strings++;
-				fprintf(os, "\t\tlw $a0 STR_%d\n",number_strings); // TO COMPLETE
+				fprintf(os, "\t\tla $a0, STR_%d\n",number_strings); // TO COMPLETE
 				fprintf(os, "\t\tli $v0, 4\n");
 				fprintf(os, "\t\tsyscall\n");
 				break;
@@ -215,20 +215,25 @@ void translatemips(quad q, FILE* os) {
 }
 
 void tomips(quad* globalcode, FILE* os) {
+	fprintf(os, "#\tSCALPA Project\n#\tOutput test code in MIPS\n#\t\n\n\n\n");
 	fprintf(os, ".data\n");
+	fprintf(os, "# In the section .data we establish data components such as \n");
+	fprintf(os, "# variables or strings to be displayed on the console. \n\n");
 	// Should be changed to Mich's table
 	// Loop on table and show vars
 
-	// ASCIZZ write "string"
+	// ASCIIZ write "string"
+
 	int number_str=0;
 	for (int i = 0; i < nextquad; i++) {
 		if(globalcode[i].type == Q_WRITE && globalcode[i].res->type==QO_STR ){
 			number_str++;
-			fprintf(os,"STR_%d: .asciiz\t \"%s\" \n", number_str, globalcode[i].res->u.str);  
+			fprintf(os,"STR_%d:\t.asciiz\t \"%s\" \n", number_str, globalcode[i].res->u.str);  
 		}
 	}
-	fprintf(os, "\n.text\n");
-	fprintf(os, "main:\n");
+	fprintf(os, "\n\n.text\n");
+	fprintf(os, "# In the section .text we put our executable code \n");
+	//fprintf(os, "main:\n");
 	quad_compt = 0;
 	for (int i = 0; i < nextquad; i++) {
 		translatemips(globalcode[i], os);
@@ -345,7 +350,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		  gencode(q);
 	  }
-	  | WHILE M cond DO M instr
+	  | WHILE M cond DO M instr 
 	  {
 	  		complete($3.true, $5);
 			complete($6, $2);

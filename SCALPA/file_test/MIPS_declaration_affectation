@@ -1,0 +1,15 @@
+program maxi
+var i, j: int ;
+begin
+i := 53;
+write i;
+write "\n";
+j := i;
+write j;
+write "\n";
+j := 3;
+write j;
+write "\n";
+write i;
+write "\n";
+end
