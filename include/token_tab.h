@@ -1,5 +1,5 @@
 #ifndef TOKEN_TAB_H
-#define TOKEN_TAB
+#define TOKEN_TAB_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -151,6 +151,6 @@ P_symb *get_symb_char(char *id);
 int get_symb_type_A(char *id);
 int get_CSTval_symb_ident(char *id);
 void affect_symb(char* ident, quadop* qsymb);
-quadop *affect_opb(quadop *q1, int opb, quadop *q2);
+void affect_opb(quadop *q1, int opb, quadop *q2, quadop* q3);
 //affect_symb(t->u.name, t);
 #endif

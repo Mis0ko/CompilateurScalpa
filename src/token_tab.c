@@ -310,32 +310,23 @@ void affect_symb(char *ident, quadop *qsymb)
         break;
 
     case QO_NAME:
-        printf("on essaye d'affecter %s\n", qsymb->u.name);
-        if (!strcmp("true", qsymb->u.name))
-            my_symb->u.bool_val = 1;
-        else if (!strcmp("false", qsymb->u.name))
-            my_symb->u.bool_val = 0;
-        // val = get_CSTval_symb_ident(qsymb->u.name);
-        // if (val == -1)
-        // {
-        //     printf("error affect_sym, QO_NAME\n");
-        //     break;
-        // }
-        if (my_symb->type_A == T_INT)
-            my_symb->u.int_val = qsymb->u.cst;
-        break;
+        // affect_symb(t->u.name, t_val);
+        val = get_CSTval_symb_ident(qsymb->u.name);
+        quadop* val_quadop = malloc(sizeof(quadop));//à free après
+        val_quadop->type = QO_CST;
+        val_quadop->u.cst = val;
+        affect_symb(ident, val_quadop);
     }
     return;
 }
 
-quadop *affect_opb(quadop *q1, int opb, quadop *q2)
+void affect_opb(quadop *q1, int opb, quadop *q2, quadop* q3)
 {
-    quadop *q3;
     int v1, v2, v3;
     v3 = -1;
     if (q2 == NULL){
         bug("affect_opb: q2 NULL");
-        return NULL;
+        return ;
     }
 
     if (q2->type == QO_NAME)
@@ -385,7 +376,7 @@ quadop *affect_opb(quadop *q1, int opb, quadop *q2)
 
     q3->type = QO_CST;
     q3->u.cst = v3;
-    return q3;
+    return;
 }
 
 /************** pour quand ya un opb ***********************/
