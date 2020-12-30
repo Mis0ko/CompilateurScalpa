@@ -1,5 +1,5 @@
 #ifndef QUAD_H
-#define QUAD
+#define QUAD_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +51,7 @@ quadop* quadop_name(char *str);
 
 /*
 * allocate an operand type constant string
-* u.name contains the string
+* u.str contains the string
 */
 quadop* quadop_str(char *str);
 

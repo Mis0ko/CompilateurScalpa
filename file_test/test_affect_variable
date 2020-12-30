@@ -1,0 +1,11 @@
+program maxi
+var i, j, max, b, a, c :int;
+var mesboules1, mesboules2 : bool;
+begin
+b:=10;
+mesboules1:=true
+if 5<4 then max := 4; 
+a:=7;
+b:= 9 + 2;
+c:= b+5;
+end;

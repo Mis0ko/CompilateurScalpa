@@ -1,10 +1,11 @@
 #ifndef TOKEN_TAB_H
-#define TOKEN_TAB
+#define TOKEN_TAB_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "fct_utilitaires.h"
 #include "quad.h"
+#include <math.h>
 
 struct P_symb;
 struct ident_list;
@@ -41,11 +42,11 @@ typedef struct P_symb
     char*               name;           // Name of the identifier
     ident_type          type_I;         // Type of the identifier ( variable , function , array , function parameter , ... )
     atomic_type         type_A;         // atomic type of ident / return value if function (int, real, bool, char)
+    union { int int_val; char *str_val ; int bool_val ;}u;  // value of the token: int bool or char*
     unsigned int        addr;           // Memory address
     int                 scope;          // globale/locale, begin with 0 for globable and +1 for each new bloc, but we begin without it.
     struct P_symb* next_doublon;
 } P_symb ;
-
 
 /******************** FUNCTIONS ********************/
 /*
@@ -137,6 +138,46 @@ ident_list* create_identlist(char* ident);
 * Add a new ident to the linked-list that already exists
 */
 ident_list* add_to_identlist(ident_list* old_list, char* ident);
+
+
+/***
+ * Function for affectation / deal with symb's value
+ * ***/
+
+
+
+
+/***
+ * return symb with the name of id, otherwise return null.
+ * ***/
+P_symb *get_symb_char(char *id);
+
+/****
+ * return the atomic type of a symb (bool, int, char*..)
+ * with the enum arg, otherwise return -1 if symb not found. 
+ * ***/
+int get_symb_type_A(char *id);
+
+/***
+ * return the value of a symb stored in a variable in the program
+ * (an indent) for the bool and int value
+ * ***/
+int get_CSTval_symb_ident(char *id);
+
+/***
+ * affect_symbol for every type of symbol, must be completed
+ * 
+ * ident := qsymb
+ * ***/
+void affect_symb(char* ident, quadop* qsymb);
+
+
+/***
+ * update in the 
+ * ***/
+void affect_opb(quadop *q1, int opb, quadop *q2, quadop* q3);
+
+
 void print_symb(P_symb* symb);
 void print_tab();
 

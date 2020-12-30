@@ -92,6 +92,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 		  chk_symb_declared($1);
 		  chk_symb_type($1,$3);
+		  affect_symb($1, $3);
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
 		  gencode(q);
 		  $$ = crelist(nextquad);
@@ -173,10 +174,22 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 		  yyerror("erreur de type");
 		  return 1;
 	  }
+
 	  quadop* t = new_temp();
 	  create_symblist("var", create_identlist(t->u.name), "int");
+	  
 	  quad q = quad_make($2, $1, $3, t);
+
+
+	  quadop* t_val = malloc(sizeof(quadop)); //faut free ça plus tard
+	  affect_opb($1, $2, $3, t_val);
+	  affect_symb(t->u.name, t_val);
+
+
 	  gencode(q);
+	  printf("\n\n\nquadop* : type: %i ", t->type);
+	  if(t->u.name != NULL)
+	  	printf("%s\n", t->u.name);
 	  $$ = t;
 }
 | MINUS E %prec NEG
@@ -291,7 +304,7 @@ int main() {
 	return 0;
 }
 
-/*
+/***
 *	Test fonctionnel : creation de variable:
 *
 *	Ce test contient tout type de symbole afin de recouvrir la totalité
@@ -300,4 +313,21 @@ int main() {
 *	ajout symbole classique.
 *
 *	./ar < file_test/test_declaration_var
-*/
+*
+*	
+*	Test fonctionnel pour ajouter des affectation d'entiers sur 
+*	des variables dans la table des symboles
+*
+*	./ar < file_test/test_affect_variable 
+****/
+
+
+/***
+ * Truc ultra important! on va considéré que dans une même portée
+ * On peut trouver qu'une seule varibale de même nom et type.
+ * On se servira de scope pour faire la diff avec 2 variables
+ *  de même nom et types quand on aura fait les fonctions
+ * ça permet d'implémenter vite et simplement, faudra modifier la fonction
+ * en dessous avec la prise ne compte de scope je le fais 
+ * pas encore ça a pas d'intérêt mais à pas oublier.
+ * ***/
