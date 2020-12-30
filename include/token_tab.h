@@ -3,10 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "fct_utilitaires.h"
 #include "quad.h"
-
 
 struct P_symb;
 struct ident_list;
@@ -26,7 +24,7 @@ typedef enum ident_type
 // le fichier y.tab.h
 typedef enum atomic_type
 {
-    T_INT , T_UNIT , T_BOOL, T_STR //############ CHANGE
+    T_INT , T_UNIT , T_BOOL
 } atomic_type ;
 
 typedef struct ident_list
@@ -43,7 +41,6 @@ typedef struct P_symb
     char*               name;           // Name of the identifier
     ident_type          type_I;         // Type of the identifier ( variable , function , array , function parameter , ... )
     atomic_type         type_A;         // atomic type of ident / return value if function (int, real, bool, char)
-    union { int int_val; char *str_val ; int bool_val ;}u;  // value of the token: int bool or char*
     unsigned int        addr;           // Memory address
     int                 scope;          // globale/locale, begin with 0 for globable and +1 for each new bloc, but we begin without it.
     struct P_symb* next_doublon;
@@ -143,14 +140,4 @@ ident_list* add_to_identlist(ident_list* old_list, char* ident);
 void print_symb(P_symb* symb);
 void print_tab();
 
-/***
- * new functions for affect
- * 
- * **/
-P_symb *get_symb_char(char *id);
-int get_symb_type_A(char *id);
-int get_CSTval_symb_ident(char *id);
-void affect_symb(char* ident, quadop* qsymb);
-quadop *affect_opb(quadop *q1, int opb, quadop *q2);
-//affect_symb(t->u.name, t);
 #endif

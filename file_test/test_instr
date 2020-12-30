@@ -1,10 +1,10 @@
 program maxi
-var i, j, max, b, a :int;
-var mesboules1, mesboules2 : bool;
+var i, j, max, dfd :int;
 begin
-b:=10;
-mesboules1:=true
-if 5<4 then max := 4; 
-a:=7;
-b:= 9 + 2;
+b:=10
+if 5<4 then max := 4 endif
+a:=7
+a:=6
+while 4<5 do a:= 4 done
+b:=9
 end;
