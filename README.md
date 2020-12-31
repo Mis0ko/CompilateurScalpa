@@ -8,3 +8,6 @@ call f,2 veut dire on appelle f avec les 2 paramètres précédents
 j'ai modifié le print\_quad dans quad.c et rajouté un nouveau quad_type dans quad.h pour l'affectation avec des fonctions
 les fonctions liés aux fonctions sont dans function.c et function.h, j'ai modifié des include aussi
 le fichier test contient un exemple
+
+/!\ les fonctions comme argument avec ref pas encore implémenté (éventuellement la flemme)
+ex : function maxtab(ref f : int)
