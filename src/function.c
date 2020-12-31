@@ -4,7 +4,6 @@ extern struct P_symb** symb_tab;
 typelist* create_typelist(char *id, char *type)
 {
 	typelist *list = malloc(sizeof(typelist));
-
 	list->name = strdup(id);
 
 	if (strcmp(type, "int") == 0)

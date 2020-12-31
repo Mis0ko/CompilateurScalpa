@@ -220,14 +220,27 @@ Elist : E
 			  quadop *t = new_temp();
 			  quad q = quad_make(Q_AFFECT, $1, NULL, t);
 			  gencode(q);
-			  $$ = create_typelist(t->u.name, get_symb_type_A(t->u.name));
+			  create_symblist("var", create_identlist(t->u.name), "int");
+			  char *s = get_symb_type_A(t->u.name);
+			  $$ = create_typelist(t->u.name, s);
 		  }
 		  else
 			  $$ = create_typelist($1->u.name, get_symb_type_A($1->u.name));
 	  }
 	  | E ',' Elist
 	  {
-		  $$ = add_to_typelist(create_typelist($1->u.name, get_symb_type_A($1->u.name)), $3);
+		  if ($1->type == QO_CST)
+		  {
+			  quadop *t = new_temp();
+			  quad q = quad_make(Q_AFFECT, $1, NULL, t);
+			  gencode(q);
+			  create_symblist("var", create_identlist(t->u.name), "int");
+			  char *s = get_symb_type_A(t->u.name);
+				  $$ = add_to_typelist(create_typelist(t->u.name, get_symb_type_A(t->u.name)), $3);
+		  }
+		  else
+			  $$ = add_to_typelist(create_typelist($1->u.name, get_symb_type_A($1->u.name)), $3);
+
 	  }
 	  | cond ',' Elist {$$ = add_to_typelist(create_typelist((reify($1.true, $1.false))->u.name, "bool"), $3);}
 	  | cond {$$ = create_typelist(reify($1.true, $1.false)->u.name, "bool");}

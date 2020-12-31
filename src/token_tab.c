@@ -337,6 +337,7 @@ char* get_symb_type_A(char *id)
     if(symb == NULL)
         return NULL;
 
+	
 	if (symb->type_A == T_INT)
 		return "int";
 	if (symb->type_A == T_BOOL)
