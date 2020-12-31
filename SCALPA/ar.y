@@ -287,8 +287,8 @@ int main(int argc, char** argv) {
 	}
 	FILE * out = stdout;
 
-    if(argc == 3)
-        out = fopen(argv[2], "w");
+    if(argc == 2)
+        out = fopen(argv[1], "w");
     else
         out = fopen("out.asm", "w");
 

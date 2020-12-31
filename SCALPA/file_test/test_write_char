@@ -1,5 +1,0 @@
-program maxi
-var i : int ;
-begin
-write "Hello World";
-end;

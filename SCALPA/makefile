@@ -7,7 +7,7 @@ EXEC = ar
 SRC = src/*
 OBJ = $(SRC:.c=.o)
 
-all: $(OBJ) y.tab.c lex.yy.c
+all: $(OBJ) y.tab.c lex.yy.c 
 	$(CC) -o $(EXEC) $^ $(LDFLAGS)
 
 y.tab.c: $(EXEC).y
@@ -20,4 +20,4 @@ lex.yy.c: $(EXEC).l
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
-	/bin/rm $(EXEC) y.tab.c y.tab.h lex.yy.c
+	/bin/rm $(EXEC) y.tab.c y.tab.h lex.yy.c tests/*.asm
