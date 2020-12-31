@@ -13,6 +13,7 @@ CYAN='\033[1;36m'
 echo "${YELLOW}Running compiler on all test files found in the /tests ${NC}";
 TOTAL=0;
 
+
 echo
 for f in tests/*.txt ; 
 do 

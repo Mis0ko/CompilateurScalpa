@@ -19,5 +19,6 @@ lex.yy.c: $(EXEC).l
 %.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+
 clean:
 	/bin/rm $(EXEC) y.tab.c y.tab.h lex.yy.c tests/*.asm

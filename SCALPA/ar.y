@@ -64,8 +64,6 @@ void lex_free();
 
 %start program
 %%
-
-
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
 program: PROGRAM ID vardecllist instr
         ;
