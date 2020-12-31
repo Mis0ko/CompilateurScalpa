@@ -20,7 +20,7 @@ typedef enum quad_type
 {
 	Q_PLUS, Q_TIMES, Q_MINUS, Q_DIVIDE, Q_NEG, Q_POWER,
 	Q_AFFECT,Q_RET, Q_READ, Q_WRITE, Q_SUP, Q_SUPEQ, Q_INF, Q_INFEQ, Q_DIFF, Q_EQ, Q_OR, Q_AND,
-	Q_XOR, Q_NOT,Q_GOTO, Q_PARAM, Q_CALL} quad_type ;
+	Q_XOR, Q_NOT,Q_GOTO, Q_PARAM, Q_CALL, Q_CALL_AFFECT} quad_type ;
 
 typedef struct quad
 {

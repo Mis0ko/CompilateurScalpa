@@ -287,6 +287,9 @@ void affiche(quad q)
 		case Q_CALL:
 			printf("call %s,%i\n",q.res->u.name, q.op1->u.cst);
 			break;
+		case Q_CALL_AFFECT:
+			printf("%s = call %s,%i\n", q.res->u.name, q.op1->u.name, q.op2->u.cst);
+			break;
 		default:
 			printf("pas compris\n");
 	}

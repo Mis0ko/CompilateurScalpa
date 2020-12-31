@@ -215,7 +215,7 @@ semcol : ';' | ;
 
 Elist : E
 	  {
-		  if ($1->type == QO_CST)
+		  if ($1->type == QO_CST) // on doit creer une variable temp pour stocker la constante
 		  {
 			  quadop *t = new_temp();
 			  quad q = quad_make(Q_AFFECT, $1, NULL, t);
@@ -252,7 +252,32 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 | STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
 | ID '(' Elist ')'
+{
+	chk_symb_declared($1);
+	chk_symb_fct($1);
+	typelist* l = get_typelist($1);
+	cmp_typelist($3, l);
+	int len = gencode_param($3);
+	quadop* t = new_temp();
+	create_symblist("var", create_identlist(t->u.name), get_symb_type_A($1));
+	quad q = quad_make(Q_CALL_AFFECT, quadop_name($1),quadop_cst(len), t);
+	gencode(q);
+	$$ = t;
+}
 | ID '(' ')'
+{
+	chk_symb_declared($1);
+	chk_symb_fct($1);
+	typelist* l = get_typelist($1);
+	cmp_typelist(NULL, l);
+	int len = gencode_param(NULL);
+	quadop* t = new_temp();
+	create_symblist("var", create_identlist(t->u.name), get_symb_type_A($1));
+	quad q = quad_make(Q_CALL_AFFECT, quadop_name($1),quadop_cst(len), t);
+	gencode(q);
+	$$ = t;
+
+}
 | E %prec ID opb E //%prec ID pour regler conflits avec opb
 {
 	  if ($1->type == QO_STR || $3->type == QO_STR)
