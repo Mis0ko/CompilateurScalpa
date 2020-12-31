@@ -30,44 +30,44 @@ string     ["]([^"]|\\(.|\n))*["]
 "begin"   			{output("begin");return SBEGIN;}
 "end"   				{output("end");return SEND;}
 
-"+"          { return PLUS; }
-"*"          { return TIMES; }
-"-"          { return MINUS; }
-"/"          { return DIVIDE; }
-"^"          { return POWER; }
-":="         { return AFFECT; }
-"<"          { return INF; }
-">"          { return SUP; }
-"<="         { return INFEQ; }
-">="         { return SUPEQ; }
-"<>"         { return DIFF; }
-"="          { return EQ; }
+"+"          { output(yytext);return PLUS; }
+"*"          { output(yytext);return TIMES; }
+"-"          { output(yytext);return MINUS; }
+"/"          { output(yytext);return DIVIDE; }
+"^"          { output(yytext);return POWER; }
+":="         { output(yytext);return AFFECT; }
+"<"          { output(yytext);return INF; }
+">"          { output(yytext);return SUP; }
+"<="         { output(yytext);return INFEQ; }
+">="         { output(yytext);return SUPEQ; }
+"<>"         { output(yytext);return DIFF; }
+"="          { output(yytext);return EQ; }
 "true"       { return TRUE; }
 "false"      { return FALSE; }
 "and"        { return AND; }
 "or"         { return OR; }
 "xor"        { return XOR; }
-"not"        { return NOT; }
-"if"         { return IF; }
-"then"       { return THEN; }
-"else"       { return ELSE; }
-"endif"      { return ENDIF; }
+"not"        { output(yytext);return NOT; }
+"if"         { output(yytext);return IF; }
+"then"       { output(yytext);return THEN; }
+"else"       { output(yytext);return ELSE; }
 "while"      { output(yytext);return WHILE; }
-"done"       { output(yytext);return DONE; }
 "do"         { output(yytext);return DO; }
-"return"	 { return RETURN; }
-"write"		 { return WRITE; }
-"read"		 { return READ; }
-
+"return"	 { output(yytext);return RETURN; }
+"write"		 { output(yytext);return WRITE; }
+"read"		 { output(yytext);return READ; }
+"function"   { output(yytext);return SFUNCTION; }
+"ref"        { output(yytext);return REF; }
 {identifier} { yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
-{string} {        yylval.strval = malloc(yyleng -1);
-          memcpy(yylval.strval, yytext + 1, yyleng - 2);
-          yylval.strval[yyleng - 2] = 0;
-		  output(yylval.strval); return STR;
-        }
+{string}     {
+				yylval.strval = malloc(yyleng -1);
+				memcpy(yylval.strval, yytext + 1, yyleng - 2);
+				yylval.strval[yyleng - 2] = 0;
+				output(yylval.strval); return STR;
+			 }
 {comment}    { printf("%s\n", yytext);}
-[();:,]      { return yytext[0]; }
+[();:,]      { output(yytext);return yytext[0]; }
 \n           { }
 [\t ]        { }
 .            { printf("Caractere inconnu: %s", yytext);}

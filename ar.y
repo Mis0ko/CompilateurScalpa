@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "include/token_tab.h"
+
 #include "include/fct_utilitaires.h"
+#include "include/function.h"
 extern quad globalcode[100];
 extern int nextquad;
 extern int ntp;
@@ -27,6 +28,7 @@ void lex_free();
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
+	struct typelist *typelist;
 }
 
 %token PROGRAM  VAR
@@ -37,8 +39,8 @@ void lex_free();
 %token <intval> INF INFEQ SUP SUPEQ DIFF EQ
 %token <intval> AND OR XOR NOT
 
-%token SBEGIN SEND WRITE READ
-%token IF THEN ELSE ENDIF WHILE DO DONE RETURN
+%token SBEGIN SEND WRITE READ SFUNCTION REF
+%token IF THEN ELSE WHILE DO RETURN
 
 
 %type <list> identlist
@@ -48,13 +50,19 @@ void lex_free();
 %type <tf> cond
 %type <actualquad> M
 %type <lpos> instr tag sequence
+%type <typelist> par parlist Elist
 
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
 
+%left RETURN
 %left INF INFEQ SUP SUPEQ DIFF EQ
+%right AFFECT
 %left PLUS MINUS OR XOR
 %left TIMES DIVIDE AND
 %right POWER
 %left NEG NOT
+%left ID
 
 
 %start program
@@ -62,12 +70,12 @@ void lex_free();
 
 
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: PROGRAM ID vardecllist instr
+program: PROGRAM ID vardecllist fundecllist instr
         ;
 
-vardecllist: varsdecl {}
-            | varsdecl ';' vardecllist {}
-			| {} //element vide
+vardecllist: varsdecl
+            | varsdecl ';' vardecllist
+			| //element vide
             ;
 varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
         ;
@@ -83,9 +91,34 @@ atomictype: UNIT  {$$ = "unit";}
           | INT   {$$ = "int";}
           ;
 
+fundecllist : fundecl ';' fundecllist
+			|
+			;
+
+fundecl : SFUNCTION ID '(' parlist ')' ':' atomictype
+		{
+			create_symblist("function",create_identlist($2), $7);
+			add_typelist_to_symb($2, $4);
+		}
+		vardecllist instr
+		;
+
+parlist : par {$$ = $1;}
+		| par ',' parlist { $$ = add_to_typelist($1, $3);}
+		| { $$ = NULL;}
+		;
+
+par : ID ':' typename
+	{
+		create_symblist("param",create_identlist($1), $3);
+		$$ = create_typelist($1, $3);
+	}
+	//| REF ID ':' typename //a faire plus tard
+	;
+
+
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
-
 		  chk_symb_declared($1);
 		  chk_symb_type($1,$3);
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
@@ -94,30 +127,28 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  }
 	  | ID AFFECT cond
 	  {
-		  printf("oui1\n");
-
 		  chk_symb_declared($1);
 		  chk_symb_type($1,NULL);
 		  quad q = quad_make(Q_AFFECT, reify($3.true, $3.false), NULL, quadop_name($1));
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
-	  | IF cond THEN M instr ENDIF
+	  | IF cond THEN M instr %prec LOWER_THAN_ELSE
 	  {
 		  $$ = NULL;
 		  complete($2.true,$4);
 		  $$ = concat($2.false,$5);
 	  }
-	  | IF cond THEN M instr tag ELSE M instr ENDIF
+	  | IF cond THEN M instr ELSE tag M instr
 	  {
 		  complete($2.true, $4);
 		  complete($2.false, $8);
-		  $$ = concat($5, $6);
+		  $$ = concat($5, $7);
 		  $$ = concat($$, crelist(nextquad));
 		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		  gencode(q);
 	  }
-	  | WHILE M cond DO M instr DONE
+	  | WHILE M cond DO M instr
 	  {
 	  		complete($3.true, $5);
 			complete($6, $2);
@@ -129,37 +160,87 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 		  quad q = quad_make(Q_RET,NULL,NULL,$2);
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | RETURN
 	  {
 		  quad q = quad_make(Q_RET,NULL,NULL,NULL);
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
-	  | SBEGIN sequence SEND ';'{$$ = $2;}
+	  | SBEGIN sequence SEND {$$ = $2;}
 	  | SBEGIN SEND  { }
 	  | READ ID //lvalue a l'origine, a changer apres les tableaux
 	  {
 		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name($2));
 		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  | WRITE E
 	  {
 		  quad q = quad_make(Q_WRITE, NULL, NULL, $2);
 		  gencode(q);
+		  $$ = crelist(nextquad);
+
+	  }
+	  | ID '(' Elist ')'
+	  {
+		  chk_symb_declared($1);
+		  chk_symb_fct($1);
+		  typelist* l = get_typelist($1);
+		  cmp_typelist($3, l);
+		  int len = gencode_param($3);
+		  quad q = quad_make(Q_CALL, quadop_cst(len), NULL, quadop_name($1));
+		  gencode(q);
+		  $$ = crelist(nextquad);
+	  }
+	  | ID '(' ')'
+	  {
+		  chk_symb_declared($1);
+		  chk_symb_fct($1);
+		  typelist* l = get_typelist($1);
+		  cmp_typelist(NULL, l);
+		  int len = gencode_param(NULL);
+		  quad q = quad_make(Q_CALL, quadop_cst(len), NULL, quadop_name($1));
+		  gencode(q);
+		  $$ = crelist(nextquad);
 	  }
 	  ;
 
-sequence : sequence M instr {complete($1, $2);$$ = $3;}
-		 | instr ';' { $$ = $1;}
-		 | instr { $$ = $1; }
+sequence : sequence semcol M instr semcol {complete($1, $3);$$ = $4;}
+		 | instr semcol { $$ = $1;}
 		 ;
+
+semcol : ';' | ;
+
+Elist : E
+	  {
+		  if ($1->type == QO_CST)
+		  {
+			  quadop *t = new_temp();
+			  quad q = quad_make(Q_AFFECT, $1, NULL, t);
+			  gencode(q);
+			  $$ = create_typelist(t->u.name, get_symb_type_A(t->u.name));
+		  }
+		  else
+			  $$ = create_typelist($1->u.name, get_symb_type_A($1->u.name));
+	  }
+	  | E ',' Elist
+	  {
+		  $$ = add_to_typelist(create_typelist($1->u.name, get_symb_type_A($1->u.name)), $3);
+	  }
+	  | cond ',' Elist {$$ = add_to_typelist(create_typelist((reify($1.true, $1.false))->u.name, "bool"), $3);}
+	  | cond {$$ = create_typelist(reify($1.true, $1.false)->u.name, "bool");}
+	  ;
 
 
 E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 | NUM {	$$ = quadop_cst($1);}
 | STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
-| E opb E
+| ID '(' Elist ')'
+| ID '(' ')'
+| E %prec ID opb E //%prec ID pour regler conflits avec opb
 {
 	  if ($1->type == QO_STR || $3->type == QO_STR)
 	  {
@@ -167,6 +248,7 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 		  return 1;
 	  }
 	  quadop* t = new_temp();
+	  create_symblist("var", create_identlist(t->u.name), "int");
 	  quad q = quad_make($2, $1, $3, t);
 	  gencode(q);
 	  $$ = t;
@@ -179,6 +261,7 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 		return 1;
 	}
 	quadop* t = new_temp();
+	create_symblist("var", create_identlist(t->u.name), "int");
 	quad q = quad_make(Q_NEG, $2, NULL, t);
 	gencode(q);
 	$$ = t;

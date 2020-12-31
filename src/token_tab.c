@@ -1,6 +1,6 @@
 #include "../include/token_tab.h"
 
-P_symb** symb_tab;
+struct P_symb** symb_tab;
 
 /******************** begining of the functions ********************/
 
@@ -41,6 +41,10 @@ void create_symb(char *var, char *typename, char *id)
 
     if (strcmp(var, "var") == 0)
         symb->type_I = VARIABLE;
+	else if (strcmp(var, "param") == 0)
+	    symb->type_I = PARAMETER;
+	if (strcmp(var, "function") == 0)
+        symb->type_I = FUNCTION;
 
     if (strcmp(typename, "int") == 0)
         symb->type_A = T_INT;
@@ -52,6 +56,7 @@ void create_symb(char *var, char *typename, char *id)
     symb->idx = hachage(id);
     symb->addr = 0;  // on verra plus tard
     symb->scope = 0; //idem
+	symb->arglist = NULL;
     if (!add_symb(symb))
     {
         printf("we free the symb \"%s\" created because already exist in the symbole table\n", id);
@@ -130,6 +135,7 @@ void chk_symb_declared(char *id)
 	if (search_symb_char(id) == -1) //if symb not declared
 	{
 		printf("error : %s not declared\n", id);
+		print_tab();
 		exit(1);
 	}
 	return ;
@@ -147,25 +153,26 @@ int same_symb(P_symb *symb1, P_symb *symb2)
 
 void chk_symb_type(char *id, quadop* op1)
 {
+
 	int pos = hachage(id);
 	P_symb *symb_loop = symb_tab[pos];
 
 	while (strcmp(symb_loop->name, id))
 		symb_loop = symb_loop->next_doublon;
 
-	if (op1 == NULL && symb_loop->type_I == VARIABLE
-		&& symb_loop->type_A == T_BOOL) // if op1 is a condition and id a boolean
+	if (op1 == NULL && (symb_loop->type_I == VARIABLE || symb_loop->type_I == PARAMETER)
+		&& symb_loop->type_A == T_BOOL) // if op1 is a condition and id a boolean for affect
 		return;
 	else if (op1 == NULL )
 	{
 		printf("erreur typage de %s\n", id);
+		print_tab();
 		exit(1);
-
 	}
 
-	if (symb_loop->type_I == VARIABLE && symb_loop->type_A == T_INT
-		&& op1->type == QO_CST) // if op1 and id are int
+	if (symb_loop->type_A == T_INT && op1->type == QO_CST) // if op1 and id are int
 		return;
+
 	if (op1->type == QO_NAME) // if op1 is an identifier
 	{
 		int pos2 = hachage(op1->u.name);
@@ -174,27 +181,55 @@ void chk_symb_type(char *id, quadop* op1)
 		while (strcmp(symb_loop2->name, op1->u.name))
 			symb_loop2 = symb_loop2->next_doublon;
 
-		if (symb_loop->type_A == symb_loop2->type_A
-			&& symb_loop->type_I == symb_loop2->type_I)
+		if (symb_loop->type_A == symb_loop2->type_A)
+		{
 			return;
+
+		}
 	}
 	//otherwise
 	printf("erreur typage de %s\n", id);
+	print_tab();
 	exit(1);
 }
 
+void chk_symb_typechar(char *id1, char *id2)
+{
+	int pos = hachage(id1);
+	P_symb *symb_loop = symb_tab[pos];
+
+	while (strcmp(symb_loop->name, id1))
+		symb_loop = symb_loop->next_doublon;
+
+	int pos2 = hachage(id2);
+	P_symb *symb_loop2 = symb_tab[pos2];
+
+	while (strcmp(symb_loop2->name, id2))
+		symb_loop2 = symb_loop2->next_doublon;
+
+	if (symb_loop->type_A == symb_loop2->type_A)
+		return;
+	//otherwise
+	printf("erreur typage de %s %s\n", id1, id2);
+	print_tab();
+	exit(1);
+
+}
 
 void chk_symb_typeE(quadop* op1, quadop* op2)
 {
 	if (op1->type == QO_STR || op2->type == QO_STR)
 	{
 		printf("erreur typage comparaison\n");
+		print_tab();
 		exit(1);
 	}
 	else if (op1->type == QO_CST && op2->type == QO_NAME)
 		chk_symb_type(op2->u.name, op1);
 	else if (op1->type == QO_NAME && op2->type == QO_CST)
 		chk_symb_type(op1->u.name, op2);
+	else if (op1->type == QO_NAME && op2->type == QO_NAME)
+		chk_symb_typechar(op1->u.name, op2->u.name);
 
 	return;
 }
@@ -225,32 +260,33 @@ ident_list *add_to_identlist(ident_list *old_list, char *ident)
 void print_symb(P_symb *symb)
 {
     if (strlen(symb->name) >= 8)
-        printf("|\t\t%i\t\t|\t\t%s\t|", symb->idx, symb->name);
+        printf("|\t%i\t|\t\t%s\t|", symb->idx, symb->name);
     else
-        printf("|\t\t%i\t\t|\t\t%s\t\t|", symb->idx, symb->name);
+        printf("|\t%i\t|\t\t%s\t\t|", symb->idx, symb->name);
+
 	if (symb->type_I == VARIABLE)
-		switch (symb->type_A) {
-			case T_INT:
-				printf("int|\n");
-				break;
-			case T_BOOL:
-				printf("bool|\n");
-				break;
-			case T_UNIT:
-				printf("unit|\n");
-				break;
-		}
-	else
-		printf("\n" );
+		printf("   var  |");
+	else if (symb->type_I == PARAMETER)
+		printf("   par  |");
+	if (symb->type_I == FUNCTION)
+		printf("   fun  |");
+
+    if (symb->type_A == T_INT)
+		printf("   int   |\n");
+    else if (symb->type_A == T_BOOL)
+		printf("   bool  |\n");
+    else if (symb->type_A == T_UNIT)
+		printf("   unit  |\n");
+
 }
 
 void print_tab()
 {
-    printf("|-------------------------------|");
-    printf("-------------------------------|\n");
-    printf("|\t\tindex\t\t|\t\tident\t\t|\n");
-    printf("|-------------------------------|");
-    printf("-------------------------------|\n");
+    printf("|---------------|");
+    printf("-------------------------------|--------|---------|\n");
+    printf("|\tindex\t|\t\tident\t\t| idtype | rettype |\n");
+	printf("|---------------|");
+    printf("-------------------------------|--------|---------|\n");
     for (int i = 0; i < SIZE_HASH_TABLE; i++)
     {
         if (symb_tab[i] != NULL)
@@ -267,6 +303,44 @@ void print_tab()
             }
         }
     }
-    printf("|-------------------------------|");
-    printf("-------------------------------|\n");
+	printf("|---------------|");
+    printf("-------------------------------|--------|---------|\n");
+}
+/**
+ * return symb with the name of id, otherwise return null.
+ * **/
+P_symb* get_symb_char(char *id)
+{
+	int pos = hachage(id);
+
+	if (symb_tab[pos] == NULL)
+		return NULL;
+
+	P_symb *symb_loop = symb_tab[pos];
+
+	while (symb_loop != NULL)
+	{
+		if (!strcmp(symb_loop->name, id))
+			return symb_loop;
+		symb_loop = symb_loop->next_doublon;
+	}
+	return NULL;
+}
+
+/****
+ * return the atomic type of a symb (bool, int, char*..)
+ * with the enum arg, otherwise return -1 if symb not found.
+ * ***/
+char* get_symb_type_A(char *id)
+{
+    P_symb* symb = get_symb_char(id);
+    if(symb == NULL)
+        return NULL;
+
+	if (symb->type_A == T_INT)
+		return "int";
+	if (symb->type_A == T_BOOL)
+		return "bool";
+	if (symb->type_A == T_UNIT)
+		return "unit";
 }

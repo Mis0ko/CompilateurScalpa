@@ -1,5 +1,5 @@
 #ifndef TOKEN_TAB_H
-#define TOKEN_TAB
+#define TOKEN_TAB_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +8,7 @@
 
 struct P_symb;
 struct ident_list;
+struct typelist;
 #define SIZE_HASH_TABLE 1000
 #define SYMBNAME_SIZE 100
 
@@ -43,9 +44,10 @@ typedef struct P_symb
     atomic_type         type_A;         // atomic type of ident / return value if function (int, real, bool, char)
     unsigned int        addr;           // Memory address
     int                 scope;          // globale/locale, begin with 0 for globable and +1 for each new bloc, but we begin without it.
-    struct P_symb* next_doublon;
+	struct typelist*	arglist;		// if symb is a function, contains types of arguments
+	struct P_symb* next_doublon;
 } P_symb ;
-
+//creer un attribut de typelist, creer une fonction pour renvoyer la typlist avec un char *id en entrée
 
 /******************** FUNCTIONS ********************/
 /*
@@ -114,6 +116,7 @@ void chk_symb_type(char *id, quadop* op1);
 * and exits the program
 */
 void chk_symb_typeE(quadop* op1, quadop* op2);
+void chk_symb_typechar(char *id1, char *id2);
 
 /*
 * compare 2 symbs base on all their arguments
@@ -139,5 +142,8 @@ ident_list* create_identlist(char* ident);
 ident_list* add_to_identlist(ident_list* old_list, char* ident);
 void print_symb(P_symb* symb);
 void print_tab();
+
+P_symb* get_symb_char(char *id);
+char* get_symb_type_A(char *id);
 
 #endif

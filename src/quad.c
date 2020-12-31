@@ -281,6 +281,12 @@ void affiche(quad q)
 			else
 				printf("%s\n", q.res->u.name);
 			break;
+		case Q_PARAM:
+			printf("param %s\n", q.res->u.name);
+			break;
+		case Q_CALL:
+			printf("call %s,%i\n",q.res->u.name, q.op1->u.cst);
+			break;
 		default:
 			printf("pas compris\n");
 	}
@@ -309,7 +315,7 @@ lpos* concat(lpos* l1, lpos* l2) {
 void complete(lpos* liste, int cible) {
 	if (liste == NULL || cible == liste->position)
 		return;
-
+	printf("complete %i avec %i\n", liste->position, cible);
 	globalcode[liste->position].res = quadop_cst(cible);
 
 	while (liste->suivant != NULL) {
