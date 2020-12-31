@@ -41,13 +41,15 @@ void create_symb(char *var, char *typename, char *id)
 
     if (strcmp(var, "var") == 0)
         symb->type_I = VARIABLE;
-
+	else if (strcmp(var, "array")==0)
+		symb->type_I = ARRAY;
     if (strcmp(typename, "int") == 0)
         symb->type_A = T_INT;
     else if (strcmp(typename, "bool") == 0)
         symb->type_A = T_BOOL;
     else if (strcmp(typename, "unit") == 0)
         symb->type_A = T_UNIT;
+	
 
     symb->idx = hachage(id);
     symb->addr = 0;  // on verra plus tard
@@ -148,25 +150,28 @@ void print_symb(P_symb *symb)
 	if (symb->type_I == VARIABLE)
 		switch (symb->type_A) {
 			case T_INT:
-				printf("int|\n");
+				printf("\t\tint\t\t|\n");
 				break;
 			case T_BOOL:
-				printf("bool|\n");
+				printf("\t\tbool\t\t|\n");
 				break;
 			case T_UNIT:
-				printf("unit|\n");
+				printf("\t\tuint\t\t|\n");
 				break;
 		}
 	else
-		printf("\n" );
+		printf("\t\tarray\t\t|\n");
+		
 }
 
 void print_tab()
 {
     printf("|-------------------------------|");
+	printf("-------------------------------|");
     printf("-------------------------------|\n");
-    printf("|\t\tindex\t\t|\t\tident\t\t|\n");
+    printf("|\t\tindex\t\t|\t\tident\t\t|\t\ttype\t\t|\n");
     printf("|-------------------------------|");
+	printf("-------------------------------|");
     printf("-------------------------------|\n");
     for (int i = 0; i < SIZE_HASH_TABLE; i++)
     {
@@ -185,5 +190,6 @@ void print_tab()
         }
     }
     printf("|-------------------------------|");
+	printf("-------------------------------|");
     printf("-------------------------------|\n");
 }

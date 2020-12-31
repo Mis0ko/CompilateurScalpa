@@ -133,6 +133,12 @@ void affiche(quad q)
 			else
 				printf("%s = %d\n", q.res->u.name, q.op1->u.cst);
 			break;
+		case Q_AFFECT_ARRAY:
+			if (q.op1->type == QO_NAME)
+				printf("%s = %s\n", q.res->u.name, q.op1->u.name);
+			else
+				printf("%s = %d\n", q.res->u.name, q.op1->u.cst);
+			break;			
 
 		case Q_SUP:
 			printf("if ");

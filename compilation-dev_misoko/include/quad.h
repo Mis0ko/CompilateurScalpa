@@ -9,7 +9,7 @@ typedef struct quadop{
 	union { int cst; char *name ; } u;
 } quadop ;
 
-typedef enum quad_type { Q_PLUS, Q_TIMES, Q_MINUS, Q_DIVIDE, Q_NEG, Q_POWER,
+typedef enum quad_type { Q_AFFECT_ARRAY, Q_PLUS, Q_TIMES, Q_MINUS, Q_DIVIDE, Q_NEG, Q_POWER,
 	Q_AFFECT, Q_SUP, Q_SUPEQ, Q_INF, Q_INFEQ, Q_DIFF, Q_EQ, Q_OR, Q_AND,
 	Q_XOR, Q_NOT,Q_GOTO, Q_RET, Q_READ, Q_WRITE} quad_type ;
 

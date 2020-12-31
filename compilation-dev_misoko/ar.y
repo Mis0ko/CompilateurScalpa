@@ -18,6 +18,32 @@ void yyerror(char*);
 int yylex();
 void lex_free();
 
+//********* Declarationde tableau ********
+
+char* id_and_indexs(char *tab_id, char *exprlist){
+	char *lvalue = malloc(100);
+	sprintf(lvalue, "%s%s", tab_id, exprlist);
+	return lvalue;
+}
+
+char* all_indexs(quadop* index, char *indexs){
+	char *expr_list = malloc(100);
+	if(index->type == QO_CST)
+		sprintf(expr_list, "[%d]%s", index->u.cst, indexs);
+	else
+		sprintf(expr_list, "[%s]%s", index->u.name, indexs);	
+	return expr_list;
+}
+
+char* solo_index(quadop* index){
+	char *expr = malloc(100);
+	if(index->type == QO_CST)
+		sprintf(expr, "[%d]", index->u.cst);
+	else
+		sprintf(expr, "[%s]", index->u.name);	
+	return expr;
+}
+
 //*********ADDITION*********
 
 typedef struct dim_list {
@@ -52,7 +78,7 @@ void print_dims(dim_list* dims_list){
 		printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
         loop_dim = loop_dim->next;
 	}
-
+	printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
 }
 //************************
 %}
@@ -73,7 +99,7 @@ void print_dims(dim_list* dims_list){
 }
 
 %token PROGRAM  VAR SARRAY SOF //ADDITION
-%token <strval> ID STR
+%token <strval> ID STR 
 %token <intval> NUM UNIT BOOL INT
 %token INTRV_SEP
 %token <intval> PLUS AFFECT TIMES MINUS DIVIDE POWER TRUE FALSE
@@ -85,7 +111,7 @@ void print_dims(dim_list* dims_list){
 
 
 %type <list> identlist
-%type <strval> atomictype typename
+%type <strval> atomictype typename lvalue exprlist
 %type <intval> opb oprel
 %type <exprval> E
 %type <tf> cond
@@ -114,8 +140,7 @@ vardecllist: varsdecl {}
 			| {} //element vide
             ;
 varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
-		| VAR identlist ':' arraytype {create_symblist("var",$2, "yo");}
-        //| VAR identlist ':' SARRAY '(' INT INTRV_SEP INT ')' SOF INT  //REGARDE_ICI
+		| VAR identlist ':' arraytype {create_symblist("array",$2, "int");}
 		;
 
 identlist: ID                 {$$ = create_identlist($1);}
@@ -130,9 +155,14 @@ typename: atomictype   {$$ = $1;}
 arraytype : SARRAY '[' rangelist ']' SOF atomictype
 			{$$=$3;print_dims($3);};
 
-rangelist : NUM INTRV_SEP NUM { $$ = add_dim($1,$3);	}
-		| rangelist ',' NUM INTRV_SEP NUM  { $$ = add_dims($1,$3,$5);printf("%d %d\n",$3,$5);}
+rangelist : NUM INTRV_SEP NUM { $$ = add_dim($1,$3); }
+		| rangelist ',' NUM INTRV_SEP NUM  { $$ = add_dims($1,$3,$5);}
 		;
+
+lvalue : ID '[' exprlist ']' { $$ = id_and_indexs($1,$3); };
+
+exprlist : E 				{ $$ = solo_index($1); }
+		 | E ',' exprlist  { $$ = all_indexs($1,$3); } ;
 
 //**************************************************************
 atomictype: UNIT  {$$ = "unit";}
@@ -140,7 +170,14 @@ atomictype: UNIT  {$$ = "unit";}
           | INT   {$$ = "int";}
           ;
 
-instr : ID AFFECT E //ID correspond a lvalue sans les listes
+instr : lvalue AFFECT E {
+			quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
+			gencode(q);
+			$$ = crelist(nextquad);
+			printf("fin affectation tableau\n");
+		}
+
+	  | ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 	 	  quad q = quad_make(Q_AFFECT, $3, NULL, quadop_name($1));
 	 	  gencode(q);
@@ -162,7 +199,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  quad q = quad_make(Q_GOTO,NULL,NULL,quadop_cst(-1));
 		  gencode(q);
 	  }
-	  | WHILE M cond DO M instr DONE
+	  | WHILE M cond DO M instr //DONE
 	  {
 	  		complete($3.true, $5);
 			complete($6, $2);
@@ -204,6 +241,7 @@ sequence : instr ';' M sequence {printf("seq%i\n", $1->position);complete($1, $3
 E : ID { $$ = quadop_name($1);}
 | NUM { $$ = quadop_cst($1);}
 | '(' E ')' { $$ = $2;}
+| lvalue {$$ = quadop_name($1);}
 | E opb E
 {
 	  quadop* t = new_temp();
