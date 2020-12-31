@@ -1,41 +1,31 @@
 #include "../include/quad.h"
 
+quad globalcode[100];  // array of quadruplet
+int nextquad = 0;
+int ntp = 0;  // for the number of temporary variables
 
-quad globalcode[100]; //array of quadruplet
-int nextquad =0;
-int ntp=0; //for the number of temporary variables
-
-
-
-
-quadop* quadop_cst(int val)
-{
-	quadop *res = malloc(sizeof(quadop));
+quadop* quadop_cst(int val) {
+	quadop* res = malloc(sizeof(quadop));
 	res->type = QO_CST;
 	res->u.cst = val;
 	return res;
 }
 
-quadop* quadop_name(char *str)
-{
-	quadop *res = malloc(sizeof(quadop));
+quadop* quadop_name(char* str) {
+	quadop* res = malloc(sizeof(quadop));
 	res->type = QO_NAME;
 	res->u.name = strdup(str);
 	return res;
 }
 
-quadop* quadop_str(char *str)
-{
-	quadop *res = malloc(sizeof(quadop));
+quadop* quadop_str(char* str) {
+	quadop* res = malloc(sizeof(quadop));
 	res->type = QO_STR;
 	res->u.str = strdup(str);
 	return res;
-
 }
 
-
-quad quad_make(quad_type t, quadop* o1, quadop* o2, quadop* r)
-{
+quad quad_make(quad_type t, quadop* o1, quadop* o2, quadop* r) {
 	quad res;
 	res.type = t;
 	res.op1 = o1;
@@ -44,25 +34,21 @@ quad quad_make(quad_type t, quadop* o1, quadop* o2, quadop* r)
 	return res;
 }
 
-void gencode(quad q)
-{
+void gencode(quad q) {
 	globalcode[nextquad] = q;
 	nextquad++;
 }
 
-quadop *new_temp()
-{
-	char *nom_temp = malloc(4);
-	sprintf(nom_temp,"t%i", ntp);
+quadop* new_temp() {
+	char* nom_temp = malloc(4);
+	sprintf(nom_temp, "t%i", ntp);
 	quadop* tp = quadop_name(nom_temp);
 	ntp++;
 	return tp;
 }
 
-void affiche(quad q)
-{
-	switch(q.type)
-	{
+void affiche(quad q) {
+	switch (q.type) {
 		case Q_PLUS:
 			printf("%s = ", q.res->u.name);
 			if (q.op1->type == QO_CST)
@@ -260,7 +246,7 @@ void affiche(quad q)
 		case Q_GOTO:
 			printf("goto ");
 			if (q.res->u.cst != -1)
-			 	printf("%i\n", q.res->u.cst);
+				printf("%i\n", q.res->u.cst);
 			else
 				printf("?\n");
 			break;
@@ -295,20 +281,21 @@ lpos* crelist(int position) {
 
 lpos* concat(lpos* l1, lpos* l2) {
 	lpos* res;
-	if (l1 != NULL) res = l1;
-	else if (l2 != NULL) res = l2;
-	else res = NULL;
+	if (l1 != NULL)
+		res = l1;
+	else if (l2 != NULL)
+		res = l2;
+	else
+		res = NULL;
 	if (l1 != NULL) {
-		while (l1->suivant!=NULL)
-			l1 = l1->suivant;
-	l1->suivant = l2;
+		while (l1->suivant != NULL) l1 = l1->suivant;
+		l1->suivant = l2;
 	}
 	return res;
 }
 
 void complete(lpos* liste, int cible) {
-	if (liste == NULL || cible == liste->position)
-		return;
+	if (liste == NULL || cible == liste->position) return;
 	printf("complete %i avec %i\n", liste->position, cible);
 	globalcode[liste->position].res = quadop_cst(cible);
 
@@ -319,17 +306,13 @@ void complete(lpos* liste, int cible) {
 	}
 }
 
-
-quadop* reify(lpos* true, lpos* false)
-{
+quadop* reify(lpos * true, lpos * false) {
 	quadop* t = new_temp();
 	int nq = nextquad;
 	gencode(quad_make(Q_AFFECT, quadop_cst(1), NULL, t));
-	gencode(quad_make(Q_GOTO, NULL, NULL, quadop_cst(nq+3)));
+	gencode(quad_make(Q_GOTO, NULL, NULL, quadop_cst(nq + 3)));
 	gencode(quad_make(Q_AFFECT, quadop_cst(0), NULL, t));
 	complete(true, nq);
-	complete(false, nq+2);
+	complete(false, nq + 2);
 	return t;
-
-
 }
