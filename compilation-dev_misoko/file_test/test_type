@@ -1,6 +1,0 @@
-program maxi 
-var i, j, max, dfd :int;
-begin
-max:=4;
-while 4<5 do a:= 4 done
-end;

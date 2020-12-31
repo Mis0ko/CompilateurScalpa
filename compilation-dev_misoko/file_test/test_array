@@ -1,4 +1,0 @@
-program maxi 
-var tableau : array ( 0 .. 4 ) of int ;
-begin
-end

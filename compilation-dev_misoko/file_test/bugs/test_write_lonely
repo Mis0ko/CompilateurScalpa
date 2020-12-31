@@ -1,5 +1,0 @@
-program maxi 
-var i, j, max :int;
-begin
-write max;
-end
