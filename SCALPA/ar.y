@@ -16,8 +16,7 @@ void lex_free();
 int quad_compt;
 int number_strings;
 void translatemips(quad q, FILE* os) {
-
-
+	// Label , we assign to each instrcution a specific unique label 
 	fprintf(os, "\nLABEL_%d:\n", quad_compt);
 	quad_compt++;	
 	if( q.type == Q_DIFF || q.type == Q_EQ || q.type == Q_SUP || q.type == Q_SUPEQ || q.type == Q_INF || q.type == Q_INFEQ || q.type == Q_PLUS || q.type == Q_MINUS || q.type == Q_TIMES || q.type == Q_DIVIDE) {
@@ -221,9 +220,8 @@ void tomips(quad* globalcode, FILE* os) {
 	fprintf(os, "# variables or strings to be displayed on the console. \n\n");
 	// Should be changed to Mich's table
 	// Loop on table and show vars
-
-	// ASCIIZ write "string"
-
+	
+	// ASCIIZ gérer write "string"
 	int number_str=0;
 	for (int i = 0; i < nextquad; i++) {
 		if(globalcode[i].type == Q_WRITE && globalcode[i].res->type==QO_STR ){

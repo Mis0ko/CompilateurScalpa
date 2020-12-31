@@ -8,7 +8,9 @@
 # In the section .data we establish data components such as 
 # variables or strings to be displayed on the console. 
 
-STR_1:	.asciiz	 "Hello" 
+STR_1:	.asciiz	 "Hello \n" 
+VAR_a_:  .word  0
+VAR_t0_:  .word  0
 
 
 .text
