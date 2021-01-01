@@ -2,8 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "include/token_tab.h"
+
 #include "include/fct_utilitaires.h"
+#include "include/mipssy.h"
+#include "include/function.h"
+
 extern quad globalcode[100];
 extern int nextquad;
 extern int ntp;
@@ -11,7 +14,6 @@ extern int ntp;
 void yyerror(char*);
 int yylex();
 void lex_free();
-
 
 %}
 
@@ -27,6 +29,7 @@ void lex_free();
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
+	struct typelist *typelist;
 }
 
 %token PROGRAM  VAR
@@ -37,7 +40,7 @@ void lex_free();
 %token <intval> INF INFEQ SUP SUPEQ DIFF EQ
 %token <intval> AND OR XOR NOT
 
-%token SBEGIN SEND WRITE READ
+%token SBEGIN SEND WRITE READ SFUNCTION REF
 %token IF THEN ELSE WHILE DO RETURN
 
 
@@ -48,6 +51,7 @@ void lex_free();
 %type <tf> cond
 %type <actualquad> M
 %type <lpos> instr tag sequence
+%type <typelist> par parlist Elist
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -64,10 +68,8 @@ void lex_free();
 
 %start program
 %%
-
-
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: PROGRAM ID vardecllist instr
+program: PROGRAM ID vardecllist fundecllist instr
         ;
 
 vardecllist: varsdecl {}
@@ -87,6 +89,37 @@ atomictype: UNIT  {$$ = "unit";}
           | BOOL  {$$ = "bool";}
           | INT   {$$ = "int";}
           ;
+
+fundecllist : fundecl ';' fundecllist
+			|
+			;
+
+fundecl : SFUNCTION ID '(' parlist ')' ':' atomictype
+		{
+			create_symblist("function",create_identlist($2), $7);
+			add_typelist_to_symb($2, $4);
+			quad q = quad_make(Q_FBEGIN, NULL, NULL, quadop_name($2));
+			gencode(q);
+		}
+		vardecllist instr
+		{
+			quad q = quad_make(Q_FEND, NULL, NULL, quadop_name($2));
+			gencode(q);
+		}
+		;
+
+parlist : par {$$ = $1;}
+		| par ',' parlist { $$ = add_to_typelist($1, $3);}
+		| { $$ = NULL;}
+		;
+
+par : ID ':' typename
+	{
+		create_symblist("param",create_identlist($1), $3);
+		$$ = create_typelist($1, $3);
+	}
+	//| REF ID ':' typename //a faire plus tard
+	;
 
 instr : ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
@@ -140,7 +173,7 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
-	  | SBEGIN sequence SEND semcol{$$ = $2;}
+	  | SBEGIN sequence SEND {$$ = $2;}
 	  | SBEGIN SEND  { }
 	  | READ ID //lvalue a l'origine, a changer apres les tableaux
 	  {
@@ -155,6 +188,29 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  $$ = crelist(nextquad);
 
 	  }
+	  | ID '(' Elist ')'
+	  {
+		  chk_symb_declared($1);
+		  chk_symb_fct($1);
+		  typelist* l = get_typelist($1);
+		  cmp_typelist($3, l);
+		  int len = gencode_param($3);
+		  quad q = quad_make(Q_CALL, quadop_cst(len), NULL, quadop_name($1));
+		  gencode(q);
+		  $$ = crelist(nextquad);
+	  }
+	  | ID '(' ')'
+	  {
+		  chk_symb_declared($1);
+		  chk_symb_fct($1);
+		  typelist* l = get_typelist($1);
+		  cmp_typelist(NULL, l);
+		  int len = gencode_param(NULL);
+		  quad q = quad_make(Q_CALL, quadop_cst(len), NULL, quadop_name($1));
+		  gencode(q);
+		  $$ = crelist(nextquad);
+	  }
+
 	  ;
 
 sequence : sequence semcol M instr semcol {complete($1, $3);$$ = $4;}
@@ -163,10 +219,70 @@ sequence : sequence semcol M instr semcol {complete($1, $3);$$ = $4;}
 
 semcol : ';' | ;
 
+Elist : E
+	  {
+		  if ($1->type == QO_CST) // on doit creer une variable temp pour stocker la constante
+		  {
+			  quadop *t = new_temp();
+			  quad q = quad_make(Q_AFFECT, $1, NULL, t);
+			  gencode(q);
+			  create_symblist("var", create_identlist(t->u.name), "int");
+			  char *s = get_symb_type_A_char(t->u.name);
+			  $$ = create_typelist(t->u.name, s);
+		  }
+		  else
+			  $$ = create_typelist($1->u.name, get_symb_type_A_char($1->u.name));
+	  }
+	  | E ',' Elist
+	  {
+		  if ($1->type == QO_CST)
+		  {
+			  quadop *t = new_temp();
+			  quad q = quad_make(Q_AFFECT, $1, NULL, t);
+			  gencode(q);
+			  create_symblist("var", create_identlist(t->u.name), "int");
+			  char *s = get_symb_type_A_char(t->u.name);
+				  $$ = add_to_typelist(create_typelist(t->u.name, get_symb_type_A_char(t->u.name)), $3);
+		  }
+		  else
+			  $$ = add_to_typelist(create_typelist($1->u.name, get_symb_type_A_char($1->u.name)), $3);
+
+	  }
+	  | cond ',' Elist {$$ = add_to_typelist(create_typelist((reify($1.true, $1.false))->u.name, "bool"), $3);}
+	  | cond {$$ = create_typelist(reify($1.true, $1.false)->u.name, "bool");}
+	  ;
+
 E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 | NUM {	$$ = quadop_cst($1);}
 | STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
+| ID '(' Elist ')'
+{
+	chk_symb_declared($1);
+	chk_symb_fct($1);
+	typelist* l = get_typelist($1);
+	cmp_typelist($3, l);
+	int len = gencode_param($3);
+	quadop* t = new_temp();
+	create_symblist("var", create_identlist(t->u.name), get_symb_type_A_char($1));
+	quad q = quad_make(Q_CALL_AFFECT, quadop_name($1),quadop_cst(len), t);
+	gencode(q);
+	$$ = t;
+}
+| ID '(' ')'
+{
+	chk_symb_declared($1);
+	chk_symb_fct($1);
+	typelist* l = get_typelist($1);
+	cmp_typelist(NULL, l);
+	int len = gencode_param(NULL);
+	quadop* t = new_temp();
+	create_symblist("var", create_identlist(t->u.name), get_symb_type_A_char($1));
+	quad q = quad_make(Q_CALL_AFFECT, quadop_name($1),quadop_cst(len), t);
+	gencode(q);
+	$$ = t;
+
+}
 | E %prec ID opb E //%prec ID pour regler conflits avec opb
 {
 	  if ($1->type == QO_STR || $3->type == QO_STR)
@@ -174,22 +290,15 @@ E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
 		  yyerror("erreur de type");
 		  return 1;
 	  }
-
 	  quadop* t = new_temp();
 	  create_symblist("var", create_identlist(t->u.name), "int");
-	  
 	  quad q = quad_make($2, $1, $3, t);
-
 
 	  quadop* t_val = malloc(sizeof(quadop)); //faut free ça plus tard
 	  affect_opb($1, $2, $3, t_val);
 	  affect_symb(t->u.name, t_val);
 
-
 	  gencode(q);
-	  printf("\n\n\nquadop* : type: %i ", t->type);
-	  if(t->u.name != NULL)
-	  	printf("%s\n", t->u.name);
 	  $$ = t;
 }
 | MINUS E %prec NEG
@@ -286,7 +395,7 @@ void yyerror (char *s) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
 	init_symb_tab();
 	printf("Enter your code:\n");
 
@@ -300,6 +409,20 @@ int main() {
 		printf("%i ", i);
 		affiche(globalcode[i]);
 	}
+	FILE * out = stdout;
+
+    if(argc == 2)
+        out = fopen(argv[1], "w");
+    else
+        out = fopen("out.asm", "w");
+
+    if(!out) {
+        fprintf(stderr, "ERROR: Unable to open the output file for writing.\n");
+        return -2;
+    }
+
+    mips_code(globalcode, nextquad, out);
+    fclose(out);
 
 	// Be clean.===> Ofc As always
 	lex_free();
@@ -316,11 +439,11 @@ int main() {
 *
 *	./ar < file_test/test_declaration_var
 *
-*	
-*	Test fonctionnel pour ajouter des affectation d'entiers sur 
+*
+*	Test fonctionnel pour ajouter des affectation d'entiers sur
 *	des variables dans la table des symboles
 *
-*	./ar < file_test/test_affect_variable 
+*	./ar < file_test/test_affect_variable
 ****/
 
 
@@ -330,6 +453,6 @@ int main() {
  * On se servira de scope pour faire la diff avec 2 variables
  *  de même nom et types quand on aura fait les fonctions
  * ça permet d'implémenter vite et simplement, faudra modifier la fonction
- * en dessous avec la prise ne compte de scope je le fais 
+ * en dessous avec la prise ne compte de scope je le fais
  * pas encore ça a pas d'intérêt mais à pas oublier.
  * ***/

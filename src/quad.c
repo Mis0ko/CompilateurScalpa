@@ -16,7 +16,7 @@ quadop* quadop_cst(int val)
 	return res;
 }
 
-quadop* quadop_name(char *str)
+quadop* quadop_name(char* str)
 {
 	quadop *res = malloc(sizeof(quadop));
 	res->type = QO_NAME;
@@ -24,15 +24,13 @@ quadop* quadop_name(char *str)
 	return res;
 }
 
-quadop* quadop_str(char *str)
+quadop* quadop_str(char* str)
 {
 	quadop *res = malloc(sizeof(quadop));
 	res->type = QO_STR;
 	res->u.str = strdup(str);
 	return res;
-
 }
-
 
 quad quad_make(quad_type t, quadop* o1, quadop* o2, quadop* r)
 {
@@ -50,10 +48,10 @@ void gencode(quad q)
 	nextquad++;
 }
 
-quadop *new_temp()
+quadop* new_temp()
 {
-	char *nom_temp = malloc(4);
-	sprintf(nom_temp,"t%i", ntp);
+	char* nom_temp = malloc(4);
+	sprintf(nom_temp, "t%i", ntp);
 	quadop* tp = quadop_name(nom_temp);
 	ntp++;
 	return tp;
@@ -61,7 +59,7 @@ quadop *new_temp()
 
 void affiche(quad q)
 {
-	switch(q.type)
+	switch (q.type)
 	{
 		case Q_PLUS:
 			printf("%s = ", q.res->u.name);
@@ -187,9 +185,9 @@ void affiche(quad q)
 		case Q_INFEQ:
 			printf("if ");
 			if (q.op1->type == QO_CST)
-				printf("%d < ", q.op1->u.cst);
+				printf("%d <= ", q.op1->u.cst);
 			else
-				printf("%s < ", q.op1->u.name);
+				printf("%s <= ", q.op1->u.name);
 			if (q.op2->type == QO_CST)
 				printf("%d ", q.op2->u.cst);
 			else
@@ -260,7 +258,7 @@ void affiche(quad q)
 		case Q_GOTO:
 			printf("goto ");
 			if (q.res->u.cst != -1)
-			 	printf("%i\n", q.res->u.cst);
+				printf("%i\n", q.res->u.cst);
 			else
 				printf("?\n");
 			break;
@@ -281,6 +279,21 @@ void affiche(quad q)
 			else
 				printf("%s\n", q.res->u.name);
 			break;
+		case Q_FBEGIN:
+			printf("function %s begin\n", q.res->u.name);
+			break;
+		case Q_FEND:
+			printf("function %s end\n", q.res->u.name);
+			break;
+		case Q_PARAM:
+			printf("param %s\n", q.res->u.name);
+			break;
+		case Q_CALL:
+			printf("call %s,%i\n",q.res->u.name, q.op1->u.cst);
+			break;
+		case Q_CALL_AFFECT:
+			printf("%s = call %s,%i\n", q.res->u.name, q.op1->u.name, q.op2->u.cst);
+			break;
 		default:
 			printf("pas compris\n");
 	}
@@ -295,21 +308,21 @@ lpos* crelist(int position) {
 
 lpos* concat(lpos* l1, lpos* l2) {
 	lpos* res;
-	if (l1 != NULL) res = l1;
-	else if (l2 != NULL) res = l2;
-	else res = NULL;
+	if (l1 != NULL)
+		res = l1;
+	else if (l2 != NULL)
+		res = l2;
+	else
+		res = NULL;
 	if (l1 != NULL) {
-		while (l1->suivant!=NULL)
-			l1 = l1->suivant;
-	l1->suivant = l2;
+		while (l1->suivant != NULL) l1 = l1->suivant;
+		l1->suivant = l2;
 	}
 	return res;
 }
 
 void complete(lpos* liste, int cible) {
-	if (liste == NULL || cible == liste->position)
-		return;
-	printf("complete %i avec %i\n", liste->position, cible);
+	if (liste == NULL || cible == liste->position) return;
 	globalcode[liste->position].res = quadop_cst(cible);
 
 	while (liste->suivant != NULL) {
@@ -319,17 +332,13 @@ void complete(lpos* liste, int cible) {
 	}
 }
 
-
-quadop* reify(lpos* true, lpos* false)
-{
+quadop* reify(lpos * true, lpos * false) {
 	quadop* t = new_temp();
 	int nq = nextquad;
 	gencode(quad_make(Q_AFFECT, quadop_cst(1), NULL, t));
-	gencode(quad_make(Q_GOTO, NULL, NULL, quadop_cst(nq+3)));
+	gencode(quad_make(Q_GOTO, NULL, NULL, quadop_cst(nq + 3)));
 	gencode(quad_make(Q_AFFECT, quadop_cst(0), NULL, t));
 	complete(true, nq);
-	complete(false, nq+2);
+	complete(false, nq + 2);
 	return t;
-
-
 }

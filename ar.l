@@ -56,14 +56,16 @@ string     ["]([^"]|\\(.|\n))*["]
 "return"	 { output(yytext);return RETURN; }
 "write"		 { output(yytext);return WRITE; }
 "read"		 { output(yytext);return READ; }
-
+"function"   { output(yytext);return SFUNCTION; }
+"ref"        { output(yytext);return REF; }
 {identifier} { yylval.strval = strdup(yytext);output(yylval.strval); return ID;}
 {number}     { yylval.intval = atoi(yytext);output(yytext); return NUM;}
-{string} {        yylval.strval = malloc(yyleng -1);
-          memcpy(yylval.strval, yytext + 1, yyleng - 2);
-          yylval.strval[yyleng - 2] = 0;
-		  output(yylval.strval); return STR;
-        }
+{string}     {
+				yylval.strval = malloc(yyleng -1);
+				memcpy(yylval.strval, yytext + 1, yyleng - 2);
+				yylval.strval[yyleng - 2] = 0;
+				output(yylval.strval); return STR;
+			 }
 {comment}    { printf("%s\n", yytext);}
 [();:,]      { output(yytext);return yytext[0]; }
 \n           { }

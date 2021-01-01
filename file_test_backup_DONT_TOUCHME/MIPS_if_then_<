@@ -1,0 +1,8 @@
+program maxi 
+var i, j, max :int;
+begin
+i:= 1;
+j := 2;
+if i < j then max := j ;
+write max;
+end

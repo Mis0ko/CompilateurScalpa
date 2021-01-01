@@ -1,0 +1,7 @@
+program maxi 
+var max:int;
+begin
+if 5<6 then max := 1 else max:=0;
+write max;
+if 5<6 then write "success" else write "fail" ;
+end
