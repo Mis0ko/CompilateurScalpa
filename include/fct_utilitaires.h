@@ -1,5 +1,5 @@
 #ifndef FCT_UTILITAIRES_H
-#define FCT_UTILITAIRES
+#define FCT_UTILITAIRES_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

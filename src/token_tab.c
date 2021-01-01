@@ -197,52 +197,264 @@ ident_list *create_identlist(char *ident) {
 ident_list *add_to_identlist(ident_list *old_list, char *ident) {
 	ident_list *new_ident = malloc(sizeof(ident_list));
 	new_ident->name = malloc(SYMBNAME_SIZE);
+
 	sprintf(new_ident->name, "%s", ident);
+
 	new_ident->next = NULL;
+
 	ident_list *loop_ident = old_list;
+
 	while (loop_ident->next != NULL) loop_ident = loop_ident->next;
 	loop_ident->next = new_ident;
 	return old_list;
 }
 
-void print_symb(P_symb *symb) {
-	if (strlen(symb->name) >= 8)
-		printf("|\t\t%i\t\t|\t\t%s\t|", symb->idx, symb->name);
-	else
-		printf("|\t\t%i\t\t|\t\t%s\t\t|", symb->idx, symb->name);
-	if (symb->type_I == VARIABLE) switch (symb->type_A) {
-			case T_INT:
-				printf("int|\n");
-				break;
-			case T_BOOL:
-				printf("bool|\n");
-				break;
-			case T_UNIT:
-				printf("unit|\n");
-				break;
-		}
-	else
-		printf("\n");
+P_symb *get_symb_char(char *id)
+{
+    int pos = hachage(id);
+
+    if (symb_tab[pos] == NULL)
+        return NULL;
+
+    P_symb *symb_loop = symb_tab[pos];
+
+    while (symb_loop != NULL)
+    {
+        if (!strcmp(symb_loop->name, id))
+            return symb_loop;
+        symb_loop = symb_loop->next_doublon;
+    }
+    return NULL;
 }
 
-void print_tab() {
-	printf("|-------------------------------|");
-	printf("-------------------------------|\n");
-	printf("|\t\tindex\t\t|\t\tident\t\t|\n");
-	printf("|-------------------------------|");
-	printf("-------------------------------|\n");
-	for (int i = 0; i < SIZE_HASH_TABLE; i++) {
-		if (symb_tab[i] != NULL) {
-			print_symb(symb_tab[i]);
-			if (symb_tab[i]->next_doublon != NULL) {
-				P_symb *symb_parcour = symb_tab[i]->next_doublon;
-				while (symb_parcour != NULL) {
-					print_symb(symb_parcour);
-					symb_parcour = symb_parcour->next_doublon;
-				}
-			}
-		}
-	}
-	printf("|-------------------------------|");
-	printf("-------------------------------|\n");
+int get_symb_type_A(char *id)
+{
+    P_symb *symb = get_symb_char(id);
+    if (symb == NULL)
+        return -1;
+    return symb->type_A;
+}
+
+int get_CSTval_symb_ident(char *id)
+{
+    P_symb *my_symb = get_symb_char(id);
+    if (my_symb == NULL)
+        return -1;
+    if (get_symb_type_A(id) == -1)
+        return -1;
+    switch (my_symb->type_A)
+    {
+    case T_INT:
+        return my_symb->u.int_val;
+        break;
+    case T_BOOL:
+        return my_symb->u.bool_val;
+        break;
+    }
+    printf("value of this symb not known\n");
+    return -1;
+}
+
+// /***
+//  * for now this function is useless, we dont implement char* as variable
+//  *get the char* value from a sym that is a string
+//  *
+//  * ***/
+// char* get_charval_symb_ident(char *id)
+// {
+//     P_symb *my_symb = get_symb_char(id);
+//     if (my_symb == NULL)
+//         return -1;
+//     if (get_symb_type_A(id) == -1)
+//         return -1;
+//     switch (my_symb->type_A)
+//     {
+//     case T_STR:
+//         return my_symb->u.str_val;
+//         break;
+//     }
+//     printf("value of this symb not known\n");
+//     return -1;
+// }
+
+void affect_symb(char *ident, quadop *qsymb)
+{
+    int val;
+    P_symb *my_symb = get_symb_char(ident);
+    printf("Le symbole normalement %s et sa val %i\n", my_symb->name, my_symb->u.bool_val);
+    printf("\n\n");
+    print_symb(my_symb);
+    printf("\n\n\n");
+    if (my_symb == NULL)
+    {
+        bug("affect_symb : NULL");
+        return;
+    }
+    switch (qsymb->type)
+    {
+    case QO_CST:
+        my_symb->u.int_val = qsymb->u.cst;
+        break;
+    // met à jour la tab des symboles sur leur valeur, mais pas sur que ça soit ce que l'on veut ....
+    case QO_NAME:
+        val = get_CSTval_symb_ident(qsymb->u.name);
+        quadop *val_quadop = malloc(sizeof(quadop)); //à free après
+        val_quadop->type = QO_CST;
+        val_quadop->u.cst = val;
+        affect_symb(ident, val_quadop);
+    }
+    return;
+}
+
+void affect_opb(quadop *q1, int opb, quadop *q2, quadop *q3)
+{
+    int v1, v2, v3;
+    v3 = -1;
+    if (q2 == NULL)
+    {
+        bug("affect_opb: q2 NULL");
+        return;
+    }
+
+    if (q2->type == QO_NAME)
+        v2 = get_CSTval_symb_ident(q2->u.name);
+    else
+        v2 = q2->u.cst;
+
+    if (q1 == NULL && q2 != NULL) // case opb == NEG
+    {
+        if (opb == Q_NEG)
+        {
+            v3 = -v2;
+        }
+    }
+
+    if (q1->type == QO_NAME)
+        v1 = get_CSTval_symb_ident(q1->u.name);
+    else
+        v1 = q1->u.cst;
+
+    switch (opb)
+    {
+    case Q_PLUS:
+        v3 = v1 + v2;
+        break;
+
+    case Q_TIMES:
+        v3 = v1 * v2;
+        break;
+
+    case Q_POWER:
+        v3 = pow(v1, v2);
+        break;
+
+    case Q_MINUS:
+        v3 = v1 - v2;
+        break;
+
+    case Q_DIVIDE:
+        v3 = v1 / v2;
+        break;
+
+    default:
+        printf("affect_opb : pas compris\n");
+        break;
+    }
+
+    q3->type = QO_CST;
+    q3->u.cst = v3;
+    return;
+}
+
+/************** pour quand ya un opb ***********************/
+void print_intvar_name()
+{
+
+     for (int i = 0; i < SIZE_HASH_TABLE; i++)
+    {
+        if (symb_tab[i] != NULL && symb_tab[i]->type_A == T_INT)
+        {
+            printf("%s\n", symb_tab[i]->name);
+            if (symb_tab[i]->next_doublon != NULL)
+            {
+                P_symb *symb_parcour = symb_tab[i]->next_doublon;
+                while (symb_parcour != NULL)
+                {
+                    printf("%s\n", symb_tab[i]->name);
+                    symb_parcour = symb_parcour->next_doublon;
+                }
+            }
+        }
+    }
+}
+
+void print_symb(P_symb *symb)
+{
+    if (strlen(symb->name) >= 8)
+        printf("|\t\t%i\t\t|\t\t%s\t|", symb->idx, symb->name);
+    else
+        printf("|\t\t%i\t\t|\t\t%s\t\t|", symb->idx, symb->name);
+    if (symb->type_I == VARIABLE)
+    {
+        printf("\t\t");
+        switch (symb->type_A)
+        {
+        case T_INT:
+            printf("int");
+            break;
+        case T_BOOL:
+            printf("bool");
+            break;
+        case T_UNIT:
+            printf("unit");
+            break;
+        }
+        printf("\t\t|");
+        printf("\t\t");
+        switch (symb->type_A)
+        {
+        case T_INT:
+            printf("%i", symb->u.int_val);
+            break;
+        case T_BOOL:
+            printf("%i", symb->u.bool_val);
+            break;
+        }
+        printf("\t\t|\n");
+    }
+    else
+        printf("\n");
+}
+
+void print_tab()
+{
+    printf("|-------------------------------|");
+    printf("-------------------------------|");
+    printf("-------------------------------|");
+    printf("-------------------------------|\n");
+    printf("|\t\tindex\t\t|\t\tident \t\t|\t\tatomic_type\t|\t\t value\t\t|\n");
+    printf("|-------------------------------|");
+    printf("-------------------------------|");
+    printf("-------------------------------|");
+    printf("-------------------------------|\n");
+    for (int i = 0; i < SIZE_HASH_TABLE; i++)
+    {
+        if (symb_tab[i] != NULL)
+        {
+            print_symb(symb_tab[i]);
+            if (symb_tab[i]->next_doublon != NULL)
+            {
+                P_symb *symb_parcour = symb_tab[i]->next_doublon;
+                while (symb_parcour != NULL)
+                {
+                    print_symb(symb_parcour);
+                    symb_parcour = symb_parcour->next_doublon;
+                }
+            }
+        }
+    }
+    printf("|-------------------------------|");
+    printf("-------------------------------|");
+    printf("-------------------------------|");
+    printf("-------------------------------|\n");
 }
