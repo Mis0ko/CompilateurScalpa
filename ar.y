@@ -69,7 +69,7 @@ void lex_free();
 %start program
 %%
 /* Grammaire à complémenté au fur et à mesure de l'implémentation */
-program: PROGRAM ID vardecllist fundecllist instr
+program: PROGRAM ID vardecllist tag fundecllist M instr {complete($4, $6);}
         ;
 
 vardecllist: varsdecl {}
