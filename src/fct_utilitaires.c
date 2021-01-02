@@ -1,5 +1,5 @@
-
 #include "../include/fct_utilitaires.h"
+
 void output_S(const char *msg) { printf("Analyseur syntaxique: %s\n", msg); }
 
 void bug(const char *msg) { printf("DEBUG : %s\n", msg); }

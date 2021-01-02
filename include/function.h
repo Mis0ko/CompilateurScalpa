@@ -52,12 +52,32 @@ void add_typelist_to_symb(char *id, typelist* arg);
 */
 int gencode_param(typelist* arg);
 
+/*
+* stocks nextquad in the fp of the symb id
+* to jump to the beginning of the function when called
+*/
+void stock_fp(char *id, int nq);
 
+/*
+* gets the fp of the function id
+*/
+int get_fp(char *id);
 
+/*
+* stocks nextquad in the sp of the symb id
+* when a function is called
+*/
+void complete_sp(char *id, int nq);
 
+/*
+* gets the sp of the function id
+*/
 
+int get_sp(char *id);
 
+void stock_end_fp(char *id, int nq);
 
+int get_end_fp(char *id);
 
 
 

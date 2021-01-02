@@ -3,9 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "include/fct_utilitaires.h"
-#include "include/mipssy.h"
 #include "include/function.h"
+#include "include/mipssy.h"
+#include <getopt.h>
+
+struct option longopts[] = {
+   { "out",     required_argument, 0,  'o'  },
+   { "help",    no_argument,       0,  'h'  },
+   { "version", no_argument,       0,  'v'  },
+   { "tos",     no_argument,       0,  't'  },
+   { NULL, 0, NULL, 0 }
+};
 
 extern quad globalcode[100];
 extern int nextquad;
@@ -400,29 +408,58 @@ int main(int argc, char** argv) {
 	printf("Enter your code:\n");
 
 	yyparse();
-	printf("-----------------\nSymbol table:\n-----------------\n");
-	print_tab();
-	printf("-----------------\nSymbol integer:\n-----------------\n");
-	print_intvar_name();
-	printf("-----------------\nQuad List:\n-----------------\n");
-	for (int i=0; i<nextquad; i++) {
-		printf("%i ", i);
-		affiche(globalcode[i]);
+
+	int c;
+	char *filename = NULL;
+
+	while ((c = getopt_long(argc, argv, "o:h:t:v:", longopts, NULL)) != -1)
+	{
+		switch(c)
+		{
+			case 'v':
+				printf("Les membres du groupe sont :\n\t-Céline Ly\n\t-Yassine Lambarki\n\t-Michael Hofmann\n\t-Simon Willer\n");
+				break;
+			case 'o':
+				filename = optarg;
+				break;
+			case ':':
+				fprintf(stderr, "%s: option `-%c' requires an argument\n",argv[0], optopt);
+				break;
+			case 'h':
+				printf("option -version -o -tos\n");
+				break;
+			case 't':
+				printf("-----------------\nSymbol table:\n-----------------\n");
+				print_tab();
+				printf("-----------------\nSymbol integer:\n-----------------\n");
+				print_intvar_name();
+				printf("-----------------\nQuad List:\n-----------------\n");
+				for (int i=0; i<nextquad; i++) {
+					printf("%i ", i);
+					affiche(globalcode[i]);
+				}
+				break;
+			case '?':
+			default:
+				fprintf(stderr, "%s: option `-%c' is invalid: ignored\n",argv[0], optopt);
+		        break;
+		}
 	}
+
 	FILE * out = stdout;
 
-    if(argc == 2)
-        out = fopen(argv[1], "w");
-    else
-        out = fopen("out.asm", "w");
+	if(filename == NULL)
+		out = fopen("out.asm", "w");
+	else
+		out = fopen(filename, "w");
 
-    if(!out) {
-        fprintf(stderr, "ERROR: Unable to open the output file for writing.\n");
-        return -2;
-    }
+	if(!out) {
+		fprintf(stderr, "ERROR: Unable to open the output file for writing.\n");
+	}
 
-    mips_code(globalcode, nextquad, out);
-    fclose(out);
+	mips_code(globalcode, nextquad, out);
+	fclose(out);
+
 
 	// Be clean.===> Ofc As always
 	lex_free();

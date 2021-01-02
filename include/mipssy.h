@@ -1,3 +1,6 @@
+#ifndef MIPSSY_H
+#define MIPSSY_H
+
 #include "token_tab.h"
 
 /**
@@ -26,3 +29,4 @@ void translate_mips(quad q, FILE* os);
  *  then .text section where we display MIPS executable code
  */
 void mips_code(quad* globalcode, int nextquad, FILE* os);
+#endif
