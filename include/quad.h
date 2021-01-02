@@ -117,4 +117,7 @@ lpos* concat(lpos* l1, lpos* l2);
  */
 quadop* reify(lpos * true, lpos * false);
 
+void free_quad();
+
+
 #endif

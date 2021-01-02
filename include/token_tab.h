@@ -7,6 +7,7 @@
 
 #include "fct_utilitaires.h"
 #include "quad.h"
+#include "function.h"
 
 struct P_symb;
 struct ident_list;
@@ -183,5 +184,8 @@ void print_symb(P_symb* symb);
 void print_tab();
 
 void print_intvar_name();
+struct typelist *Free_typelist(struct typelist *list);
+P_symb *Free_symb(P_symb *symb);
+void free_symbtab();
 
 #endif

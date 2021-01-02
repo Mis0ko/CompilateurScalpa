@@ -182,7 +182,6 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  $$ = crelist(nextquad);
 	  }
 	  | SBEGIN sequence SEND {$$ = $2;}
-	  | SBEGIN SEND  { }
 	  | READ ID //lvalue a l'origine, a changer apres les tableaux
 	  {
 		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name($2));
@@ -463,6 +462,8 @@ int main(int argc, char** argv) {
 
 	// Be clean.===> Ofc As always
 	lex_free();
+	free_quad();
+	free_symbtab();
 	return 0;
 }
 

@@ -508,3 +508,46 @@ void print_tab()
 	printf("|---------------|");
 	printf("-------------------------------|--------|---------|------------|\n");
 }
+
+struct typelist *Free_typelist(struct typelist *list)
+{
+    struct typelist *next;
+    if (list != NULL)
+    {
+        free(list->name);
+        next = list->next;
+        free(list);
+    }
+    return(next);
+}
+
+P_symb *Free_symb(P_symb *symb)
+{
+	P_symb *next;
+	if (symb != NULL)
+	{
+		if (symb->name != NULL)
+			free(symb->name);
+		if (symb->arglist != NULL)
+		{
+			struct typelist* next = symb->arglist->next;
+			while ((next = Free_typelist(next)) != NULL);
+			free(symb->arglist);
+		}
+		next = symb->next_doublon;
+		free(symb);
+	}
+	return next;
+}
+void free_symbtab()
+{
+	for (int i = 0 ; i < SIZE_HASH_TABLE ;i++)
+	{
+		if (symb_tab[i] != NULL)
+		{
+			P_symb* next = symb_tab[i]->next_doublon;
+			while ((next = Free_symb(next)) != NULL);
+			free(symb_tab[i]);
+		}
+	}
+}
