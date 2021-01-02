@@ -158,3 +158,18 @@ int gencode_param(typelist* arg)
 
 	return len;
 }
+
+
+int len_param(typelist* arg)
+{
+	typelist* loop = arg;
+	int len = 0;
+
+	while (loop != NULL)
+	{
+		len++;
+		loop = loop->next;
+	}
+
+	return len;
+}

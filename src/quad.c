@@ -280,7 +280,7 @@ void affiche(quad q)
 				printf("%s\n", q.res->u.name);
 			break;
 		case Q_FBEGIN:
-			printf("function %s begin\n", q.res->u.name);
+			printf("function %s,%i begin\n", q.res->u.name, q.op1->u.cst);
 			break;
 		case Q_FEND:
 			printf("function %s end\n", q.res->u.name);

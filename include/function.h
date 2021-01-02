@@ -52,6 +52,12 @@ void add_typelist_to_symb(char *id, typelist* arg);
 */
 int gencode_param(typelist* arg);
 
+
+/*
+* returns the number of arguments of a function
+*/
+int len_param(typelist* arg);
+
 /*
 * stocks nextquad in the fp of the symb id
 * to jump to the beginning of the function when called

@@ -106,7 +106,7 @@ fundecl : SFUNCTION ID '(' parlist ')' ':' atomictype
 		{
 			create_symblist("function",create_identlist($2), $7);
 			add_typelist_to_symb($2, $4);
-			quad q = quad_make(Q_FBEGIN, NULL, NULL, quadop_name($2));
+			quad q = quad_make(Q_FBEGIN, quadop_cst(len_param($4)), NULL, quadop_name($2));
 			gencode(q);
 		}
 		vardecllist instr
