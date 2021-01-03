@@ -81,22 +81,21 @@ extern int yydebug;
     EQ = 282,                      /* EQ  */
     AND = 283,                     /* AND  */
     OR = 284,                      /* OR  */
-    XOR = 285,                     /* XOR  */
-    NOT = 286,                     /* NOT  */
-    SBEGIN = 287,                  /* SBEGIN  */
-    SEND = 288,                    /* SEND  */
-    WRITE = 289,                   /* WRITE  */
-    READ = 290,                    /* READ  */
-    SFUNCTION = 291,               /* SFUNCTION  */
-    REF = 292,                     /* REF  */
-    IF = 293,                      /* IF  */
-    THEN = 294,                    /* THEN  */
-    ELSE = 295,                    /* ELSE  */
-    WHILE = 296,                   /* WHILE  */
-    DO = 297,                      /* DO  */
-    RETURN = 298,                  /* RETURN  */
-    LOWER_THAN_ELSE = 299,         /* LOWER_THAN_ELSE  */
-    NEG = 300                      /* NEG  */
+    NOT = 285,                     /* NOT  */
+    SBEGIN = 286,                  /* SBEGIN  */
+    SEND = 287,                    /* SEND  */
+    WRITE = 288,                   /* WRITE  */
+    READ = 289,                    /* READ  */
+    SFUNCTION = 290,               /* SFUNCTION  */
+    REF = 291,                     /* REF  */
+    IF = 292,                      /* IF  */
+    THEN = 293,                    /* THEN  */
+    ELSE = 294,                    /* ELSE  */
+    WHILE = 295,                   /* WHILE  */
+    DO = 296,                      /* DO  */
+    RETURN = 297,                  /* RETURN  */
+    THEN_SIMPLE = 298,             /* THEN_SIMPLE  */
+    NEG = 299                      /* NEG  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -131,28 +130,27 @@ extern int yydebug;
 #define EQ 282
 #define AND 283
 #define OR 284
-#define XOR 285
-#define NOT 286
-#define SBEGIN 287
-#define SEND 288
-#define WRITE 289
-#define READ 290
-#define SFUNCTION 291
-#define REF 292
-#define IF 293
-#define THEN 294
-#define ELSE 295
-#define WHILE 296
-#define DO 297
-#define RETURN 298
-#define LOWER_THAN_ELSE 299
-#define NEG 300
+#define NOT 285
+#define SBEGIN 286
+#define SEND 287
+#define WRITE 288
+#define READ 289
+#define SFUNCTION 290
+#define REF 291
+#define IF 292
+#define THEN 293
+#define ELSE 294
+#define WHILE 295
+#define DO 296
+#define RETURN 297
+#define THEN_SIMPLE 298
+#define NEG 299
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 29 "ar.y"
+#line 29 "scalpa.y"
 
 	char *strval;
 	int intval;
@@ -167,10 +165,10 @@ union YYSTYPE
 	int actualquad;
 	struct typelist *typelist;
 	struct dim_list* dim_list;
-	struct array_call *array_call; //ADDITION
-	struct index_list *index_list; //ADDITION
+	struct array_call *array_call;
+	struct index_list *index_list;
 
-#line 174 "y.tab.h"
+#line 172 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

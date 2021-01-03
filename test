@@ -1,9 +1,7 @@
-program maxi 
-var i, j, max, dfd :int;
-var floata : int (* (*ceci est un commentaire*) *)
+program maxi
+var a :int;
 begin
-i:=-5;
-j:=6;
-max:=7;
-if 5<6 then max := 0 endif
-end;
+while a<3 do begin a:=a+1; write "Hello"; end;
+a:=9;
+write a;
+end

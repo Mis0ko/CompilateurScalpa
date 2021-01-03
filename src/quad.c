@@ -326,15 +326,4 @@ quadop* reify(lpos * true, lpos * false) {
 	complete(false, nq + 2);
 	return t;
 }
-void free_quad()
-{
-	for (int i = 0 ; i< nextquad; i++)
-	{
-		if (globalcode[i].res != NULL)
-			free(globalcode[i].res);
-		if (globalcode[i].op1 != NULL)
-			free(globalcode[i].op1);
-		if (globalcode[i].op2 != NULL)
-			free(globalcode[i].op2);
-	}
 }

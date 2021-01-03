@@ -18,7 +18,7 @@ echo
 for f in tests/*.txt ; 
 do 
     echo "${YELLOW}Running $f (${f%.txt}.asm)...${NC}";
-    ./ar -t -o "${f%.txt}.asm" < "$f" ;
+    ./scalpa -t -o "${f%.txt}.asm" < "$f" ;
     TOTAL=$((TOTAL+1))
 done
 

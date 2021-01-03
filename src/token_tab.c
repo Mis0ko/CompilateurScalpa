@@ -532,7 +532,10 @@ void print_symb(P_symb *symb) {
 		printf("   var  |");
 	else if (symb->type_I == PARAMETER)
 		printf("   par  |");
-	if (symb->type_I == FUNCTION) printf("   fun  |");
+	else if (symb->type_I == FUNCTION)
+		printf("   fun  |");
+	else if (symb->type_I == ARRAY)
+		printf("   arr  |");
 
 	if (symb->type_A == T_INT)
 		printf("   int   |");

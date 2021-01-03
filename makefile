@@ -3,7 +3,7 @@ LEX = lex
 YACC = yacc -d 
 CFLAGS = -O2 -Wall
 LDFLAGS = -lm -lfl # Linux: -lfl / OSX: -ll
-EXEC = ar
+EXEC = scalpa
 SRC = src/*
 OBJ = $(SRC:.c=.o)
 

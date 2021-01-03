@@ -8,13 +8,10 @@
 # In the section .data we establish data components such as 
 # variables or strings to be displayed on the console. 
 
-VAR_i_:	.word	0
-VAR_j_:	.word	0
+VAR_a_:	.word	0
 VAR_t0_:	.word	0
-VAR_dfd_:	.word	0
-VAR_max_:	.word	0
-VAR_floata_:	.word	0
 
+STR_1:	.asciiz	 "Hello" 
 
 
 .text
@@ -24,30 +21,39 @@ LABEL_0:
 		j LABEL_1
 
 LABEL_1:
+		lw $t0, VAR_a_
+		li $t1, 3
+		blt $t0, $t1, LABEL_3
 
 LABEL_2:
-		lw $t1, VAR_t0_
-		sw $t1, VAR_i_
+		j LABEL_7
 
 LABEL_3:
-		li $t1, 6
-		sw $t1, VAR_j_
+		lw $t0, VAR_a_
+		li $t1, 1
+		add $t2, $t0, $t1
+		sw $t2, VAR_t0_
 
 LABEL_4:
-		li $t1, 7
-		sw $t1, VAR_max_
+		lw $t1, VAR_t0_
+		sw $t1, VAR_a_
 
 LABEL_5:
-		li $t0, 5
-		li $t1, 6
-		blt $t0, $t1, LABEL_7
+		la $a0, STR_1
+		li $v0, 4
+		syscall
 
 LABEL_6:
-		j LABEL_END
+		j LABEL_1
 
 LABEL_7:
-		li $t1, 0
-		sw $t1, VAR_max_
+		li $t1, 9
+		sw $t1, VAR_a_
+
+LABEL_8:
+		lw $a0, VAR_a_
+		li $v0, 1
+		syscall
 
 LABEL_END:
 		li $v0, 10
