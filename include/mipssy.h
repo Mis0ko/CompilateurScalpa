@@ -2,7 +2,7 @@
 #define MIPSSY_H
 
 #include "token_tab.h"
-
+#include "array.h"
 /**
  *  @brief translates each quad to mips
  * 	@param q : a quad

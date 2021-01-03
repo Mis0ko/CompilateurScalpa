@@ -8,22 +8,15 @@
 #include "fct_utilitaires.h"
 #include "quad.h"
 #include "function.h"
+#include "array.h"
 
 struct P_symb;
 struct ident_list;
 struct typelist;
+struct dim_list;
 #define SIZE_HASH_TABLE 1000
 #define SYMBNAME_SIZE 100
 
-//ADDITION
-/*
-* struct of dimensions of an array
-*/
-typedef struct dim_list {
-	int min_dim;
-	int max_dim;
-	struct dim_list* next;
-} dim_list;
 
 
 /******************** STRUCT/ENUM for syntaxe analysis ********************/
@@ -56,8 +49,6 @@ typedef struct P_symb {
 	struct dim_list* dim; // Addition for arrau , this a struct of dimensions of the arraytype
 } P_symb;
 
-//********** Addition for arrays
-dim_list * lookfor_dims(char *tab_id);
 ident_list *create_symblist_array(char *var, ident_list *list, char *typename, dim_list* dims);
 void create_symb_array(char *var, char *typename, char *id, dim_list* dims);
 

@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #include "include/function.h"
 #include "include/mipssy.h"
-#include <getopt.h>
+#include "include/array.h"
 
 struct option longopts[] = {
    { "out",     required_argument, 0,  'o'  },
@@ -23,114 +24,6 @@ void yyerror(char*);
 int yylex();
 void lex_free();
 
-//********* Declarationde tableau ********
-void check_indx(char *tab_id, struct index_list *index_list) {
-	struct dim_list *dim_tab = lookfor_dims(tab_id);
-	if (dim_tab == NULL) {
-		printf("failed finding dims\n");
-		exit(EXIT_FAILURE);
-	}
-	int min_dim, max_dim;
-	min_dim = dim_tab->min_dim;
-	max_dim = dim_tab->max_dim;
-	if (index_list->type == INDX_CST) {
-		// printf("%d %d %d\n",min_dim, index_list->un.index_int, max_dim);
-		if (index_list->un.index_int > max_dim ||
-			index_list->un.index_int < min_dim) {
-			printf("error index isn't valid");
-			exit(EXIT_FAILURE);
-		}
-	}
-	if (index_list->next_indxlist != NULL) {
-		dim_tab = dim_tab->next;
-		min_dim = dim_tab->min_dim;
-		max_dim = dim_tab->max_dim;
-		if (index_list->next_indxlist->type == INDX_CST) {
-			// printf("%d %d %d\n",min_dim,
-			// index_list->next_indxlist->un.index_int, max_dim);
-			if (index_list->next_indxlist->un.index_int > max_dim ||
-				index_list->next_indxlist->un.index_int < min_dim) {
-				printf("error index isn't valid");
-				exit(1);
-			}
-		}
-	}
-}
-
-struct array_call *array_call_info(char *tab_id,
-								   struct index_list *index_list) {
-	char *tabid_tabindx = malloc(100);
-	sprintf(tabid_tabindx, "%s%s", tab_id, index_list->tab);
-
-	struct array_call *arraycall = malloc(sizeof(array_call));
-	arraycall->tab_name = strdup(tab_id);
-	arraycall->tab_element = strdup(tabid_tabindx);
-	arraycall->head_array = index_list;
-
-	return arraycall;
-}
-
-struct index_list *all_indexs(struct index_list *indx, quadop *index) {
-	struct index_list *indxlist = malloc(sizeof(index_list));
-	char *expr_list = malloc(100);
-	if (index->type == QO_CST) {
-		sprintf(expr_list, "%s[%d]", indx->tab, index->u.cst);
-		indxlist->un.index_int = index->u.cst;
-		indxlist->type = INDX_CST;
-	} else {
-		sprintf(expr_list, "%s[%s]", indx->tab, index->u.name);
-		indxlist->un.index_name = strdup(index->u.name);
-		indxlist->type = INDX_NAME;
-	}
-	indxlist->tab = strdup(expr_list);
-
-	indxlist->next_indxlist = indx;
-	return indxlist;
-}
-struct index_list *solo_index(quadop *index) {
-	struct index_list *indxlist = malloc(sizeof(index_list));
-	char *expr = malloc(100);
-	if (index->type == QO_CST) {
-		sprintf(expr, "[%d]", index->u.cst);
-		indxlist->un.index_int = index->u.cst;
-		indxlist->type = INDX_CST;
-	} else {
-		sprintf(expr, "[%s]", index->u.name);
-		indxlist->un.index_name = strdup(index->u.name);
-		indxlist->type = INDX_NAME;
-	}
-	indxlist->tab = strdup(expr);
-
-	indxlist->next_indxlist = NULL;
-	return indxlist;
-}
-
-//*********ADDITION********* Added dans token_tab.h
-
-dim_list *add_dim(int dim_inf, int dim_sup) {
-	dim_list *st_dimension = malloc(sizeof(dim_list));
-	st_dimension->min_dim = dim_inf;
-	st_dimension->max_dim = dim_sup;
-	st_dimension->next = NULL;
-	return st_dimension;
-}
-
-dim_list *add_dims(dim_list *old_list, int dim_inf, int dim_sup) {
-	dim_list *loop_dim = old_list;
-	while (loop_dim->next != NULL) loop_dim = loop_dim->next;
-	loop_dim->next = add_dim(dim_inf, dim_sup);
-	return old_list;
-}
-
-void print_dims(dim_list *dims_list) {
-	dim_list *loop_dim = dims_list;
-	while (loop_dim->next != NULL) {
-		printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
-		loop_dim = loop_dim->next;
-	}
-	printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
-}
-//************************
 %}
 
 %union {
@@ -147,17 +40,17 @@ void print_dims(dim_list *dims_list) {
 	int actualquad;
 	struct typelist *typelist;
 	struct dim_list* dim_list;
-	struct array_call *array_call; //ADDITION
-	struct index_list *index_list; //ADDITION	
+	struct array_call *array_call;
+	struct index_list *index_list;
 }
 
-%token PROGRAM  VAR SARRAY SOF INTRV_SEP //ADDITION
+%token PROGRAM  VAR SARRAY SOF INTRV_SEP
 %token <strval> ID STR
 %token <intval> NUM UNIT BOOL INT
 
 %token <intval> PLUS AFFECT TIMES MINUS DIVIDE POWER TRUE FALSE
 %token <intval> INF INFEQ SUP SUPEQ DIFF EQ
-%token <intval> AND OR XOR NOT
+%token <intval> AND OR NOT
 
 %token SBEGIN SEND WRITE READ SFUNCTION REF
 %token IF THEN ELSE WHILE DO RETURN
@@ -177,13 +70,13 @@ void print_dims(dim_list *dims_list) {
 %type <index_list> exprlist
 %type <array_call> lvalue
 
-%nonassoc LOWER_THAN_ELSE
+%nonassoc THEN_SIMPLE
 %nonassoc ELSE
 
 %left RETURN
 %left INF INFEQ SUP SUPEQ DIFF EQ
 %right AFFECT
-%left PLUS MINUS OR XOR
+%left PLUS MINUS OR
 %left TIMES DIVIDE AND
 %right POWER
 %left NEG NOT
@@ -218,7 +111,7 @@ rangelist : NUM INTRV_SEP NUM { $$ = add_dim($1, $3); }
 		;
 
 lvalue : ID '[' exprlist ']' { $$ = array_call_info($1, $3); check_indx($1, $3);
-		//printf("%s %s %d\n", $$->tab_name, $$->tab_element , $$->head_array->un.index_int); //print the most right index 
+		//printf("%s %s %d\n", $$->tab_name, $$->tab_element , $$->head_array->un.index_int); //print the most right index
 		//printf("%d\n", $$->head_array->next_indxlist->un.index_int);
 		}
 
@@ -263,7 +156,7 @@ par : ID ':' typename
 	//| REF ID ':' typename //a faire plus tard
 	;
 
-instr : 
+instr :
 		lvalue AFFECT E {
 			quad q = quad_make(Q_AFFECT, $3, NULL, quadop_array($1));
 			//printf("%d %d %s %s",$1->i, $1->j, $1->tab_element,$1->tab_name);
@@ -290,7 +183,7 @@ instr :
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
-	  | IF cond THEN M instr %prec LOWER_THAN_ELSE
+	  | IF cond THEN M instr %prec THEN_SIMPLE
 	  {
 		  $$ = NULL;
 		  complete($2.true,$4);

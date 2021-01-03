@@ -1,8 +1,9 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.7.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +31,10 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 #ifndef YY_YY_Y_TAB_H_INCLUDED
 # define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
@@ -40,57 +45,65 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    PROGRAM = 258,
-    VAR = 259,
-    SARRAY = 260,
-    SOF = 261,
-    INTRV_SEP = 262,
-    ID = 263,
-    STR = 264,
-    NUM = 265,
-    UNIT = 266,
-    BOOL = 267,
-    INT = 268,
-    PLUS = 269,
-    AFFECT = 270,
-    TIMES = 271,
-    MINUS = 272,
-    DIVIDE = 273,
-    POWER = 274,
-    TRUE = 275,
-    FALSE = 276,
-    INF = 277,
-    INFEQ = 278,
-    SUP = 279,
-    SUPEQ = 280,
-    DIFF = 281,
-    EQ = 282,
-    AND = 283,
-    OR = 284,
-    XOR = 285,
-    NOT = 286,
-    SBEGIN = 287,
-    SEND = 288,
-    WRITE = 289,
-    READ = 290,
-    SFUNCTION = 291,
-    REF = 292,
-    IF = 293,
-    THEN = 294,
-    ELSE = 295,
-    WHILE = 296,
-    DO = 297,
-    RETURN = 298,
-    LOWER_THAN_ELSE = 299,
-    NEG = 300
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    PROGRAM = 258,                 /* PROGRAM  */
+    VAR = 259,                     /* VAR  */
+    SARRAY = 260,                  /* SARRAY  */
+    SOF = 261,                     /* SOF  */
+    INTRV_SEP = 262,               /* INTRV_SEP  */
+    ID = 263,                      /* ID  */
+    STR = 264,                     /* STR  */
+    NUM = 265,                     /* NUM  */
+    UNIT = 266,                    /* UNIT  */
+    BOOL = 267,                    /* BOOL  */
+    INT = 268,                     /* INT  */
+    PLUS = 269,                    /* PLUS  */
+    AFFECT = 270,                  /* AFFECT  */
+    TIMES = 271,                   /* TIMES  */
+    MINUS = 272,                   /* MINUS  */
+    DIVIDE = 273,                  /* DIVIDE  */
+    POWER = 274,                   /* POWER  */
+    TRUE = 275,                    /* TRUE  */
+    FALSE = 276,                   /* FALSE  */
+    INF = 277,                     /* INF  */
+    INFEQ = 278,                   /* INFEQ  */
+    SUP = 279,                     /* SUP  */
+    SUPEQ = 280,                   /* SUPEQ  */
+    DIFF = 281,                    /* DIFF  */
+    EQ = 282,                      /* EQ  */
+    AND = 283,                     /* AND  */
+    OR = 284,                      /* OR  */
+    XOR = 285,                     /* XOR  */
+    NOT = 286,                     /* NOT  */
+    SBEGIN = 287,                  /* SBEGIN  */
+    SEND = 288,                    /* SEND  */
+    WRITE = 289,                   /* WRITE  */
+    READ = 290,                    /* READ  */
+    SFUNCTION = 291,               /* SFUNCTION  */
+    REF = 292,                     /* REF  */
+    IF = 293,                      /* IF  */
+    THEN = 294,                    /* THEN  */
+    ELSE = 295,                    /* ELSE  */
+    WHILE = 296,                   /* WHILE  */
+    DO = 297,                      /* DO  */
+    RETURN = 298,                  /* RETURN  */
+    LOWER_THAN_ELSE = 299,         /* LOWER_THAN_ELSE  */
+    NEG = 300                      /* NEG  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define PROGRAM 258
 #define VAR 259
 #define SARRAY 260
@@ -137,10 +150,9 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 136 "ar.y" /* yacc.c:1909  */
+#line 29 "ar.y"
 
 	char *strval;
 	int intval;
@@ -156,11 +168,11 @@ union YYSTYPE
 	struct typelist *typelist;
 	struct dim_list* dim_list;
 	struct array_call *array_call; //ADDITION
-	struct index_list *index_list; //ADDITION	
+	struct index_list *index_list; //ADDITION
 
-#line 162 "y.tab.h" /* yacc.c:1909  */
+#line 174 "y.tab.h"
+
 };
-
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

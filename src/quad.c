@@ -9,6 +9,8 @@ int ntp=0; //for the number of temporary variables
 
 quadop* quadop_array(array_call* arraycall){
 	quadop* res = malloc(sizeof(quadop));
+	CHK_MALLOC(res);
+
 	res->type = QO_ARRAY;
 	res->u.name = strdup(arraycall->tab_element);
 	res->array = arraycall;
@@ -19,6 +21,8 @@ quadop* quadop_array(array_call* arraycall){
 quadop* quadop_cst(int val)
 {
 	quadop *res = malloc(sizeof(quadop));
+	CHK_MALLOC(res);
+
 	res->type = QO_CST;
 	res->u.cst = val;
 	return res;
@@ -27,6 +31,8 @@ quadop* quadop_cst(int val)
 quadop* quadop_name(char* str)
 {
 	quadop *res = malloc(sizeof(quadop));
+	CHK_MALLOC(res);
+
 	res->type = QO_NAME;
 	res->u.name = strdup(str);
 	return res;
@@ -35,6 +41,8 @@ quadop* quadop_name(char* str)
 quadop* quadop_str(char* str)
 {
 	quadop *res = malloc(sizeof(quadop));
+	CHK_MALLOC(res);
+
 	res->type = QO_STR;
 	res->u.str = strdup(str);
 	return res;
@@ -59,6 +67,8 @@ void gencode(quad q)
 quadop* new_temp()
 {
 	char* nom_temp = malloc(4);
+	CHK_MALLOC(nom_temp);
+
 	sprintf(nom_temp, "t%i", ntp);
 	quadop* tp = quadop_name(nom_temp);
 	ntp++;
@@ -145,11 +155,11 @@ void affiche(quad q)
 			break;
 
 		case Q_AFFECT:
-			if (q.op1->type == QO_NAME)
-				printf("%s = %s\n", q.res->u.name, q.op1->u.name);
-			else
-				printf("%s = %d\n", q.res->u.name, q.op1->u.cst);
-			break;
+		if (q.op1->type == QO_CST)
+			printf("%s = %d\n", q.res->u.name, q.op1->u.cst);
+		else
+			printf("%s = %s\n", q.res->u.name, q.op1->u.name);
+		break;
 
 		case Q_SUP:
 			printf("if ");
@@ -228,41 +238,6 @@ void affiche(quad q)
 				printf("%s ", q.op2->u.name);
 			printf("goto %i\n", q.res->u.cst);
 			break;
-		case Q_AND:
-			printf("if ");
-			if (q.op1->type == QO_CST)
-				printf("%d and ", q.op1->u.cst);
-			else
-				printf("%s and ", q.op1->u.name);
-			if (q.op2->type == QO_CST)
-				printf("%d ", q.op2->u.cst);
-			else
-				printf("%s ", q.op2->u.name);
-			printf("goto %i\n", q.res->u.cst);
-			break;
-		case Q_OR:
-			printf("if ");
-			if (q.op1->type == QO_CST)
-				printf("%d or ", q.op1->u.cst);
-			else
-				printf("%s or ", q.op1->u.name);
-			if (q.op2->type == QO_CST)
-				printf("%d ", q.op2->u.cst);
-			else
-				printf("%s ", q.op2->u.name);
-			printf("goto %i\n", q.res->u.cst);
-			break;
-		case Q_XOR:
-			printf("%s = ", q.res->u.name);
-			if (q.op1->type == QO_CST)
-				printf("%d xor ", q.op1->u.cst);
-			else
-				printf("%s xor ", q.op1->u.name);
-			if (q.op2->type == QO_CST)
-				printf("%d\n", q.op2->u.cst);
-			else
-				printf("%s\n", q.op2->u.name);
-			break;
 		case Q_GOTO:
 			printf("goto ");
 			if (q.res->u.cst != -1)
@@ -309,6 +284,7 @@ void affiche(quad q)
 
 lpos* crelist(int position) {
 	lpos* new = malloc(sizeof(lpos));
+	CHK_MALLOC(new);
 	new->position = position;
 	new->suivant = NULL;
 	return new;

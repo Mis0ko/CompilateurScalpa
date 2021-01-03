@@ -3,32 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/*
- * struct of a list of index
- */
-typedef struct index_list {
-	char *tab;
-	enum { INDX_CST, INDX_NAME} type;
-	union un { 
-		char *index_name;
-		int index_int;
-	} un;
-	struct index_list* next_indxlist;
-
-} index_list;
-
-/*
- * struct of an array call , name of array , 
- * elementcall tab[i][j] , index_list(i,j)
- */
-typedef struct array_call {
-	char *tab_name;
-	char *tab_element;
-	struct index_list* head_array;
-} array_call;
-
-
+#include "array.h"
 /*
  * structure of an operand
  */

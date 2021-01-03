@@ -26,6 +26,7 @@ ident_list *create_symblist_array(char *var, ident_list *list, char *typename,
 
 void create_symb_array(char *var, char *typename, char *id, dim_list *dims) {
 	P_symb *symb = malloc(sizeof(P_symb));
+	CHK_MALLOC(symb);
 	symb->next_doublon = NULL;
 	symb->name = malloc(SYMBNAME_SIZE);
 	CHK_MALLOC(symb->name);
@@ -132,7 +133,10 @@ void print_vars(FILE *os) {
 
 /******************** begining of the functions ********************/
 
-void init_symb_tab() { symb_tab = malloc(SIZE_HASH_TABLE * sizeof(P_symb *)); }
+void init_symb_tab() {
+	symb_tab = malloc(SIZE_HASH_TABLE * sizeof(P_symb *));
+	CHK_MALLOC(symb_tab);
+}
 
 ident_list *create_symblist(char *var, ident_list *list, char *typename) {
 	ident_list *list_parcour = list;
@@ -154,6 +158,7 @@ int hachage(char *chaine) {
 
 void create_symb(char *var, char *typename, char *id) {
 	P_symb *symb = malloc(sizeof(P_symb));
+	CHK_MALLOC(symb);
 	symb->next_doublon = NULL;
 	symb->name = malloc(SYMBNAME_SIZE);
 	CHK_MALLOC(symb->name);
@@ -327,6 +332,8 @@ void chk_symb_typeE(quadop *op1, quadop *op2) {
 ident_list *create_identlist(char *ident) {
 	ident_list *my_list = malloc(sizeof(ident_list));
 	my_list->name = malloc(SYMBNAME_SIZE);
+	CHK_MALLOC(my_list);
+	CHK_MALLOC(my_list->name);
 	sprintf(my_list->name, "%s", ident);
 	my_list->next = NULL;
 	return my_list;
@@ -335,6 +342,8 @@ ident_list *create_identlist(char *ident) {
 ident_list *add_to_identlist(ident_list *old_list, char *ident) {
 	ident_list *new_ident = malloc(sizeof(ident_list));
 	new_ident->name = malloc(SYMBNAME_SIZE);
+	CHK_MALLOC(new_ident);
+	CHK_MALLOC(new_ident->name);
 
 	sprintf(new_ident->name, "%s", ident);
 
@@ -433,6 +442,7 @@ void affect_symb(char *ident, quadop *qsymb) {
 		case QO_NAME:
 			val = get_CSTval_symb_ident(qsymb->u.name);
 			quadop *val_quadop = malloc(sizeof(quadop));  //à free après
+			CHK_MALLOC(val_quadop);
 			val_quadop->type = QO_CST;
 			val_quadop->u.cst = val;
 			affect_symb(ident, val_quadop);
