@@ -47,90 +47,100 @@ extern int yydebug;
   {
     PROGRAM = 258,
     VAR = 259,
-    ID = 260,
-    STR = 261,
-    NUM = 262,
-    UNIT = 263,
-    BOOL = 264,
-    INT = 265,
-    PLUS = 266,
-    AFFECT = 267,
-    TIMES = 268,
-    MINUS = 269,
-    DIVIDE = 270,
-    POWER = 271,
-    TRUE = 272,
-    FALSE = 273,
-    INF = 274,
-    INFEQ = 275,
-    SUP = 276,
-    SUPEQ = 277,
-    DIFF = 278,
-    EQ = 279,
-    AND = 280,
-    OR = 281,
-    XOR = 282,
-    NOT = 283,
-    SBEGIN = 284,
-    SEND = 285,
-    WRITE = 286,
-    READ = 287,
-    IF = 288,
-    THEN = 289,
-    ELSE = 290,
-    WHILE = 291,
-    DO = 292,
-    RETURN = 293,
-    LOWER_THAN_ELSE = 294,
-    NEG = 295
+    SARRAY = 260,
+    SOF = 261,
+    INTRV_SEP = 262,
+    ID = 263,
+    STR = 264,
+    NUM = 265,
+    UNIT = 266,
+    BOOL = 267,
+    INT = 268,
+    PLUS = 269,
+    AFFECT = 270,
+    TIMES = 271,
+    MINUS = 272,
+    DIVIDE = 273,
+    POWER = 274,
+    TRUE = 275,
+    FALSE = 276,
+    INF = 277,
+    INFEQ = 278,
+    SUP = 279,
+    SUPEQ = 280,
+    DIFF = 281,
+    EQ = 282,
+    AND = 283,
+    OR = 284,
+    XOR = 285,
+    NOT = 286,
+    SBEGIN = 287,
+    SEND = 288,
+    WRITE = 289,
+    READ = 290,
+    SFUNCTION = 291,
+    REF = 292,
+    IF = 293,
+    THEN = 294,
+    ELSE = 295,
+    WHILE = 296,
+    DO = 297,
+    RETURN = 298,
+    LOWER_THAN_ELSE = 299,
+    NEG = 300
   };
 #endif
 /* Tokens.  */
 #define PROGRAM 258
 #define VAR 259
-#define ID 260
-#define STR 261
-#define NUM 262
-#define UNIT 263
-#define BOOL 264
-#define INT 265
-#define PLUS 266
-#define AFFECT 267
-#define TIMES 268
-#define MINUS 269
-#define DIVIDE 270
-#define POWER 271
-#define TRUE 272
-#define FALSE 273
-#define INF 274
-#define INFEQ 275
-#define SUP 276
-#define SUPEQ 277
-#define DIFF 278
-#define EQ 279
-#define AND 280
-#define OR 281
-#define XOR 282
-#define NOT 283
-#define SBEGIN 284
-#define SEND 285
-#define WRITE 286
-#define READ 287
-#define IF 288
-#define THEN 289
-#define ELSE 290
-#define WHILE 291
-#define DO 292
-#define RETURN 293
-#define LOWER_THAN_ELSE 294
-#define NEG 295
+#define SARRAY 260
+#define SOF 261
+#define INTRV_SEP 262
+#define ID 263
+#define STR 264
+#define NUM 265
+#define UNIT 266
+#define BOOL 267
+#define INT 268
+#define PLUS 269
+#define AFFECT 270
+#define TIMES 271
+#define MINUS 272
+#define DIVIDE 273
+#define POWER 274
+#define TRUE 275
+#define FALSE 276
+#define INF 277
+#define INFEQ 278
+#define SUP 279
+#define SUPEQ 280
+#define DIFF 281
+#define EQ 282
+#define AND 283
+#define OR 284
+#define XOR 285
+#define NOT 286
+#define SBEGIN 287
+#define SEND 288
+#define WRITE 289
+#define READ 290
+#define SFUNCTION 291
+#define REF 292
+#define IF 293
+#define THEN 294
+#define ELSE 295
+#define WHILE 296
+#define DO 297
+#define RETURN 298
+#define LOWER_THAN_ELSE 299
+#define NEG 300
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 18 "ar.y" /* yacc.c:1909  */
+#line 136 "ar.y" /* yacc.c:1909  */
 
 	char *strval;
 	int intval;
@@ -143,8 +153,12 @@ union YYSTYPE
 	} tf;
 	struct lpos* lpos;
 	int actualquad;
+	struct typelist *typelist;
+	struct dim_list* dim_list;
+	struct array_call *array_call; //ADDITION
+	struct index_list *index_list; //ADDITION	
 
-#line 148 "y.tab.h" /* yacc.c:1909  */
+#line 162 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
