@@ -23,6 +23,114 @@ void yyerror(char*);
 int yylex();
 void lex_free();
 
+//********* Declarationde tableau ********
+void check_indx(char *tab_id, struct index_list *index_list) {
+	struct dim_list *dim_tab = lookfor_dims(tab_id);
+	if (dim_tab == NULL) {
+		printf("failed finding dims\n");
+		exit(EXIT_FAILURE);
+	}
+	int min_dim, max_dim;
+	min_dim = dim_tab->min_dim;
+	max_dim = dim_tab->max_dim;
+	if (index_list->type == INDX_CST) {
+		// printf("%d %d %d\n",min_dim, index_list->un.index_int, max_dim);
+		if (index_list->un.index_int > max_dim ||
+			index_list->un.index_int < min_dim) {
+			printf("error index isn't valid");
+			exit(EXIT_FAILURE);
+		}
+	}
+	if (index_list->next_indxlist != NULL) {
+		dim_tab = dim_tab->next;
+		min_dim = dim_tab->min_dim;
+		max_dim = dim_tab->max_dim;
+		if (index_list->next_indxlist->type == INDX_CST) {
+			// printf("%d %d %d\n",min_dim,
+			// index_list->next_indxlist->un.index_int, max_dim);
+			if (index_list->next_indxlist->un.index_int > max_dim ||
+				index_list->next_indxlist->un.index_int < min_dim) {
+				printf("error index isn't valid");
+				exit(1);
+			}
+		}
+	}
+}
+
+struct array_call *array_call_info(char *tab_id,
+								   struct index_list *index_list) {
+	char *tabid_tabindx = malloc(100);
+	sprintf(tabid_tabindx, "%s%s", tab_id, index_list->tab);
+
+	struct array_call *arraycall = malloc(sizeof(array_call));
+	arraycall->tab_name = strdup(tab_id);
+	arraycall->tab_element = strdup(tabid_tabindx);
+	arraycall->head_array = index_list;
+
+	return arraycall;
+}
+
+struct index_list *all_indexs(struct index_list *indx, quadop *index) {
+	struct index_list *indxlist = malloc(sizeof(index_list));
+	char *expr_list = malloc(100);
+	if (index->type == QO_CST) {
+		sprintf(expr_list, "%s[%d]", indx->tab, index->u.cst);
+		indxlist->un.index_int = index->u.cst;
+		indxlist->type = INDX_CST;
+	} else {
+		sprintf(expr_list, "%s[%s]", indx->tab, index->u.name);
+		indxlist->un.index_name = strdup(index->u.name);
+		indxlist->type = INDX_NAME;
+	}
+	indxlist->tab = strdup(expr_list);
+
+	indxlist->next_indxlist = indx;
+	return indxlist;
+}
+struct index_list *solo_index(quadop *index) {
+	struct index_list *indxlist = malloc(sizeof(index_list));
+	char *expr = malloc(100);
+	if (index->type == QO_CST) {
+		sprintf(expr, "[%d]", index->u.cst);
+		indxlist->un.index_int = index->u.cst;
+		indxlist->type = INDX_CST;
+	} else {
+		sprintf(expr, "[%s]", index->u.name);
+		indxlist->un.index_name = strdup(index->u.name);
+		indxlist->type = INDX_NAME;
+	}
+	indxlist->tab = strdup(expr);
+
+	indxlist->next_indxlist = NULL;
+	return indxlist;
+}
+
+//*********ADDITION********* Added dans token_tab.h
+
+dim_list *add_dim(int dim_inf, int dim_sup) {
+	dim_list *st_dimension = malloc(sizeof(dim_list));
+	st_dimension->min_dim = dim_inf;
+	st_dimension->max_dim = dim_sup;
+	st_dimension->next = NULL;
+	return st_dimension;
+}
+
+dim_list *add_dims(dim_list *old_list, int dim_inf, int dim_sup) {
+	dim_list *loop_dim = old_list;
+	while (loop_dim->next != NULL) loop_dim = loop_dim->next;
+	loop_dim->next = add_dim(dim_inf, dim_sup);
+	return old_list;
+}
+
+void print_dims(dim_list *dims_list) {
+	dim_list *loop_dim = dims_list;
+	while (loop_dim->next != NULL) {
+		printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
+		loop_dim = loop_dim->next;
+	}
+	printf("dim : %d %d \n", loop_dim->min_dim, loop_dim->max_dim);
+}
+//************************
 %}
 
 %union {
@@ -38,9 +146,12 @@ void lex_free();
 	struct lpos* lpos;
 	int actualquad;
 	struct typelist *typelist;
+	struct dim_list* dim_list;
+	struct array_call *array_call; //ADDITION
+	struct index_list *index_list; //ADDITION	
 }
 
-%token PROGRAM  VAR
+%token PROGRAM  VAR SARRAY SOF INTRV_SEP //ADDITION
 %token <strval> ID STR
 %token <intval> NUM UNIT BOOL INT
 
@@ -60,6 +171,11 @@ void lex_free();
 %type <actualquad> M
 %type <lpos> instr tag sequence
 %type <typelist> par parlist Elist
+
+
+%type <dim_list> rangelist arraytype //ADDITION
+%type <index_list> exprlist
+%type <array_call> lvalue
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -85,13 +201,31 @@ vardecllist: varsdecl {}
 			| {} //element vide
             ;
 varsdecl: VAR identlist ':' typename {create_symblist("var",$2, $4);}
+        | VAR identlist ':' arraytype {create_symblist_array("array",$2, "int", $4);} //ADDITION
         ;
-
 identlist: ID                 {$$ = create_identlist($1);}
          | identlist ',' ID   {$$ = add_to_identlist($1, $3);}
          ;
 
-typename: atomictype   {$$ = $1;}
+ //**********************ADDITION*************************************
+typename: atomictype   { $$ = $1; }
+		;
+
+arraytype : SARRAY '[' rangelist ']' SOF atomictype { $$ = $3; print_dims($3); };
+
+rangelist : NUM INTRV_SEP NUM { $$ = add_dim($1, $3); }
+		|  NUM INTRV_SEP NUM ',' rangelist { $$ = add_dims($5, $1, $3);}
+		;
+
+lvalue : ID '[' exprlist ']' { $$ = array_call_info($1, $3); check_indx($1, $3);
+		//printf("%s %s %d\n", $$->tab_name, $$->tab_element , $$->head_array->un.index_int); //print the most right index 
+		//printf("%d\n", $$->head_array->next_indxlist->un.index_int);
+		}
+
+exprlist : E 				{ $$ = solo_index($1); }
+		 | exprlist ',' E  { $$ = all_indexs($1, $3); } ;
+
+//**************************************************************
 
 atomictype: UNIT  {$$ = "unit";}
           | BOOL  {$$ = "bool";}
@@ -129,7 +263,17 @@ par : ID ':' typename
 	//| REF ID ':' typename //a faire plus tard
 	;
 
-instr : ID AFFECT E //ID correspond a lvalue sans les listes
+instr : 
+		lvalue AFFECT E {
+			quad q = quad_make(Q_AFFECT, $3, NULL, quadop_array($1));
+			//printf("%d %d %s %s",$1->i, $1->j, $1->tab_element,$1->tab_name);
+			//printf("%s",q.res->u.name);
+			gencode(q);
+			$$ = crelist(nextquad);
+			printf("fin affectation tableau\n");
+		}
+
+	  | ID AFFECT E //ID correspond a lvalue sans les listes
 	  {
 		  chk_symb_declared($1);
 		  chk_symb_type($1,$3);
@@ -182,9 +326,9 @@ instr : ID AFFECT E //ID correspond a lvalue sans les listes
 		  $$ = crelist(nextquad);
 	  }
 	  | SBEGIN sequence SEND {$$ = $2;}
-	  | READ ID //lvalue a l'origine, a changer apres les tableaux
+	  | READ E //lvalue a l'origine, a changer apres les tableaux
 	  {
-		  quad q = quad_make(Q_READ, NULL, NULL, quadop_name($2));
+		  quad q = quad_make(Q_READ, NULL, NULL, $2);
 		  gencode(q);
 		  $$ = crelist(nextquad);
 	  }
@@ -260,6 +404,7 @@ Elist : E
 	  ;
 
 E : ID { chk_symb_declared($1); $$ = quadop_name($1);}
+| lvalue { $$ = quadop_array($1);}
 | NUM {	$$ = quadop_cst($1);}
 | STR { $$ = quadop_str($1);}
 | '(' E ')' { $$ = $2;}
@@ -411,7 +556,7 @@ int main(int argc, char** argv) {
 	int c;
 	char *filename = NULL;
 
-	while ((c = getopt_long(argc, argv, "o:h:t:v:", longopts, NULL)) != -1)
+	while ((c = getopt_long(argc, argv, "o:htv", longopts, NULL)) != -1)
 	{
 		switch(c)
 		{
@@ -462,8 +607,8 @@ int main(int argc, char** argv) {
 
 	// Be clean.===> Ofc As always
 	lex_free();
-	free_quad();
-	free_symbtab();
+	//free_quad();
+	//free_symbtab();
 	return 0;
 }
 

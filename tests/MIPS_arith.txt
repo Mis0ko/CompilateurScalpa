@@ -5,7 +5,6 @@ j:= 22;
 i := j+18;
 write i;
 write "\n";
-i := j-19;
 write i;
 write "\n";
 i := j*4;

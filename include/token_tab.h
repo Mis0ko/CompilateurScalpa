@@ -15,11 +15,16 @@ struct typelist;
 #define SIZE_HASH_TABLE 1000
 #define SYMBNAME_SIZE 100
 
+//ADDITION
 /*
-void translatemips(quad q, FILE* os);
-void mips_code(quad* globalcode, int nextquad, FILE* os);
+* struct of dimensions of an array
 */
-// add
+typedef struct dim_list {
+	int min_dim;
+	int max_dim;
+	struct dim_list* next;
+} dim_list;
+
 
 /******************** STRUCT/ENUM for syntaxe analysis ********************/
 typedef enum ident_type { VARIABLE, FUNCTION, ARRAY, PARAMETER } ident_type;
@@ -48,7 +53,14 @@ typedef struct P_symb {
 						 // bloc, but we begin without it.
 	struct typelist* arglist;		// if symb is a function, contains types of arguments
 	struct P_symb* next_doublon;
+	struct dim_list* dim; // Addition for arrau , this a struct of dimensions of the arraytype
 } P_symb;
+
+//********** Addition for arrays
+dim_list * lookfor_dims(char *tab_id);
+ident_list *create_symblist_array(char *var, ident_list *list, char *typename, dim_list* dims);
+void create_symb_array(char *var, char *typename, char *id, dim_list* dims);
+
 
 /********** Addition mips
 /*

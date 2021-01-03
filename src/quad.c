@@ -7,6 +7,14 @@ int ntp=0; //for the number of temporary variables
 
 
 
+quadop* quadop_array(array_call* arraycall){
+	quadop* res = malloc(sizeof(quadop));
+	res->type = QO_ARRAY;
+	res->u.name = strdup(arraycall->tab_element);
+	res->array = arraycall;
+	return res;
+}
+
 
 quadop* quadop_cst(int val)
 {

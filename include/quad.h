@@ -5,15 +5,41 @@
 #include <string.h>
 
 /*
+ * struct of a list of index
+ */
+typedef struct index_list {
+	char *tab;
+	enum { INDX_CST, INDX_NAME} type;
+	union un { 
+		char *index_name;
+		int index_int;
+	} un;
+	struct index_list* next_indxlist;
+
+} index_list;
+
+/*
+ * struct of an array call , name of array , 
+ * elementcall tab[i][j] , index_list(i,j)
+ */
+typedef struct array_call {
+	char *tab_name;
+	char *tab_element;
+	struct index_list* head_array;
+} array_call;
+
+
+/*
  * structure of an operand
  */
 typedef struct quadop {
-	enum { QO_CST, QO_NAME, QO_STR } type;
-	union {
+	enum { QO_CST, QO_NAME, QO_STR, QO_ARRAY } type;
+	union u {
 		int cst;
 		char* name;
 		char* str;
 	} u;
+	struct array_call* array;
 } quadop;
 
 /*
@@ -61,6 +87,14 @@ typedef struct lpos {
 	struct lpos* suivant;
 } lpos;
 
+
+////// ADDITION
+/*
+ * allocate an operand type array
+ * u.name contains the array element
+ * array_call contains info of array
+ */
+quadop* quadop_array(struct array_call* array_call) ;
 /*
  * allocate an operand type number
  * u.cst contains the value

@@ -14,7 +14,7 @@
 %}
 
 identifier [a-zA-Z_]+[0-9a-zA-Z_]*
-number     [1-9][0-9]*|"0"
+number     [-]?[1-9][0-9]*|"0"
 comment    "(*"((\*+[^(*])|([^*]))*\**"*)"
 string     ["]([^"]|\\(.|\n))*["]
 
@@ -26,6 +26,10 @@ string     ["]([^"]|\\(.|\n))*["]
 "int"   				{output("int");return INT;}
 "bool"  				{output("bool");return BOOL;}
 "unit"          	{output("unit");return UNIT; }
+
+"array"          	{output("array");return SARRAY; }
+"of"          	{output("of");return SOF; }
+".."		 {return INTRV_SEP;}
 
 "begin"   			{output("begin");return SBEGIN;}
 "end"   				{output("end");return SEND;}
@@ -68,6 +72,8 @@ string     ["]([^"]|\\(.|\n))*["]
 			 }
 {comment}    { printf("%s\n", yytext);}
 [();:,]      { output(yytext);return yytext[0]; }
+"["			 { output(yytext); return yytext[0];}
+"]"			 { output(yytext); return yytext[0];}
 \n           { }
 [\t ]        { }
 .            { printf("Caractere inconnu: %s", yytext);}
