@@ -1,4 +1,4 @@
-# Network Scanner
+# Scalpa Compilator
 
 By [Michael Hofmann](https://github.com/Mis0ko), [Celine LY](https://github.com/LyCeline06), [Yassine El Allioui](https://github.com/boboyoyo7)<br/>
 Last update : 01/01/2021.
