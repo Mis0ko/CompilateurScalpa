@@ -1,9 +1,0 @@
-program maxi
-
-function fini() : unit
-begin
-write "Hello World\n";
-end;
-begin
-fini();
-end
