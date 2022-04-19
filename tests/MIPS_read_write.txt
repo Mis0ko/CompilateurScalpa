@@ -1,0 +1,7 @@
+program maxi
+var i : int;
+begin 
+write "Enter integer\n";
+read i;
+write i;
+end

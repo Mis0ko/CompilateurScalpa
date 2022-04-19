@@ -1,0 +1,16 @@
+program maxi 
+var i, j, max :int;
+begin
+j:= 22;
+i := j+18;
+write i;
+write "\n";
+write i;
+write "\n";
+i := j*4;
+write i;
+write "\n";
+i := max+1;
+write i;
+write "\n";
+end

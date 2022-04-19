@@ -1,0 +1,8 @@
+program maxi 
+var i, j: int ;
+var tableau : array [-3 .. 3, -2 .. 2] of int ;
+begin
+write tableau[0,0];
+write "\n";
+write tableau[-2,0];
+end

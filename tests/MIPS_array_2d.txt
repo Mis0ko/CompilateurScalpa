@@ -1,0 +1,12 @@
+program maxi 
+var i, j: int ;
+var tableau : array [0 .. 12, 0 .. 15] of int ;
+begin
+i := 2;
+j := 4;
+write "hello"
+write tableau[i,j];
+read tableau[i,4];
+write "stfw"
+write tableau[2,j];
+end

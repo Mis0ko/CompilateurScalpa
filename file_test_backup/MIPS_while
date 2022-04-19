@@ -1,0 +1,7 @@
+program maxi
+var a :int;
+begin
+while a<3 do begin a:=a+1; write "Hello"; end;
+a:=9;
+write a;
+end;

@@ -1,0 +1,4 @@
+program maxi
+begin 
+write "Hello World\n";
+end

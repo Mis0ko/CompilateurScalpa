@@ -1,0 +1,32 @@
+program maxi
+var i,j,max : int;
+function appel_1() : unit
+begin
+write "premier appel de fonction"
+write "\n"
+end;
+function bjr() : unit
+begin
+write "Hello"
+end;
+function fini() : unit
+begin
+write "programme vraiment terminé"
+write "\n"
+end;
+function WORLD() : unit
+begin
+write " World"
+write "\n"
+end;
+begin
+i := 4;
+j := 0;
+write i;
+write j;
+write "\n";
+appel_1()
+bjr()
+WORLD()
+fini()
+end
